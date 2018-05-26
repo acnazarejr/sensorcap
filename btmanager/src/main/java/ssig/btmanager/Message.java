@@ -4,21 +4,21 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
 
-    private int messageType;
+    private int code;
     private Serializable content;
 
-    public Message(int messageType, Serializable content){
-        this.messageType = messageType;
+    public Message(int code, Serializable content){
+        this.code = code;
         this.content = content;
     }
 
 
-    public int getMessageType() {
-        return messageType;
+    public int getCode() {
+        return code;
     }
 
-    public void setMessageType(int messageType) {
-        this.messageType = messageType;
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public Serializable getContent() {

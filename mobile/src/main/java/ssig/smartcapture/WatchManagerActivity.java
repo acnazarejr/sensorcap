@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import ssig.btmanager.BTConnectorServer;
 import ssig.btmanager.Message;
+import ssig.common.MessageType;
 
 public class WatchManagerActivity extends AppCompatActivity {
 
@@ -71,7 +72,7 @@ public class WatchManagerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    BTConnectorServer.getInstance().writeMessage(new Message(0, new String("casa")));
+                    BTConnectorServer.getInstance().writeMessage(new Message(MessageType.REQUEST_SENSOR_INFO.code(), null));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
