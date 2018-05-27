@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
@@ -19,9 +20,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ssig.smartcap.mobile.R;
+import com.ssig.smartcap.mobile.fragment.ArchiveFragment;
+import com.ssig.smartcap.mobile.fragment.CaptureFragment;
+import com.ssig.smartcap.mobile.fragment.DevicesFragment;
+import com.ssig.smartcap.mobile.fragment.TimeToolFragment;
 import com.ssig.smartcap.mobile.utils.Tools;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private BottomNavigationView navigation;
     private ActionBar actionBar;
@@ -36,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbar();
         initBottomNavigation();
+
+        loadFragment(new CaptureFragment());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -88,13 +95,15 @@ public class MainActivity extends AppCompatActivity {
         isBottomNavigationHide = false;
 
         navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                actionBar.setTitle(item.getTitle());
-                return true;
-            }
-        });
+//        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+//            @Override
+//            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//                actionBar.setTitle(item.getTitle());
+//                return true;
+//            }
+//        });
+
+        navigation.setOnNavigationItemSelectedListener(this);
 
         NestedScrollView nested_content = findViewById(R.id.nested_scroll_view);
         nested_content.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
@@ -105,14 +114,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        // display image
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_1), R.drawable.image_8);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_2), R.drawable.image_9);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_3), R.drawable.image_15);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_4), R.drawable.image_14);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_5), R.drawable.image_12);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_6), R.drawable.image_2);
-        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_7), R.drawable.image_5);
+//        // display image
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_1), R.drawable.image_8);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_2), R.drawable.image_9);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_3), R.drawable.image_15);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_4), R.drawable.image_14);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_5), R.drawable.image_12);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_6), R.drawable.image_2);
+//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_7), R.drawable.image_5);
 
     }
 
@@ -123,5 +132,49 @@ public class MainActivity extends AppCompatActivity {
         navigation.animate().translationY(moveY).setStartDelay(100).setDuration(300).start();
     }
 
+
+
+
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment fragment = null;
+
+        actionBar.setTitle(item.getTitle());
+
+        switch (item.getItemId()) {
+            case R.id.navigation_capture:
+                fragment = new CaptureFragment();
+                break;
+
+            case R.id.navigation_devices:
+                fragment = new DevicesFragment();
+                break;
+
+            case R.id.navigation_time_tool:
+                fragment = new TimeToolFragment();
+                break;
+
+            case R.id.navigation_archive:
+                fragment = new ArchiveFragment();
+                break;
+        }
+
+        return loadFragment(fragment);
+    }
+
+
+
+
+    private boolean loadFragment(Fragment fragment) {
+
+        //switching fragment
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+            return true;
+        }
+        return false;
+    }
 
 }

@@ -6,76 +6,52 @@
     android:layout_height="match_parent"
     android:background="@color/grey_5">
 
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:contentInsetStartWithNavigation="0dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:theme="@style/Toolbar.Light" />
-
-    </android.support.design.widget.AppBarLayout>
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="vertical">
 
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/nested_scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:scrollingCache="true">
-
-        <LinearLayout
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:descendantFocusability="blocksDescendants"
-            android:orientation="vertical">
+            android:background="@android:color/white"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <!--<View-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="?attr/actionBarSize"-->
-                <!--android:layout_marginBottom="@dimen/spacing_middle" />-->
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:contentInsetStartWithNavigation="0dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:theme="@style/Toolbar.Light" />
 
-            <include layout="@layout/fragment_tabs_store" />
-
-        </LinearLayout>
-
-    </android.support.v4.widget.NestedScrollView>
-
+        </android.support.design.widget.AppBarLayout>
 
 
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/nested_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="none"
+            android:scrollingCache="true">
 
 
+            <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
 
+                android:text="Teste"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+        </android.support.v4.widget.NestedScrollView>
 
-
-
-
-
-
-
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:orientation="vertical">-->
-
-        <!---->
-
-    <!--</LinearLayout>-->
-
-    <!-- search bar layout -->
-    <!--<include-->
-        <!--android:id="@+id/search_bar"-->
-        <!--layout="@layout/include_card_view_search_bar" />-->
-
+    </LinearLayout>
 
 
     <android.support.design.widget.BottomNavigationView
