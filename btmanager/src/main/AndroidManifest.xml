@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ssig.dcc.ufmg.br.connectionmanager" >
+    package="com.ssig.btmanager" >
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 </manifest>

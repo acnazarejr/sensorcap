@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_capture"
+        android:icon="@drawable/ic_running"
+        android:title="Capture" />
+
+    <item
+        android:id="@+id/navigation_devices"
+        android:icon="@drawable/ic_devices"
+        android:title="Devices" />
+
+    <item
+        android:id="@+id/navigation_time_tool"
+        android:icon="@drawable/ic_timer"
+        android:title="Time Tool" />
+
+    <item
+        android:id="@+id/navigation_archive"
+        android:icon="@drawable/ic_library_books"
+        android:title="Archive" />
+
+
+</menu>

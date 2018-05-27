@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "ssig.smartcapture"
+        applicationId "com.ssig.smartcap.wear"
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 1
@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:wear:27.1.1'
     compileOnly 'com.google.android.wearable:wearable:2.3.0'
+
     implementation project(':btmanager')
     implementation project(path: ':common')
     implementation project(path: ':sensorsmanager')
