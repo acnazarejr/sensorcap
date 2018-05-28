@@ -3,14 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/teal_800"
-    tools:context=".fragment.SmartphoneDeviceFragment">
+    tools:context=".fragment.SmartwatchFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/teal_800"
-        android:text="@string/lorem_ipsum" />
+        android:text="Smartwatch" />
 
 </FrameLayout>

@@ -7,9 +7,14 @@
         android:title="Capture" />
 
     <item
-        android:id="@+id/navigation_devices"
-        android:icon="@drawable/ic_devices"
-        android:title="Devices" />
+        android:id="@+id/navigation_smartphone"
+        android:icon="@drawable/ic_smartphone"
+        android:title="Smartphone" />
+
+    <item
+        android:id="@+id/navigation_smartwatch"
+        android:icon="@drawable/ic_smartwatch"
+        android:title="Smartwatch" />
 
     <item
         android:id="@+id/navigation_time_tool"

@@ -33,7 +33,6 @@ public abstract class AbstractMainFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        this.tab_layout = getActivity().findViewById(R.id.tab_layout);
         this.actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
     }
 

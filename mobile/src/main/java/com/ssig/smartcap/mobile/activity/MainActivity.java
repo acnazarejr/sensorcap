@@ -1,29 +1,25 @@
 package com.ssig.smartcap.mobile.activity;
 
 import android.annotation.SuppressLint;
-import android.drm.DrmStore;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
-import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ssig.smartcap.mobile.R;
 import com.ssig.smartcap.mobile.fragment.ArchiveFragment;
 import com.ssig.smartcap.mobile.fragment.CaptureFragment;
-import com.ssig.smartcap.mobile.fragment.DevicesFragment;
+import com.ssig.smartcap.mobile.fragment.SmartphoneFragment;
+import com.ssig.smartcap.mobile.fragment.SmartwatchFragment;
 import com.ssig.smartcap.mobile.fragment.TimeToolFragment;
 import com.ssig.smartcap.mobile.utils.Tools;
 
@@ -113,8 +109,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 fragment = new CaptureFragment();
                 break;
 
-            case R.id.navigation_devices:
-                fragment = new DevicesFragment();
+            case R.id.navigation_smartphone:
+                fragment = new SmartphoneFragment();
+                break;
+
+            case R.id.navigation_smartwatch:
+                fragment = new SmartwatchFragment();
                 break;
 
             case R.id.navigation_time_tool:
