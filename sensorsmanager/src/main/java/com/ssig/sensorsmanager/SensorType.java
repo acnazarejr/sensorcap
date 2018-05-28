@@ -7,7 +7,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum SensorType {
-    ACC(0), GYR(1), MAG(2), LAC(3), BAR(4);
+
+    TYPE_ACCELEROMETER(10), TYPE_ACCELEROMETER_UNCALIBRATED(11),
+    TYPE_GYROSCOPE(20), TYPE_GYROSCOPE_UNCALIBRATED(21),
+    TYPE_MAGNETIC_FIELD(30), TYPE_MAGNETIC_FIELD_UNCALIBRATED(31),
+    TYPE_PRESSURE(40),
+    TYPE_HEART_RATE(50),
+    TYPE_GRAVITY(101),
+    TYPE_LINEAR_ACCELERATION(102),
+    TYPE_ROTATION_VECTOR(103),
+    TYPE_GAME_ROTATION_VECTOR(104),
+    TYPE_GEOMAGNETIC_ROTATION_VECTOR(105),
+    TYPE_STEP_DETECTOR(106);
 
 
     private final int code;
@@ -28,29 +39,47 @@ public enum SensorType {
         throw new IllegalArgumentException("invalid code");
     }
 
-    public String pmFeature() {
+    public Integer androidType() {
 
-        Map<Integer, String> codeMap = new HashMap<>();
+        Map<Integer, Integer> codeMap = new HashMap<>();
 
-        codeMap.put(SensorType.ACC.code(), PackageManager.FEATURE_SENSOR_ACCELEROMETER);
-        codeMap.put(SensorType.BAR.code(), PackageManager.FEATURE_SENSOR_BAROMETER);
-        codeMap.put(SensorType.GYR.code(), PackageManager.FEATURE_SENSOR_GYROSCOPE);
-        codeMap.put(SensorType.MAG.code(), PackageManager.FEATURE_SENSOR_COMPASS);
-        codeMap.put(SensorType.LAC.code(), PackageManager.FEATURE_SENSOR_ACCELEROMETER);
+        codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               Sensor.TYPE_ACCELEROMETER);
+        codeMap.put(SensorType.TYPE_ACCELEROMETER_UNCALIBRATED.code(),  Sensor.TYPE_ACCELEROMETER_UNCALIBRATED);
+        codeMap.put(SensorType.TYPE_GRAVITY.code(),                     Sensor.TYPE_GRAVITY);
+        codeMap.put(SensorType.TYPE_GYROSCOPE.code(),                   Sensor.TYPE_GYROSCOPE);
+        codeMap.put(SensorType.TYPE_GYROSCOPE_UNCALIBRATED.code(),      Sensor.TYPE_GYROSCOPE_UNCALIBRATED);
+        codeMap.put(SensorType.TYPE_LINEAR_ACCELERATION.code(),         Sensor.TYPE_LINEAR_ACCELERATION);
+        codeMap.put(SensorType.TYPE_ROTATION_VECTOR.code(),             Sensor.TYPE_ROTATION_VECTOR);
+        codeMap.put(SensorType.TYPE_STEP_DETECTOR.code(),               Sensor.TYPE_STEP_DETECTOR);
+        codeMap.put(SensorType.TYPE_GAME_ROTATION_VECTOR.code(),        Sensor.TYPE_GAME_ROTATION_VECTOR);
+        codeMap.put(SensorType.TYPE_GEOMAGNETIC_ROTATION_VECTOR.code(), Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR);
+        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD.code(),              Sensor.TYPE_MAGNETIC_FIELD);
+        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD_UNCALIBRATED.code(), Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED);
+        codeMap.put(SensorType.TYPE_PRESSURE.code(),                    Sensor.TYPE_PRESSURE);
+        codeMap.put(SensorType.TYPE_HEART_RATE.code(),                  Sensor.TYPE_HEART_RATE);
 
         return codeMap.get(this.code);
 
     }
 
-    public Integer androidType() {
+    public String toString() {
 
-        Map<Integer, Integer> codeMap = new HashMap<>();
+        Map<Integer, String> codeMap = new HashMap<>();
 
-        codeMap.put(SensorType.ACC.code(), Sensor.TYPE_ACCELEROMETER);
-        codeMap.put(SensorType.BAR.code(), Sensor.TYPE_PRESSURE);
-        codeMap.put(SensorType.GYR.code(), Sensor.TYPE_GYROSCOPE);
-        codeMap.put(SensorType.MAG.code(), Sensor.TYPE_MAGNETIC_FIELD);
-        codeMap.put(SensorType.LAC.code(), Sensor.TYPE_LINEAR_ACCELERATION);
+        codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               "Accelerometer");
+        codeMap.put(SensorType.TYPE_ACCELEROMETER_UNCALIBRATED.code(),  "Accelerometer Uncalibrated");
+        codeMap.put(SensorType.TYPE_GRAVITY.code(),                     "Gravity");
+        codeMap.put(SensorType.TYPE_GYROSCOPE.code(),                   "Gyroscope");
+        codeMap.put(SensorType.TYPE_GYROSCOPE_UNCALIBRATED.code(),      "Gyroscope Uncalibrated");
+        codeMap.put(SensorType.TYPE_LINEAR_ACCELERATION.code(),         "Linear Acceleration");
+        codeMap.put(SensorType.TYPE_ROTATION_VECTOR.code(),             "Rotation Vector");
+        codeMap.put(SensorType.TYPE_STEP_DETECTOR.code(),               "Step Detector");
+        codeMap.put(SensorType.TYPE_GAME_ROTATION_VECTOR.code(),        "Game Rotation Vector");
+        codeMap.put(SensorType.TYPE_GEOMAGNETIC_ROTATION_VECTOR.code(), "Geomagnetic Rotation Vector");
+        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD.code(),              "Magnetic Field");
+        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD_UNCALIBRATED.code(), "Magnetic Field Uncalibrated");
+        codeMap.put(SensorType.TYPE_PRESSURE.code(),                    "Pressure");
+        codeMap.put(SensorType.TYPE_HEART_RATE.code(),                  "Heart Rate");
 
         return codeMap.get(this.code);
 

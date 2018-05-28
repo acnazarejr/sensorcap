@@ -68,23 +68,37 @@
 
             </LinearLayout>
 
-
-            <include layout="@layout/widget_sensor_setting"/>
-
-            <View
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/sensorsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="2px"
-                android:background="@color/grey_10" />
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:scrollingCache="true" />
 
-            <include layout="@layout/widget_sensor_setting"/>
+
+            <!--<include layout="@layout/widget_sensor_setting"/>-->
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="2px"-->
+                <!--android:background="@color/grey_10" />-->
+
+            <!--<include layout="@layout/widget_sensor_setting"/>-->
 
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2px"
-                android:background="@color/grey_10" />
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="2px"-->
+                <!--android:background="@color/grey_10" />-->
 
-            <include layout="@layout/widget_sensor_setting"/>
+            <!--<include layout="@layout/widget_sensor_setting"/>-->
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="2px"-->
+                <!--android:background="@color/grey_10" />-->
+
+            <!--<include layout="@layout/widget_sensor_setting"/>-->
 
         </LinearLayout>
 

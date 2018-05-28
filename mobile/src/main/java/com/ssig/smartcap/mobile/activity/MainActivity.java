@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         this.initToolbar();
         this.initBottomNavigation();
         this.initFragmentContainer();
+
+
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <integer-array name="social_images">
+        <item>@drawable/img_social_android</item>
+        <item>@drawable/img_social_apple</item>
+        <item>@drawable/img_social_behance</item>
+        <item>@drawable/img_social_blogger</item>
+        <item>@drawable/img_social_deviantart</item>
+
+        <item>@drawable/img_social_dribbble</item>
+        <item>@drawable/img_social_envato</item>
+        <item>@drawable/img_social_evernote</item>
+        <item>@drawable/img_social_facebook</item>
+        <item>@drawable/img_social_flickr</item>
+
+        <item>@drawable/img_social_instagram</item>
+        <item>@drawable/img_social_linkedin</item>
+        <item>@drawable/img_social_pinterest</item>
+        <item>@drawable/img_social_skype</item>
+        <item>@drawable/img_social_soundcould</item>
+
+        <item>@drawable/img_social_tumblr</item>
+        <item>@drawable/img_social_twitter</item>
+        <item>@drawable/img_social_vimeo</item>
+        <item>@drawable/img_social_youtube</item>
+    </integer-array>
+
+    <string-array name="social_names">
+        <item>Android</item>
+        <item>Apple</item>
+        <item>Behance</item>
+        <item>Blogger</item>
+        <item>Deviantart</item>
+
+        <item>Dribbble</item>
+        <item>Envato</item>
+        <item>Evernote</item>
+        <item>Facebook</item>
+        <item>Flickr</item>
+
+        <item>Instagram</item>
+        <item>Linkedin</item>
+        <item>Pinterest</item>
+        <item>Skype</item>
+        <item>Soundcould</item>
+
+        <item>Tumblr</item>
+        <item>Twitter</item>
+        <item>Vimeo</item>
+        <item>Youtube</item>
+    </string-array>
+
+
+</resources>

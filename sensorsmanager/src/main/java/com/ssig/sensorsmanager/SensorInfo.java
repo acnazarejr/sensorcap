@@ -1,30 +1,32 @@
 package com.ssig.sensorsmanager;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-
 import java.io.Serializable;
 
 public class SensorInfo implements Serializable{
 
     static final long serialVersionUID = 123456789123456789L;
 
-    private SensorType sensorType;
-    private int maxValue;
-    private int minValue;
-    private String vendor;
-    private float resolution;
+    protected SensorType sensorType;
+    protected String name;
+    protected String vendor;
+    protected int version;
+    protected float power;
+    protected float maximunRange;
+    protected int maxDelay;
+    protected int minDelay;
+    protected float resolution;
+
 
     public SensorInfo(SensorType sensorType){
         this.sensorType = sensorType;
-        this.maxValue = 0;
-        this.minValue = 0;
+        this.name = null;
         this.vendor = null;
-        this.resolution = 0;
+        this.version = -1;
+        this.maximunRange = -1;
+        this.maxDelay = -1;
+        this.minDelay = -1;
+        this.resolution = -1;
     }
-
 
     public SensorType getSensorType() {
         return sensorType;
@@ -34,21 +36,14 @@ public class SensorInfo implements Serializable{
         this.sensorType = sensorType;
     }
 
-    public int getMaxValue() {
-        return maxValue;
+    public float getMaximunRange() {
+        return maximunRange;
     }
 
-    public void setMaxValue(int maxValue) {
-        this.maxValue = maxValue;
+    public void setMaximunRange(float maximunRange) {
+        this.maximunRange = maximunRange;
     }
 
-    public int getMinValue() {
-        return minValue;
-    }
-
-    public void setMinValue(int minValue) {
-        this.minValue = minValue;
-    }
 
     public String getVendor() {
         return vendor;
@@ -64,5 +59,45 @@ public class SensorInfo implements Serializable{
 
     public void setResolution(float resolution) {
         this.resolution = resolution;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public float getPower() {
+        return power;
+    }
+
+    public void setPower(float power) {
+        this.power = power;
+    }
+
+    public int getMaxDelay() {
+        return maxDelay;
+    }
+
+    public void setMaxDelay(int maxDelay) {
+        this.maxDelay = maxDelay;
+    }
+
+    public int getMinDelay() {
+        return minDelay;
+    }
+
+    public void setMinDelay(int minDelay) {
+        this.minDelay = minDelay;
     }
 }

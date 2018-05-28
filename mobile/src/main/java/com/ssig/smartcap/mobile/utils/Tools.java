@@ -81,15 +81,15 @@ public class Tools {
 //        }
 //    }
 //
-//    public static void displayImageOriginal(Context ctx, ImageView img, @DrawableRes int drawable) {
-//        try {
-//            Glide.with(ctx).load(drawable)
-//                    .crossFade()
-//                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                    .into(img);
-//        } catch (Exception e) {
-//        }
-//    }
+    public static void displayImageOriginal(Context ctx, ImageView img, @DrawableRes int drawable) {
+        try {
+            Glide.with(ctx).load(drawable)
+                    .crossFade()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(img);
+        } catch (Exception e) {
+        }
+    }
 //
 //    public static void displayImageRound(final Context ctx, final ImageView img, @DrawableRes int drawable) {
 //        try {
@@ -188,29 +188,29 @@ public class Tools {
 //        return (int) (pxValue / scale + 0.5f);
 //    }
 //
-//    public static boolean toggleArrow(View view) {
-//        if (view.getRotation() == 0) {
-//            view.animate().setDuration(200).rotation(180);
-//            return true;
-//        } else {
-//            view.animate().setDuration(200).rotation(0);
-//            return false;
-//        }
-//    }
-//
-//    public static boolean toggleArrow(boolean show, View view) {
-//        return toggleArrow(show, view, true);
-//    }
-//
-//    public static boolean toggleArrow(boolean show, View view, boolean delay) {
-//        if (show) {
-//            view.animate().setDuration(delay ? 200 : 0).rotation(180);
-//            return true;
-//        } else {
-//            view.animate().setDuration(delay ? 200 : 0).rotation(0);
-//            return false;
-//        }
-//    }
+    public static boolean toggleArrow(View view) {
+        if (view.getRotation() == 0) {
+            view.animate().setDuration(200).rotation(180);
+            return true;
+        } else {
+            view.animate().setDuration(200).rotation(0);
+            return false;
+        }
+    }
+
+    public static boolean toggleArrow(boolean show, View view) {
+        return toggleArrow(show, view, true);
+    }
+
+    public static boolean toggleArrow(boolean show, View view, boolean delay) {
+        if (show) {
+            view.animate().setDuration(delay ? 200 : 0).rotation(180);
+            return true;
+        } else {
+            view.animate().setDuration(delay ? 200 : 0).rotation(0);
+            return false;
+        }
+    }
 //
 //    public static void changeNavigateionIconColor(Toolbar toolbar, @ColorInt int color) {
 //        Drawable drawable = toolbar.getNavigationIcon();
