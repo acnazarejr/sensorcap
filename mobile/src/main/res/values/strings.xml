@@ -2,5 +2,9 @@
     <string name="app_name">SmartCapture</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="lorem_ipsum">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ultrices sed felis non tristique. Donec aliquet neque ac sapien ultricies mattis. Mauris sodales lobortis sapien, vel scelerisque purus blandit a. Cras non maximus orci. Morbi dignissim orci eget risus imperdiet viverra. Nullam non ex efficitur, facilisis diam ut, hendrerit enim. Mauris vulputate felis placerat molestie imperdiet. Sed porta tellus ac arcu cursus sodales.
+
+        Vestibulum vel efficitur tellus, placerat sollicitudin nisl. Cras sollicitudin nunc vitae leo tempus ultrices. Vivamus dictum nisi eu dapibus dictum. Integer a sagittis felis, non posuere leo. Proin ut dictum nisi, ac tempus purus. Nulla nulla lacus, gravida eget ligula sit amet, eleifend consequat leo. Nunc et mollis erat, ac laoreet ante. Aenean vel consectetur dui. Vestibulum dignissim pulvinar orci at facilisis. Donec a tempus nunc, id bibendum nisl. Cras a ipsum eget sem dignissim vehicula.
+    </string>
 </resources>

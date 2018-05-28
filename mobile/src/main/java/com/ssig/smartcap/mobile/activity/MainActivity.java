@@ -1,6 +1,7 @@
 package com.ssig.smartcap.mobile.activity;
 
 import android.annotation.SuppressLint;
+import android.drm.DrmStore;
 import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -29,7 +30,6 @@ import com.ssig.smartcap.mobile.utils.Tools;
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private BottomNavigationView navigation;
-    private ActionBar actionBar;
     private Toolbar toolbar;
 
     boolean isBottomNavigationHide;
@@ -39,25 +39,19 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initToolbar();
-        initBottomNavigation();
-
-        loadFragment(new CaptureFragment());
+        this.initToolbar();
+        this.initBottomNavigation();
+        this.initFragmentContainer();
     }
 
     // ---------------------------------------------------------------------------------------------
     // ACTION TOOLBAR STUFFS
     // ---------------------------------------------------------------------------------------------
-
     private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setLogo(R.drawable.logo);
-        toolbar.getLogo().setColorFilter(ContextCompat.getColor(this, R.color.teal_800), PorterDuff.Mode.SRC_ATOP);
-        setSupportActionBar(toolbar);
-        actionBar = getSupportActionBar();
-        actionBar.setTitle("Capture");
-//        actionBar.setDisplayShowHomeEnabled(true);
-//        actionBar.setDisplayHomeAsUpEnabled(false);
+        this.toolbar = findViewById(R.id.toolbar);
+        this.toolbar.setLogo(R.drawable.logo);
+        this.toolbar.getLogo().setColorFilter(ContextCompat.getColor(this, R.color.teal_800), PorterDuff.Mode.SRC_ATOP);
+        this.setSupportActionBar(this.toolbar);
         Tools.setSystemBarColor(this, R.color.grey_20);
         Tools.setSystemBarLight(this);
     }
@@ -67,12 +61,10 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_action, menu);
-
         if(menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }
-
         Tools.changeMenuIconColor(menu, ContextCompat.getColor(this, R.color.grey_60));
         return true;
     }
@@ -89,21 +81,11 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     // ---------------------------------------------------------------------------------------------
     // BOTTOM NAVIGATION STUFFS
     // ---------------------------------------------------------------------------------------------
-
     private void initBottomNavigation() {
 
-        isBottomNavigationHide = false;
-
-        navigation = findViewById(R.id.navigation);
-//        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//                actionBar.setTitle(item.getTitle());
-//                return true;
-//            }
-//        });
-
-        navigation.setOnNavigationItemSelectedListener(this);
+        this.isBottomNavigationHide = false;
+        this.navigation = findViewById(R.id.navigation);
+        this.navigation.setOnNavigationItemSelectedListener(this);
 
         NestedScrollView nested_content = findViewById(R.id.nested_scroll_view);
         nested_content.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
@@ -112,16 +94,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 animateNavigation((scrollY > oldScrollY));
             }
         });
-
-
-//        // display image
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_1), R.drawable.image_8);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_2), R.drawable.image_9);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_3), R.drawable.image_15);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_4), R.drawable.image_14);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_5), R.drawable.image_12);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_6), R.drawable.image_2);
-//        Tools.displayImageOriginal(this, (ImageView) findViewById(R.id.image_7), R.drawable.image_5);
 
     }
 
@@ -133,12 +105,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     }
 
 
-
-
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Fragment fragment = null;
-
-        actionBar.setTitle(item.getTitle());
 
         switch (item.getItemId()) {
             case R.id.navigation_capture:
@@ -157,21 +125,20 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 fragment = new ArchiveFragment();
                 break;
         }
-
         return loadFragment(fragment);
     }
 
 
-
+    // ---------------------------------------------------------------------------------------------
+    // FRAGMENT STUFFS
+    // ---------------------------------------------------------------------------------------------
+    private void initFragmentContainer() {
+        this.loadFragment(new CaptureFragment());
+    }
 
     private boolean loadFragment(Fragment fragment) {
-
-        //switching fragment
         if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
             return true;
         }
         return false;
