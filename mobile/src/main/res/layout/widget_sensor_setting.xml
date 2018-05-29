@@ -16,28 +16,30 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/sensor_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Sensor Name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textColor="@color/teal_600"
             android:textStyle="bold" />
 
-        <View
-            android:layout_width="@dimen/spacing_middle"
-            android:layout_height="wrap_content" />
+        <!--<View-->
+            <!--android:layout_width="@dimen/spacing_middle"-->
+            <!--android:layout_height="wrap_content" />-->
 
-        <android.support.v7.widget.SwitchCompat
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            app:trackTint="@color/switch_color_background"
-            app:thumbTint="@color/switch_color_primary" />
+        <!--<android.support.v7.widget.SwitchCompat-->
+            <!--android:id="@+id/sensor_enable"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:checked="true"-->
+            <!--app:trackTint="@color/switch_color_background"-->
+            <!--app:thumbTint="@color/switch_color_primary" />-->
 
-        <View
-            android:layout_width="@dimen/spacing_middle"
-            android:layout_height="wrap_content" />
+        <!--<View-->
+            <!--android:layout_width="@dimen/spacing_middle"-->
+            <!--android:layout_height="wrap_content" />-->
 
     </LinearLayout>
 
@@ -45,7 +47,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
-        android:clickable="true"
         android:layout_marginTop="@dimen/spacing_small"
         android:layout_marginBottom="@dimen/spacing_small"
         android:gravity="center_vertical"
@@ -56,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Vendor"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@color/grey_90"
             android:textStyle="bold" />
 
@@ -66,10 +67,11 @@
 
 
         <TextView
+            android:id="@+id/sensor_vendor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bosch Systems Sensor 34.212"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:text="Sensor Vendor"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@color/grey_90" />
 
         <View
@@ -86,25 +88,6 @@
         android:layout_marginBottom="@dimen/spacing_small"
         android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Sensor Values"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_90"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginBottom="@dimen/spacing_small"
-        android:orientation="horizontal">
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -116,18 +99,32 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-32.6"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:textColor="@color/grey_90" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Min"
+                android:text="Power"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/grey_60"
                 android:textStyle="bold"/>
 
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_rounded_grey"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingLeft="@dimen/spacing_xmedium"
+                android:paddingRight="@dimen/spacing_xmedium"
+                android:paddingTop="@dimen/spacing_small">
+
+                <TextView
+                    android:id="@+id/sensor_power"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
+
+            </RelativeLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -141,17 +138,31 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="32.6"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:textColor="@color/grey_90" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Max"
+                android:text="Max. Range"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/grey_60"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_rounded_grey"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingLeft="@dimen/spacing_xmedium"
+                android:paddingRight="@dimen/spacing_xmedium"
+                android:paddingTop="@dimen/spacing_small">
+
+                <TextView
+                    android:id="@+id/sensor_max_range"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 
@@ -162,21 +173,35 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0.1432"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:textColor="@color/grey_90" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Resolution"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 android:textColor="@color/grey_60"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_rounded_grey"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingLeft="@dimen/spacing_xmedium"
+                android:paddingRight="@dimen/spacing_xmedium"
+                android:paddingTop="@dimen/spacing_small">
+
+                <TextView
+                    android:id="@+id/sensor_resolution"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Body2"
+                    android:textColor="@android:color/white" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 
@@ -196,16 +221,32 @@ l
             android:layout_weight="1"
             android:text="Sensor Frequency"
             android:gravity="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@color/grey_90"
             android:textStyle="bold" />
+
     </LinearLayout>
 
-    <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/middle_lorem_ipsum"-->
-        <!--android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
-        <!--android:textColor="@color/grey_40" />-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:orientation="horizontal">
+
+
+        <com.warkiz.widget.IndicatorSeekBar
+            android:id="@+id/sensor_delay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:isb_indicator_type="circular_bubble"
+            app:isb_progress="50"
+            app:isb_seek_bar_type="discrete_ticks_texts"
+            app:isb_tick_num="6"
+            app:isb_tick_type="oval" />
+
+    </LinearLayout>
 
 </LinearLayout>

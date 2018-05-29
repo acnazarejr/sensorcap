@@ -4,11 +4,12 @@
     android:id="@+id/lyt_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:id="@+id/lyt_title"
+        android:clickable="true"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/white"
         android:gravity="center_vertical"
@@ -22,7 +23,7 @@
         <com.github.ivbaranov.mli.MaterialLetterIcon
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:id="@+id/image"/>
+            android:id="@+id/icon"/>
 
         <!--<ImageView-->
             <!--android:id="@+id/image"-->
@@ -47,6 +48,18 @@
         <View
             android:layout_width="@dimen/spacing_large"
             android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/sensor_enable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            app:trackTint="@color/switch_color_background"
+            app:thumbTint="@color/switch_color_primary" />
+
+        <!--<View-->
+            <!--android:layout_width="@dimen/spacing_large"-->
+            <!--android:layout_height="wrap_content" />-->
 
         <ImageButton
             android:id="@+id/bt_expand"

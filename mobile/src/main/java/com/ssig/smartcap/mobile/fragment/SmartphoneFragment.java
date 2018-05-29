@@ -13,6 +13,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.SensorInfoFactory;
+import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.mobile.R;
 import com.ssig.smartcap.mobile.adapter.AdapterListExpand;
 import com.ssig.smartcap.mobile.model.SensorListItem;
@@ -21,6 +24,8 @@ import com.ssig.smartcap.mobile.widget.LineItemDecoration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SmartphoneFragment extends AbstractMainFragment {
 
@@ -47,30 +52,29 @@ public class SmartphoneFragment extends AbstractMainFragment {
         recyclerView.addItemDecoration(new LineItemDecoration(this.getContext(), LinearLayout.VERTICAL));
         recyclerView.setHasFixedSize(true);
 
+        Map<SensorType, SensorInfo> sensors = SensorInfoFactory.getAllSensorInfo(this.getContext());
         List<SensorListItem> items = new ArrayList<>();
-        TypedArray drw_arr = this.getContext().getResources().obtainTypedArray(R.array.social_images);
-        String name_arr[] = this.getContext().getResources().getStringArray(R.array.social_names);
 
-        for (int i = 0; i < drw_arr.length(); i++) {
-            SensorListItem obj = new SensorListItem();
-            obj.image = drw_arr.getResourceId(i, -1);
-            obj.name = name_arr[i];
-            obj.imageDrw = this.getContext().getResources().getDrawable(obj.image);
-            items.add(obj);
+
+        for (Map.Entry<SensorType, SensorInfo> entry : sensors.entrySet()) {
+            SensorInfo sensorInfo = entry.getValue();
+            if (sensorInfo != null) {
+                SensorListItem sensorListItem = new SensorListItem(sensorInfo);
+                items.add(sensorListItem);
+            }
         }
-        Collections.shuffle(items);
 
         //set data and list adapter
         mAdapter = new AdapterListExpand(this.getContext(), items);
         recyclerView.setAdapter(mAdapter);
 
         // on item list clicked
-        mAdapter.setOnItemClickListener(new AdapterListExpand.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, SensorListItem obj, int position) {
-                Snackbar.make(parent_view, "Item " + obj.name + " clicked", Snackbar.LENGTH_SHORT).show();
-            }
-        });
+//        mAdapter.setOnItemClickListener(new AdapterListExpand.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(View view, SensorListItem obj, int position) {
+//                Snackbar.make(parent_view, "Item " + obj.getName() + " clicked", Snackbar.LENGTH_SHORT).show();
+//            }
+//        });
 
     }
 

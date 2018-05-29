@@ -6,6 +6,7 @@ import android.hardware.SensorManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class SensorInfoFactory {
 
@@ -29,6 +30,7 @@ public class SensorInfoFactory {
             sensorInfo.setMaxDelay(defaultSensor.getMaxDelay());
             sensorInfo.setMinDelay(defaultSensor.getMinDelay());
             sensorInfo.setResolution(defaultSensor.getResolution());
+            sensorInfo.setReportingMode(defaultSensor.getReportingMode());
             return sensorInfo;
         }
         return null;
@@ -36,7 +38,7 @@ public class SensorInfoFactory {
 
     public static Map<SensorType, SensorInfo> getAllSensorInfo(Context context) {
 
-        Map<SensorType, SensorInfo> allSensors = new HashMap<>();
+        Map<SensorType, SensorInfo> allSensors = new TreeMap<>();
 
         for(SensorType sensorType : SensorType.values()){
             allSensors.put(sensorType, SensorInfoFactory.getSensorInfo(context, sensorType));

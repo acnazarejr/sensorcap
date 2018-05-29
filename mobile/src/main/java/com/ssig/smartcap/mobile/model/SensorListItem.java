@@ -10,11 +10,9 @@ public class SensorListItem extends SensorInfo implements Serializable {
 
     static final long serialVersionUID = 123456789123456789L;
 
-    public int image;
-    public Drawable imageDrw;
-    public String name;
     public boolean expanded = false;
     public boolean parent = false;
+    public boolean enabled = true;
 
     // flag when item swiped
     public boolean swiped = false;
@@ -30,6 +28,7 @@ public class SensorListItem extends SensorInfo implements Serializable {
         this.maxDelay = sensorInfo.getMaxDelay();
         this.minDelay = sensorInfo.getMinDelay();
         this.resolution = sensorInfo.getResolution();
+        this.reportingMode = sensorInfo.getReportingMode();
     }
 
 }

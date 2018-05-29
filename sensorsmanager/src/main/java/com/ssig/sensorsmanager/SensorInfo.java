@@ -1,5 +1,7 @@
 package com.ssig.sensorsmanager;
 
+import android.hardware.Sensor;
+
 import java.io.Serializable;
 
 public class SensorInfo implements Serializable{
@@ -15,6 +17,7 @@ public class SensorInfo implements Serializable{
     protected int maxDelay;
     protected int minDelay;
     protected float resolution;
+    protected int reportingMode;
 
 
     public SensorInfo(SensorType sensorType){
@@ -22,10 +25,12 @@ public class SensorInfo implements Serializable{
         this.name = null;
         this.vendor = null;
         this.version = -1;
+        this.power = -1;
         this.maximunRange = -1;
         this.maxDelay = -1;
         this.minDelay = -1;
         this.resolution = -1;
+        this.reportingMode = -1;
     }
 
     public SensorType getSensorType() {
@@ -62,7 +67,7 @@ public class SensorInfo implements Serializable{
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -100,4 +105,31 @@ public class SensorInfo implements Serializable{
     public void setMinDelay(int minDelay) {
         this.minDelay = minDelay;
     }
+
+    public int getMinFrequency() {
+        if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
+            return maxDelay>0?1000000/maxDelay:5;
+        return -1;
+    }
+
+    public int getMaxFrequency() {
+        if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
+            return minDelay>0?1000000/minDelay:5;
+        return -1;
+    }
+
+    public int getDefaultFrequency() {
+        if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
+            return (int) 0.9*getMaxFrequency();
+        return -1;
+    }
+
+    public int getReportingMode() {
+        return reportingMode;
+    }
+
+    public void setReportingMode(int reportingMode) {
+        this.reportingMode = reportingMode;
+    }
+
 }

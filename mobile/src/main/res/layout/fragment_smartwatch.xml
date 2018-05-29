@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.vlonjatg.progressactivity.ProgressFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:progressActivity="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/progressSmartwatchFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.SmartwatchFragment">
+    android:layout_gravity="center"
+    tools:context=".fragment.SmartwatchFragment"
+    progressActivity:errorImageHeight="220dp"
+    progressActivity:errorImageWidth="150dp"
+    progressActivity:errorTitleTextSize="8dp"
+    progressActivity:errorTitleTextColor="@color/teal_800"
+    progressActivity:errorContentTextSize="4dp"
+    progressActivity:errorButtonBackgroundColor="@color/teal_800"
+    progressActivity:errorButtonTextColor="@color/grey_10">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
@@ -11,4 +21,4 @@
         android:layout_height="match_parent"
         android:text="Smartwatch" />
 
-</FrameLayout>
+</com.vlonjatg.progressactivity.ProgressFrameLayout>
