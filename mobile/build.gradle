@@ -43,6 +43,10 @@ dependencies {
     implementation 'com.github.warkiz.widget:indicatorseekbar:1.2.9'
     implementation 'com.github.vlonjatg:progress-activity:2.0.5'
 
+    implementation 'com.google.zxing:core:3.2.1'
+    implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+
+    implementation 'com.github.instacart.truetime-android:library:3.3'
 
     wearApp project(':wear')
     implementation 'com.google.android.gms:play-services-wearable:+'
