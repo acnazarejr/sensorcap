@@ -84,16 +84,19 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
 
-    private List<SensorListItem> sensors;
+    private List<SensorListItem> sensorListItems;
     private Context ctx;
     private int color;
 
-    public AdapterListSensor(Context context, List<SensorListItem> sensors, int color) {
-        this.sensors = sensors;
+    public AdapterListSensor(Context context, List<SensorListItem> sensorListItems, int color) {
+        this.sensorListItems = sensorListItems;
         this.ctx = context;
         this.color = color;
     }
 
+    public List<SensorListItem> getSensorListItems() {
+        return sensorListItems;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -110,11 +113,12 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (holder instanceof SensorViewHolder) {
 
             final SensorViewHolder view = (SensorViewHolder) holder;
-            final SensorListItem sensorListItem = sensors.get(position);
+            final SensorListItem sensorListItem = sensorListItems.get(position);
 
             // CONFIGURE TITLE LAYOUT
             this.displayTextIcon(ctx, view.icon, sensorListItem.getSensorType().abbrev(), sensorListItem.enabled);
             view.sensorType.setText(sensorListItem.getSensorType().toString());
+            view.sensorEnabled.setChecked(sensorListItem.enabled);
             this.changeSwitchColor(view.sensorEnabled, this.color);
 
             // CONFIGURE EXPAND LAYOUT
@@ -141,7 +145,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
                 view.sensorFrequency.getBuilder()
                         .setMin(sensorListItem.getMinFrequency())
                         .setMax(sensorListItem.getMaxFrequency())
-                        .setProgress(sensorListItem.getDefaultFrequency())
+                        .setProgress(sensorListItem.frequency)
                         .setIndicatorColor(ContextCompat.getColor(this.ctx, this.color))
                         .setThumbColor(ContextCompat.getColor(this.ctx, this.color))
                         .setProgressTrackColor(ContextCompat.getColor(this.ctx, this.color))
@@ -162,7 +166,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     boolean show = toggleLayoutExpand(!sensorListItem.expanded, view.buttonExpand, view.layoutExpand);
-                    sensors.get(position).expanded = show;
+                    sensorListItems.get(position).expanded = show;
                 }
             });
 
@@ -170,7 +174,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onClick(View v) {
                     boolean show = toggleLayoutExpand(!sensorListItem.expanded, view.buttonExpand, view.layoutExpand);
-                    sensors.get(position).expanded = show;
+                    sensorListItems.get(position).expanded = show;
                 }
             });
 
@@ -178,7 +182,29 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     displayTextIcon(ctx, view.icon, sensorListItem.getSensorType().abbrev(), isChecked);
-                    sensors.get(position).expanded = isChecked;
+                    sensorListItems.get(position).enabled = isChecked;
+                }
+            });
+
+            view.sensorFrequency.setOnSeekChangeListener(new IndicatorSeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(IndicatorSeekBar seekBar, int progress, float progressFloat, boolean fromUserTouch) {
+                    sensorListItems.get(position).frequency = progress;
+                }
+
+                @Override
+                public void onSectionChanged(IndicatorSeekBar seekBar, int thumbPosOnTick, String textBelowTick, boolean fromUserTouch) {
+
+                }
+
+                @Override
+                public void onStartTrackingTouch(IndicatorSeekBar seekBar, int thumbPosOnTick) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+
                 }
             });
 
@@ -262,7 +288,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return sensors.size();
+        return sensorListItems.size();
     }
 
 }

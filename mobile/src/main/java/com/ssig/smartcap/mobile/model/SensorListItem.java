@@ -11,6 +11,7 @@ public class SensorListItem extends SensorInfo implements Serializable {
     public boolean expanded = false;
     public boolean parent = false;
     public boolean enabled = true;
+    public int frequency;
 
     // flag when item swiped
     public boolean swiped = false;
@@ -27,6 +28,7 @@ public class SensorListItem extends SensorInfo implements Serializable {
         this.minDelay = sensorInfo.getMinDelay();
         this.resolution = sensorInfo.getResolution();
         this.reportingMode = sensorInfo.getReportingMode();
+        this.frequency = sensorInfo.getDefaultFrequency();
     }
 
 }

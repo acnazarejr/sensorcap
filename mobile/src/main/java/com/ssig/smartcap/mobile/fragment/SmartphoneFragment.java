@@ -1,5 +1,7 @@
 package com.ssig.smartcap.mobile.fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -35,6 +37,7 @@ public class SmartphoneFragment extends AbstractMainFragment {
 
     private RecyclerView recyclerView;
     private AdapterListSensor adapterListSensor;
+    Map<SensorType, SensorInfo> smartphoneSensors;
 
     public SmartphoneFragment(){
         super("Smartphone Settings", R.drawable.ic_smartphone, R.color.smartphone, R.layout.fragment_smartphone);
@@ -44,34 +47,9 @@ public class SmartphoneFragment extends AbstractMainFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         parent_view = getActivity().findViewById(android.R.id.content);
+        smartphoneSensors = SensorInfoFactory.getAllSensorInfo(this.getContext());
     }
 
-
-//    private void loadingAndDisplayContent() {
-//        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_smartphone_progress);
-//        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_smartphone_content);
-//        layout_progress.setVisibility(View.VISIBLE);
-//        layout_progress.setAlpha(1.0f);
-//        layout_content.setVisibility(View.GONE);
-//
-//        initComponent();
-//        ViewAnimation.fadeOut(layout_progress);
-//        ViewAnimation.fadeIn(layout_content);
-//
-////        new Handler().postDelayed(new Runnable() {
-////            @Override
-////            public void run() {
-////                ViewAnimation.fadeOut(layout_progress);
-////            }
-////        }, LOADING_DURATION);
-////
-////        new Handler().postDelayed(new Runnable() {
-////            @Override
-////            public void run() {
-////                initComponent();
-////            }
-////        }, LOADING_DURATION + 400);
-//    }
 
 
     @Override
@@ -81,14 +59,17 @@ public class SmartphoneFragment extends AbstractMainFragment {
         recyclerView.addItemDecoration(new LineItemDecoration(this.getContext(), LinearLayout.VERTICAL));
         recyclerView.setHasFixedSize(true);
 
-        Map<SensorType, SensorInfo> sensors = SensorInfoFactory.getAllSensorInfo(this.getContext());
-        List<SensorListItem> items = new ArrayList<>();
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("smartphone", Context.MODE_PRIVATE);
 
+        Map<SensorType, SensorInfo> sensors = this.smartphoneSensors;
+        List<SensorListItem> items = new ArrayList<>();
 
         for (Map.Entry<SensorType, SensorInfo> entry : sensors.entrySet()) {
             SensorInfo sensorInfo = entry.getValue();
             if (sensorInfo != null) {
                 SensorListItem sensorListItem = new SensorListItem(sensorInfo);
+                sensorListItem.enabled = sharedPreferences.getBoolean(sensorListItem.getSensorType().abbrev() + "_ENABLED", true);
+                sensorListItem.frequency = sharedPreferences.getInt(sensorListItem.getSensorType().abbrev() + "_FREQUENCY", sensorListItem.getDefaultFrequency());
                 items.add(sensorListItem);
             }
         }
@@ -112,7 +93,14 @@ public class SmartphoneFragment extends AbstractMainFragment {
     @Override
     public void onStop() {
         super.onStop();
-        Toast.makeText(getContext(), "STOP", Toast.LENGTH_LONG).show();
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("smartphone", Context.MODE_PRIVATE);
+        List<SensorListItem> sensorsSensorListItems = this.adapterListSensor.getSensorListItems();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for(SensorListItem sensorListItem : sensorsSensorListItems){
+            editor.putBoolean(sensorListItem.getSensorType().abbrev() + "_ENABLED", sensorListItem.enabled);
+            editor.putInt(sensorListItem.getSensorType().abbrev() + "_FREQUENCY", sensorListItem.frequency);
+        }
+        editor.commit();
     }
 
 

@@ -333,4 +333,7 @@
         <item type="color">#ff9800</item>
     </array>
 
+    <color name="capture">@color/teal_800</color>
+    <color name="smartphone">@color/blue_800</color>
+
 </resources>
