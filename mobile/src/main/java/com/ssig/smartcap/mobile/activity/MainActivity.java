@@ -23,6 +23,8 @@ import com.ssig.smartcap.mobile.fragment.SmartwatchFragment;
 import com.ssig.smartcap.mobile.fragment.TimeToolFragment;
 import com.ssig.smartcap.mobile.utils.Tools;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private BottomNavigationView navigation;

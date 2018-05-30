@@ -1,7 +1,5 @@
 package com.ssig.smartcap.mobile.model;
 
-import android.graphics.drawable.Drawable;
-
 import com.ssig.sensorsmanager.SensorInfo;
 
 import java.io.Serializable;
@@ -20,11 +18,11 @@ public class SensorListItem extends SensorInfo implements Serializable {
     public SensorListItem(SensorInfo sensorInfo) {
         super(sensorInfo.getSensorType());
         this.sensorType = sensorInfo.getSensorType();
-        this.name = sensorInfo.getName();
+        this.model = sensorInfo.getModel();
         this.vendor = sensorInfo.getVendor();
         this.version = sensorInfo.getVersion();
         this.power = sensorInfo.getPower();
-        this.maximunRange = sensorInfo.getMaximunRange();
+        this.maximumRange = sensorInfo.getMaximumRange();
         this.maxDelay = sensorInfo.getMaxDelay();
         this.minDelay = sensorInfo.getMinDelay();
         this.resolution = sensorInfo.getResolution();

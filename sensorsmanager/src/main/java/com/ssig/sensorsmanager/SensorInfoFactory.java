@@ -4,7 +4,6 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -22,11 +21,11 @@ public class SensorInfoFactory {
 
         if (defaultSensor != null){
             SensorInfo sensorInfo = new SensorInfo((sensorType));
-            sensorInfo.setName(defaultSensor.getName());
+            sensorInfo.setModel(defaultSensor.getName());
             sensorInfo.setVendor(defaultSensor.getVendor());
             sensorInfo.setVersion(defaultSensor.getVersion());
             sensorInfo.setPower(defaultSensor.getPower());
-            sensorInfo.setMaximunRange(defaultSensor.getMaximumRange());
+            sensorInfo.setMaximumRange(defaultSensor.getMaximumRange());
             sensorInfo.setMaxDelay(defaultSensor.getMaxDelay());
             sensorInfo.setMinDelay(defaultSensor.getMinDelay());
             sensorInfo.setResolution(defaultSensor.getResolution());

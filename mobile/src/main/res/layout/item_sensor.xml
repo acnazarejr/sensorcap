@@ -77,9 +77,16 @@
         android:layout_height="wrap_content"
         android:background="@color/grey_3"
         android:orientation="vertical"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:padding="@dimen/spacing_large">
 
-        <include layout="@layout/widget_sensor_setting"/>
+        <include layout="@layout/layout_sensor_details"/>
+
+        <include layout="@layout/layout_sensor_frequency"/>
+
+
+
+
 
     </LinearLayout>
 

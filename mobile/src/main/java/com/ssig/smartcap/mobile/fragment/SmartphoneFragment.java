@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,26 +13,28 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ssig.sensorsmanager.SensorInfo;
 import com.ssig.sensorsmanager.SensorInfoFactory;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.mobile.R;
-import com.ssig.smartcap.mobile.adapter.AdapterListExpand;
+import com.ssig.smartcap.mobile.adapter.AdapterListSensor;
 import com.ssig.smartcap.mobile.model.SensorListItem;
+import com.ssig.smartcap.mobile.utils.ViewAnimation;
 import com.ssig.smartcap.mobile.widget.LineItemDecoration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class SmartphoneFragment extends AbstractMainFragment {
 
     private View parent_view;
+    private final static int LOADING_DURATION = 3500;
+
     private RecyclerView recyclerView;
-    private AdapterListExpand mAdapter;
+    private AdapterListSensor adapterListSensor;
 
     public SmartphoneFragment(){
         super("Smartphone Settings", R.layout.fragment_smartphone);
@@ -42,8 +45,30 @@ public class SmartphoneFragment extends AbstractMainFragment {
         super.onViewCreated(view, savedInstanceState);
         this.setTextViewDrawableColor((TextView) getActivity().findViewById(R.id.text_sensor_title));
         parent_view = getActivity().findViewById(android.R.id.content);
-        initComponent();
     }
+
+
+//    private void loadingAndDisplayContent() {
+//        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_progress);
+//        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_content);
+//        layout_progress.setVisibility(View.VISIBLE);
+//        layout_progress.setAlpha(1.0f);
+//        layout_content.setVisibility(View.GONE);
+//
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                ViewAnimation.fadeOut(layout_progress);
+//            }
+//        }, LOADING_DURATION);
+//
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                initComponent();
+//            }
+//        }, LOADING_DURATION + 400);
+//    }
 
 
     private void initComponent() {
@@ -65,8 +90,8 @@ public class SmartphoneFragment extends AbstractMainFragment {
         }
 
         //set data and list adapter
-        mAdapter = new AdapterListExpand(this.getContext(), items);
-        recyclerView.setAdapter(mAdapter);
+        adapterListSensor = new AdapterListSensor(this.getContext(), items);
+        recyclerView.setAdapter(adapterListSensor);
 
         // on item list clicked
 //        mAdapter.setOnItemClickListener(new AdapterListExpand.OnItemClickListener() {
@@ -76,6 +101,19 @@ public class SmartphoneFragment extends AbstractMainFragment {
 //            }
 //        });
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+//        initComponent();
+//        loadingAndDisplayContent();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Toast.makeText(getContext(), "STOP", Toast.LENGTH_LONG).show();
     }
 
 

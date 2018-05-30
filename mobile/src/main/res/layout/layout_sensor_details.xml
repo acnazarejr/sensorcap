@@ -1,48 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="?attr/actionBarSize"
     android:orientation="vertical"
-    android:padding="@dimen/spacing_large">
+    android:padding="@dimen/spacing_small">
 
+    <!--Title-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_small"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sensor Details"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/grey_90"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <!--Model-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
+        android:layout_marginTop="@dimen/spacing_small"
+        android:layout_marginBottom="@dimen/spacing_small"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/sensor_name"
+            android:id="@+id/sensor_model"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Sensor Name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/teal_600"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/teal_800"
             android:textStyle="bold" />
-
-        <!--<View-->
-            <!--android:layout_width="@dimen/spacing_middle"-->
-            <!--android:layout_height="wrap_content" />-->
-
-        <!--<android.support.v7.widget.SwitchCompat-->
-            <!--android:id="@+id/sensor_enable"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:checked="true"-->
-            <!--app:trackTint="@color/switch_color_background"-->
-            <!--app:thumbTint="@color/switch_color_primary" />-->
-
-        <!--<View-->
-            <!--android:layout_width="@dimen/spacing_middle"-->
-            <!--android:layout_height="wrap_content" />-->
 
     </LinearLayout>
 
+    <!--Vendor-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +64,7 @@
             android:layout_weight="1"
             android:text="Vendor"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/grey_90"
+            android:textColor="@color/grey_60"
             android:textStyle="bold" />
 
         <View
@@ -72,7 +78,7 @@
             android:layout_height="wrap_content"
             android:text="Sensor Vendor"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/grey_90" />
+            android:textColor="@color/teal_800" />
 
         <View
             android:layout_width="@dimen/spacing_middle"
@@ -80,7 +86,7 @@
 
     </LinearLayout>
 
-
+    <!--Other Values-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -205,48 +211,10 @@
 
         </LinearLayout>
 
-l
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginBottom="@dimen/spacing_small"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Sensor Frequency"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/grey_90"
-            android:textStyle="bold" />
 
     </LinearLayout>
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_small"
-        android:layout_marginBottom="@dimen/spacing_small"
-        android:orientation="horizontal">
 
-
-        <com.warkiz.widget.IndicatorSeekBar
-            android:id="@+id/sensor_delay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:isb_indicator_type="circular_bubble"
-            app:isb_progress="50"
-            app:isb_seek_bar_type="discrete_ticks_texts"
-            app:isb_tick_num="6"
-            app:isb_tick_type="oval" />
-
-    </LinearLayout>
 
 </LinearLayout>

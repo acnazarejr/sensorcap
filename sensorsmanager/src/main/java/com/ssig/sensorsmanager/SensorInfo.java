@@ -9,11 +9,11 @@ public class SensorInfo implements Serializable{
     static final long serialVersionUID = 123456789123456789L;
 
     protected SensorType sensorType;
-    protected String name;
+    protected String model;
     protected String vendor;
     protected int version;
     protected float power;
-    protected float maximunRange;
+    protected float maximumRange;
     protected int maxDelay;
     protected int minDelay;
     protected float resolution;
@@ -22,11 +22,11 @@ public class SensorInfo implements Serializable{
 
     public SensorInfo(SensorType sensorType){
         this.sensorType = sensorType;
-        this.name = null;
+        this.model = null;
         this.vendor = null;
         this.version = -1;
         this.power = -1;
-        this.maximunRange = -1;
+        this.maximumRange = -1;
         this.maxDelay = -1;
         this.minDelay = -1;
         this.resolution = -1;
@@ -37,16 +37,12 @@ public class SensorInfo implements Serializable{
         return sensorType;
     }
 
-    public void setSensorType(SensorType sensorType) {
-        this.sensorType = sensorType;
+    public float getMaximumRange() {
+        return maximumRange;
     }
 
-    public float getMaximunRange() {
-        return maximunRange;
-    }
-
-    public void setMaximunRange(float maximunRange) {
-        this.maximunRange = maximunRange;
+    public void setMaximumRange(float maximumRange) {
+        this.maximumRange = maximumRange;
     }
 
 
@@ -66,12 +62,12 @@ public class SensorInfo implements Serializable{
         this.resolution = resolution;
     }
 
-    public String getName() {
-        return this.name;
+    public String getModel() {
+        return this.model;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public int getVersion() {
@@ -108,19 +104,19 @@ public class SensorInfo implements Serializable{
 
     public int getMinFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return maxDelay>0?1000000/maxDelay:5;
+            return maxDelay>0?1000000/maxDelay:1;
         return -1;
     }
 
     public int getMaxFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return minDelay>0?1000000/minDelay:5;
+            return minDelay>0?1000000/minDelay:1;
         return -1;
     }
 
     public int getDefaultFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return (int) 0.9*getMaxFrequency();
+            return (int)(0.9*getMaxFrequency());
         return -1;
     }
 
