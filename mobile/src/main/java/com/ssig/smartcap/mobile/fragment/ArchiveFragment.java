@@ -5,7 +5,12 @@ import com.ssig.smartcap.mobile.R;
 public class ArchiveFragment extends AbstractMainFragment {
 
     public ArchiveFragment(){
-        super("Capture Archive", R.layout.fragment_archive);
+        super("Capture Archive", R.drawable.ic_running, R.color.teal_500, R.layout.fragment_archive);
+    }
+
+    @Override
+    public boolean makeContent() {
+        return true;
     }
 
 }

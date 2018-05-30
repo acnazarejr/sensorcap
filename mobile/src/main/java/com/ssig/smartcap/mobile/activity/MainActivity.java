@@ -1,6 +1,7 @@
 package com.ssig.smartcap.mobile.activity;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -16,6 +17,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.ssig.smartcap.mobile.R;
+import com.ssig.smartcap.mobile.fragment.AbstractMainFragment;
 import com.ssig.smartcap.mobile.fragment.ArchiveFragment;
 import com.ssig.smartcap.mobile.fragment.CaptureFragment;
 import com.ssig.smartcap.mobile.fragment.SmartphoneFragment;
@@ -49,8 +51,6 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     // ---------------------------------------------------------------------------------------------
     private void initToolbar() {
         this.toolbar = findViewById(R.id.toolbar);
-        this.toolbar.setLogo(R.drawable.logo);
-        this.toolbar.getLogo().setColorFilter(ContextCompat.getColor(this, R.color.teal_800), PorterDuff.Mode.SRC_ATOP);
         this.setSupportActionBar(this.toolbar);
         Tools.setSystemBarColor(this, R.color.grey_20);
         Tools.setSystemBarLight(this);
@@ -142,6 +142,12 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     private boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
+//            this.navigation.setBackgroundColor(((AbstractMainFragment)fragment).color);
+            int color = ContextCompat.getColor(this,((AbstractMainFragment)fragment).color);
+            this.navigation.setBackgroundColor(color);
+            this.toolbar.setTitle(((AbstractMainFragment)fragment).title);
+            this.toolbar.setNavigationIcon(((AbstractMainFragment)fragment).icon);
+            this.toolbar.getNavigationIcon().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
             return true;
         }

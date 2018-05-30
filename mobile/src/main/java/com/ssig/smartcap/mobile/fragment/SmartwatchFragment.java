@@ -13,7 +13,7 @@ public class SmartwatchFragment extends AbstractMainFragment {
     private ProgressLayout progressLayout;
 
     public SmartwatchFragment(){
-        super("Smartwatch Settings", R.layout.fragment_smartwatch);
+        super("Smartwatch Settings", R.drawable.ic_running, R.color.teal_500, R.layout.fragment_smartwatch);
     }
 
 
@@ -35,4 +35,8 @@ public class SmartwatchFragment extends AbstractMainFragment {
         }
     };
 
+    @Override
+    public boolean makeContent() {
+        return true;
+    }
 }

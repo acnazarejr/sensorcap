@@ -1,9 +1,11 @@
 package com.ssig.smartcap.mobile.adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
@@ -54,7 +56,6 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
         public TextView frequencyNotAvailableText;
 
 
-
         public SensorViewHolder(View v) {
             super(v);
 
@@ -63,7 +64,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
             layoutExpand = v.findViewById(R.id.lyt_expand);
 
             icon = v.findViewById(R.id.icon);
-            sensorType = v.findViewById(R.id.name);
+            sensorType = v.findViewById(R.id.title);
             buttonExpand = v.findViewById(R.id.bt_expand);
             sensorEnabled = v.findViewById(R.id.sensor_enable);
 
@@ -85,10 +86,12 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private List<SensorListItem> sensors;
     private Context ctx;
+    private int color;
 
-    public AdapterListSensor(Context context, List<SensorListItem> sensors) {
+    public AdapterListSensor(Context context, List<SensorListItem> sensors, int color) {
         this.sensors = sensors;
         this.ctx = context;
+        this.color = color;
     }
 
 
@@ -112,10 +115,13 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
             // CONFIGURE TITLE LAYOUT
             this.displayTextIcon(ctx, view.icon, sensorListItem.getSensorType().abbrev(), sensorListItem.enabled);
             view.sensorType.setText(sensorListItem.getSensorType().toString());
+            this.changeSwitchColor(view.sensorEnabled, this.color);
 
             // CONFIGURE EXPAND LAYOUT
             view.sensorModel.setText(sensorListItem.getModel() + " (" + "v" + String.valueOf(sensorListItem.getVersion()) + ")");
+            view.sensorModel.setTextColor(ContextCompat.getColor(this.ctx, this.color));
             view.sensorVendor.setText(sensorListItem.getVendor());
+            view.sensorVendor.setTextColor(ContextCompat.getColor(this.ctx, this.color));
 
             DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
             decimalFormatSymbols.setDecimalSeparator('.');
@@ -136,6 +142,9 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
                         .setMin(sensorListItem.getMinFrequency())
                         .setMax(sensorListItem.getMaxFrequency())
                         .setProgress(sensorListItem.getDefaultFrequency())
+                        .setIndicatorColor(ContextCompat.getColor(this.ctx, this.color))
+                        .setThumbColor(ContextCompat.getColor(this.ctx, this.color))
+                        .setProgressTrackColor(ContextCompat.getColor(this.ctx, this.color))
                         .apply();
             }else{
                 view.frequencyAvailable.setVisibility(View.GONE);
@@ -182,8 +191,53 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
             Tools.toggleArrow(sensorListItem.expanded, view.buttonExpand, false);
 
+//            setAnimation(holder.itemView, position);
+
         }
     }
+
+//    private int lastPosition = -1;
+//    private boolean on_attach = true;
+//
+//    @Override
+//    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                on_attach = false;
+//                super.onScrollStateChanged(recyclerView, newState);
+//            }
+//        });
+//        super.onAttachedToRecyclerView(recyclerView);
+//    }
+//
+//    private void setAnimation(View view, int position) {
+//        if (position > lastPosition) {
+//            ItemAnimation.animate(view, on_attach ? position : -1, ItemAnimation.FADE_IN);
+//            lastPosition = position;
+//        }
+//    }
+
+    private void changeSwitchColor(SwitchCompat switchCompat, int Color){
+        int[][] states = new int[][] {
+                new int[] {-android.R.attr.state_checked},
+                new int[] {android.R.attr.state_checked},
+        };
+
+        int[] thumbColors = new int[] {
+                ContextCompat.getColor(this.ctx, R.color.grey_800),
+                ContextCompat.getColor(this.ctx, color),
+        };
+
+        int[] trackColors = new int[] {
+                ContextCompat.getColor(this.ctx, R.color.grey_300),
+                Tools.manipulateColor(ContextCompat.getColor(this.ctx, color), (float)1.5),
+        };
+
+        DrawableCompat.setTintList(DrawableCompat.wrap(switchCompat.getThumbDrawable()), new ColorStateList(states, thumbColors));
+        DrawableCompat.setTintList(DrawableCompat.wrap(switchCompat.getTrackDrawable()), new ColorStateList(states, trackColors));
+    }
+
 
     private void displayTextIcon(Context ctx, MaterialLetterIcon icon, String text, boolean enabled){
         icon.setLetterSize(14);

@@ -18,7 +18,7 @@
 
     <item
         android:id="@+id/navigation_time_tool"
-        android:icon="@drawable/ic_timer"
+        android:icon="@drawable/ic_qrcode_scan"
         android:title="Time Tool" />
 
     <item

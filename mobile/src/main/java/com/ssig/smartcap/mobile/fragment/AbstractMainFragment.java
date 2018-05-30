@@ -1,7 +1,11 @@
 package com.ssig.smartcap.mobile.fragment;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -9,56 +13,68 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.ssig.smartcap.mobile.R;
+import com.ssig.smartcap.mobile.utils.ViewAnimation;
 
 public abstract class AbstractMainFragment extends Fragment {
 
-    private String title;
-    private TabLayout tab_layout;
-    private ActionBar actionBar;
+    public String title;
+    public int icon;
+    public int color;
+    View view;
+
     private int resource;
 
 
-    public AbstractMainFragment(String title, @LayoutRes int resource) {
+    public AbstractMainFragment(String title, int icon, int color, @LayoutRes int resource) {
         this.title = title;
         this.resource = resource;
+        this.icon = icon;
+        this.color = color;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(this.resource, container, false);
+        this.view = inflater.inflate(this.resource, container, false);
+        return this.view;
+    }
+
+    public void reload(@NonNull View progress, @NonNull View content, View error){
+
+        progress.setVisibility(View.GONE);
+        content.setVisibility(View.GONE);
+        content.setVisibility(View.GONE);
+
+        progress.setVisibility(View.VISIBLE);
+        progress.setAlpha(1.0f);
+        boolean loaded = this.makeContent();
+        if(!loaded && error != null) {
+            this.swapViews(progress, error);
+        }else{
+            this.swapViews(progress, content);
+        }
+
     }
 
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        this.actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+    private void swapViews(@NonNull final View outView, @NonNull final View inView){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ViewAnimation.fadeOut(outView);
+            }
+        }).run();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ViewAnimation.fadeIn(inView);
+            }
+        }).run();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-//        this.resetTabLayout();
-        this.resetActionBar();
-    }
+    public abstract boolean makeContent();
 
 
-    public void resetActionBar() {
-        this.actionBar.setTitle(this.getTitle());
-    }
-
-    public void resetTabLayout(){
-        this.tab_layout.removeAllTabs();
-        this.tab_layout.setVisibility(View.GONE);
-    }
-
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 }

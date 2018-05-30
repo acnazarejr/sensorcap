@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:minHeight="?attr/actionBarSize"
     android:orientation="vertical"
     android:padding="@dimen/spacing_small">
 
@@ -43,7 +42,6 @@
             android:layout_weight="1"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/teal_800"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -67,22 +65,13 @@
             android:textColor="@color/grey_60"
             android:textStyle="bold" />
 
-        <View
-            android:layout_width="@dimen/spacing_middle"
-            android:layout_height="wrap_content" />
-
 
         <TextView
             android:id="@+id/sensor_vendor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sensor Vendor"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:textColor="@color/teal_800" />
-
-        <View
-            android:layout_width="@dimen/spacing_middle"
-            android:layout_height="wrap_content" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
     </LinearLayout>
 

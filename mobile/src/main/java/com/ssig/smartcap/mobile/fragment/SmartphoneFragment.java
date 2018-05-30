@@ -37,41 +37,45 @@ public class SmartphoneFragment extends AbstractMainFragment {
     private AdapterListSensor adapterListSensor;
 
     public SmartphoneFragment(){
-        super("Smartphone Settings", R.layout.fragment_smartphone);
+        super("Smartphone Settings", R.drawable.ic_smartphone, R.color.smartphone, R.layout.fragment_smartphone);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.setTextViewDrawableColor((TextView) getActivity().findViewById(R.id.text_sensor_title));
         parent_view = getActivity().findViewById(android.R.id.content);
     }
 
 
 //    private void loadingAndDisplayContent() {
-//        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_progress);
-//        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_content);
+//        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_smartphone_progress);
+//        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_smartphone_content);
 //        layout_progress.setVisibility(View.VISIBLE);
 //        layout_progress.setAlpha(1.0f);
 //        layout_content.setVisibility(View.GONE);
 //
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                ViewAnimation.fadeOut(layout_progress);
-//            }
-//        }, LOADING_DURATION);
+//        initComponent();
+//        ViewAnimation.fadeOut(layout_progress);
+//        ViewAnimation.fadeIn(layout_content);
 //
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                initComponent();
-//            }
-//        }, LOADING_DURATION + 400);
+////        new Handler().postDelayed(new Runnable() {
+////            @Override
+////            public void run() {
+////                ViewAnimation.fadeOut(layout_progress);
+////            }
+////        }, LOADING_DURATION);
+////
+////        new Handler().postDelayed(new Runnable() {
+////            @Override
+////            public void run() {
+////                initComponent();
+////            }
+////        }, LOADING_DURATION + 400);
 //    }
 
 
-    private void initComponent() {
+    @Override
+    public boolean makeContent() {
         recyclerView = (RecyclerView) getActivity().findViewById(R.id.sensorsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
         recyclerView.addItemDecoration(new LineItemDecoration(this.getContext(), LinearLayout.VERTICAL));
@@ -90,24 +94,19 @@ public class SmartphoneFragment extends AbstractMainFragment {
         }
 
         //set data and list adapter
-        adapterListSensor = new AdapterListSensor(this.getContext(), items);
+        adapterListSensor = new AdapterListSensor(this.getContext(), items, this.color);
         recyclerView.setAdapter(adapterListSensor);
 
-        // on item list clicked
-//        mAdapter.setOnItemClickListener(new AdapterListExpand.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(View view, SensorListItem obj, int position) {
-//                Snackbar.make(parent_view, "Item " + obj.getName() + " clicked", Snackbar.LENGTH_SHORT).show();
-//            }
-//        });
+        return true;
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
-//        initComponent();
-//        loadingAndDisplayContent();
+        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_smartphone_progress);
+        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_smartphone_content);
+        this.reload(layout_progress, layout_content, null);
     }
 
     @Override

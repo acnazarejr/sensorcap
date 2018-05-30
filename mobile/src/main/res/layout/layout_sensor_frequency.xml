@@ -50,7 +50,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:isb_indicator_color="@color/teal_800"
             app:isb_indicator_stay="true"
             app:isb_indicator_text_color="@color/grey_10"
             app:isb_min="0"
@@ -58,12 +57,10 @@
             app:isb_progress="90"
             app:isb_seek_bar_type="continuous"
             app:isb_show_indicator="true"
-            app:isb_thumb_color="@color/teal_800"
             app:isb_thumb_width="22dp"
             app:isb_track_background_bar_size="5dp"
             app:isb_track_background_bar_color="@color/grey_400"
-            app:isb_track_progress_bar_size="5dp"
-            app:isb_track_progress_bar_color="@color/teal_400" />
+            app:isb_track_progress_bar_size="5dp"/>
 
         <TextView
             android:id="@+id/sensor_max_frequency"
