@@ -7,10 +7,10 @@ import java.io.Serializable;
  */
 
 public class PersonInfo implements Serializable {
-    private String nome;
+    private String Name;
     private Float Height;
     private Float Weight;
-    private Integer age;
+    private Integer Age;
     public enum Gender {
         FEMALE, MALE;
     }
@@ -18,12 +18,12 @@ public class PersonInfo implements Serializable {
     public PersonInfo(){
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return this.Name;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setName(String name) {
+        this.Name = name;
     }
 
     public Float getHeight() {
@@ -39,14 +39,14 @@ public class PersonInfo implements Serializable {
     }
 
     public void setWeight(Float weight) {
-        Weight = weight;
+        this.Weight = weight;
     }
 
     public Integer getAge() {
-        return age;
+        return this.Age;
     }
 
     public void setAge(Integer age) {
-        this.age = age;
+        this.Age = age;
     }
 }

@@ -9,11 +9,23 @@ import java.util.HashMap;
 
 public class CaptureConfig implements Serializable {
     private PersonInfo person = null;
-    private HashMap<SensorType, SensorConfig> sensors = new HashMap<SensorType, SensorConfig>();
+    private SmartphonePosition smartphonePosition = null;
+    private SmartphoneSide smartphoneSide = null;
+    private SmartwatchSide smartwatchSide = null;
+    private HashMap<SensorType, SensorConfig> sensors = new HashMap<>();
     private String activity = null;
     private Integer delayStart = null;
     private Boolean bip = null;
     private Boolean vibration = null;
+
+    public HashMap<SensorType, SensorConfig> getSensors() {
+        return sensors;
+    }
+
+    public PersonInfo getPerson() {
+        return person;
+    }
+
     public enum SmartphonePosition{
         FRONT, BACK;
     }
@@ -24,13 +36,12 @@ public class CaptureConfig implements Serializable {
         LEFT, RIGHT;
     }
 
-    public CaptureConfig(){
-
+    public CaptureConfig(PersonInfo p){
+        this.person = p;
         //TODO//
-
     }
 
-    public void addSensors(SensorConfig sensorConfig){
+    public void addSensorConfig(SensorConfig sensorConfig){
         sensors.put(sensorConfig.getSensortype(), sensorConfig);
     }
 
@@ -60,5 +71,29 @@ public class CaptureConfig implements Serializable {
 
     public void setActivity(String activity) {
         this.activity = activity;
+    }
+
+    public SmartphonePosition getSmartphonePosition() {
+        return smartphonePosition;
+    }
+
+    public void setSmartphonePosition(SmartphonePosition smartphonePosition) {
+        this.smartphonePosition = smartphonePosition;
+    }
+
+    public SmartphoneSide getSmartphoneSide() {
+        return smartphoneSide;
+    }
+
+    public void setSmartphoneSide(SmartphoneSide smartphoneSide) {
+        this.smartphoneSide = smartphoneSide;
+    }
+
+    public SmartwatchSide getSmartwatchSide() {
+        return smartwatchSide;
+    }
+
+    public void setSmartwatchSide(SmartwatchSide smartwatchSide) {
+        this.smartwatchSide = smartwatchSide;
     }
 }

@@ -9,9 +9,9 @@ import java.io.Serializable;
 public class SensorConfig implements Serializable {
     private SensorType sensortype = null;
     private Boolean enabled = false;
-    private Double frequency = 0.0;
+    private Integer frequency = 0;
 
-    public SensorConfig(SensorType type, Boolean enable, Double freq){
+    public SensorConfig(SensorType type, Boolean enable, Integer freq){
         this.sensortype = type;
         this.enabled = enable;
         this.frequency = freq;
@@ -25,7 +25,7 @@ public class SensorConfig implements Serializable {
         return enabled;
     }
 
-    public Double getFrequency() {
+    public Integer getFrequency() {
         return frequency;
     }
 }
