@@ -1,5 +1,7 @@
 package com.ssig.smartcap.wear;
 
+import android.content.ContentValues;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -80,7 +82,6 @@ public class MainActivity extends WearableActivity {
             messageControl.execute();
         }
     }
-
 
     private class MessageControl extends AsyncTask<Void, Void, Void> {
 

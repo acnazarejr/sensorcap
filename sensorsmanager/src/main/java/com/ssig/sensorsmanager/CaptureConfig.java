@@ -1,40 +1,64 @@
-//package com.ssig.sensorsmanager;
-//
-//import java.io.Serializable;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//
-//public class CaptureConfig implements Serializable{
-//
-//    Map<SensorType, Integer> sensors;
-//
-//
-//    public CaptureConfig(){
-//        this.sensors = new HashMap<>();
-//        this.sensors.put(SensorType.ACC, null);
-//        this.sensors.put(SensorType.GYR, null);
-//        this.sensors.put(SensorType.BAR, null);
-//        this.sensors.put(SensorType.MAG, null);
-//        this.sensors.put(SensorType.LAC, null);
-//    }
-//
-//    public void enableSensor(SensorType sensorType, int delay){
-//        this.sensors.put(sensorType, delay);
-//    }
-//
-//    public void disableSensor(SensorType sensorType){
-//        this.sensors.put(sensorType, null);
-//    }
-//
-//    public boolean isSensorEnable(SensorType sensorType){
-//        return this.sensors.get(sensorType) != null;
-//    }
-//
-//    public Integer getSensorDelay(SensorType sensorType){
-//        if (this.isSensorEnable(sensorType))
-//            return this.sensors.get(sensorType);
-//        return null;
-//    }
-//
-//}
+package com.ssig.sensorsmanager;
+
+import java.io.Serializable;
+import java.util.HashMap;
+
+/**
+ * Created by flabe on 01/06/2018.
+ */
+
+public class CaptureConfig implements Serializable {
+    private PersonInfo person = null;
+    private HashMap<SensorType, SensorConfig> sensors = new HashMap<SensorType, SensorConfig>();
+    private String activity = null;
+    private Integer delayStart = null;
+    private Boolean bip = null;
+    private Boolean vibration = null;
+    public enum SmartphonePosition{
+        FRONT, BACK;
+    }
+    public enum SmartphoneSide{
+        LEFT, RIGHT;
+    }
+    public enum SmartwatchSide {
+        LEFT, RIGHT;
+    }
+
+    public CaptureConfig(){
+
+        //TODO//
+
+    }
+
+    public void addSensors(SensorConfig sensorConfig){
+        sensors.put(sensorConfig.getSensortype(), sensorConfig);
+    }
+
+    public Boolean getVibration() {
+        return vibration;
+    }
+
+    public void setVibration(Boolean vibration) {
+        this.vibration = vibration;
+    }
+
+    public Boolean getBip() {
+        return bip;
+    }
+
+    public Integer getDelayStart() {
+        return delayStart;
+    }
+
+    public void setDelayStart(Integer delayStart) {
+        this.delayStart = delayStart;
+    }
+
+    public String getActivity() {
+        return activity;
+    }
+
+    public void setActivity(String activity) {
+        this.activity = activity;
+    }
+}
