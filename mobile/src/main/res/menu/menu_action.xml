@@ -1,16 +1,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
     <item
+        android:id="@+id/action_ntp"
+        android:icon="@drawable/ic_earth_off"
+        android:orderInCategory="100"
+        android:title="@string/synchronize_ntp"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:orderInCategory="200"
-        android:title="Settings"
+        android:title="@string/settings"
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_about"
         android:icon="@drawable/ic_info"
         android:orderInCategory="300"
-        android:title="About"
+        android:title="@string/about"
         app:showAsAction="never" />
 
 

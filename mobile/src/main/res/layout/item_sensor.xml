@@ -14,12 +14,14 @@
         android:background="@android:color/white"
         android:gravity="center_vertical"
         android:minHeight="?attr/actionBarSize"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:focusable="true">
 
         <com.github.ivbaranov.mli.MaterialLetterIcon
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginHorizontal="@dimen/spacing_medium"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
             android:id="@+id/icon"/>
 
 
@@ -28,7 +30,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Item Title"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/grey_80" />
 
@@ -44,7 +45,8 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:tint="@color/grey_60"
-            android:layout_marginHorizontal="@dimen/spacing_medium"
+            android:layout_marginLeft="@dimen/spacing_medium"
+            android:layout_marginRight="@dimen/spacing_medium"
             app:srcCompat="@drawable/ic_expand_arrow" />
 
     </LinearLayout>

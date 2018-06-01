@@ -40,7 +40,34 @@ public class SmartphoneFragment extends AbstractMainFragment {
     Map<SensorType, SensorInfo> smartphoneSensors;
 
     public SmartphoneFragment(){
-        super("Smartphone Settings", R.drawable.ic_smartphone, R.color.smartphone, R.layout.fragment_smartphone);
+        super(R.layout.fragment_smartphone);
+    }
+
+    @Override
+    public void setViews() {
+        this.progressView = getActivity().findViewById(R.id.layout_smartphone_progress);
+        this.contentView = getActivity().findViewById(R.id.layout_smartphone_content);
+        this.errorView = null;
+    }
+
+    @Override
+    public String getTitle() {
+        return "Capture Mode";
+    }
+
+    @Override
+    public int getIcon() {
+        return R.drawable.ic_running;
+    }
+
+    @Override
+    public int getPrimaryColor() {
+        return R.color.smartphone_primary;
+    }
+
+    @Override
+    public int getSecondaryColor() {
+        return R.color.smartphone_secondary;
     }
 
     @Override
@@ -54,7 +81,7 @@ public class SmartphoneFragment extends AbstractMainFragment {
 
     @Override
     public boolean makeContent() {
-        recyclerView = (RecyclerView) getActivity().findViewById(R.id.sensorsRecyclerView);
+        recyclerView = getActivity().findViewById(R.id.sensorsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
         recyclerView.addItemDecoration(new LineItemDecoration(this.getContext(), LinearLayout.VERTICAL));
         recyclerView.setHasFixedSize(true);
@@ -75,19 +102,11 @@ public class SmartphoneFragment extends AbstractMainFragment {
         }
 
         //set data and list adapter
-        adapterListSensor = new AdapterListSensor(this.getContext(), items, this.color);
+        adapterListSensor = new AdapterListSensor(this.getContext(), items, this.getPrimaryColor());
         recyclerView.setAdapter(adapterListSensor);
 
         return true;
 
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        final LinearLayout layout_progress = getActivity().findViewById(R.id.layout_smartphone_progress);
-        final LinearLayout layout_content = getActivity().findViewById(R.id.layout_smartphone_content);
-        this.reload(layout_progress, layout_content, null);
     }
 
     @Override
@@ -104,12 +123,12 @@ public class SmartphoneFragment extends AbstractMainFragment {
     }
 
 
-    private void setTextViewDrawableColor(TextView textView) {
-        for (Drawable drawable : textView.getCompoundDrawables()) {
-            if (drawable != null) {
-                drawable.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this.getContext(), R.color.teal_800), PorterDuff.Mode.SRC_IN));
-            }
-        }
-    }
+//    private void setTextViewDrawableColor(TextView textView) {
+//        for (Drawable drawable : textView.getCompoundDrawables()) {
+//            if (drawable != null) {
+//                drawable.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this.getContext(), R.color.teal_800), PorterDuff.Mode.SRC_IN));
+//            }
+//        }
+//    }
 
 }

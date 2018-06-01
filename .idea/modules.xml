@@ -7,7 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/mobile/mobile.iml" filepath="$PROJECT_DIR$/mobile/mobile.iml" />
       <module fileurl="file://$PROJECT_DIR$/sensorsmanager/sensorsmanager.iml" filepath="$PROJECT_DIR$/sensorsmanager/sensorsmanager.iml" />
       <module fileurl="file://$PROJECT_DIR$/smartcap.iml" filepath="$PROJECT_DIR$/smartcap.iml" />
-      <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wear_old/wear_old.iml" filepath="$PROJECT_DIR$/wear_old/wear_old.iml" />
     </modules>
   </component>
 </project>

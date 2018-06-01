@@ -1,16 +1,44 @@
 package com.ssig.smartcap.mobile.fragment;
 
+import android.support.annotation.NonNull;
+import android.view.View;
+
 import com.ssig.smartcap.mobile.R;
 
 public class ArchiveFragment extends AbstractMainFragment {
 
     public ArchiveFragment(){
-        super("Capture Archive", R.drawable.ic_running, R.color.teal_500, R.layout.fragment_archive);
+        super(R.layout.fragment_archive);
+    }
+
+    @Override
+    public void setViews() {
+        return;
     }
 
     @Override
     public boolean makeContent() {
         return true;
+    }
+
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Override
+    public int getIcon() {
+        return R.drawable.ic_folder_multiple;
+    }
+
+    @Override
+    public int getPrimaryColor() {
+        return R.color.archive_primary;
+    }
+
+    @Override
+    public int getSecondaryColor() {
+        return R.color.archive_secondary;
     }
 
 }

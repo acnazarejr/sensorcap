@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Sensor Details"
+            android:text="@string/sensor_details_title"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/grey_90"
@@ -60,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Vendor"
+            android:text="@string/vendor"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textColor="@color/grey_60"
             android:textStyle="bold" />
@@ -70,7 +70,7 @@
             android:id="@+id/sensor_vendor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sensor Vendor"
+            android:text="@string/sensor_vendor"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
     </LinearLayout>
@@ -81,7 +81,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_small"
         android:layout_marginBottom="@dimen/spacing_small"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:baselineAligned="true">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -94,7 +95,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Power"
+                android:text="@string/power"
                 android:paddingBottom="@dimen/spacing_small"
                 android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
@@ -105,6 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/shape_rounded_grey"
+                android:backgroundTint="@color/green_200"
                 android:paddingBottom="@dimen/spacing_small"
                 android:paddingLeft="@dimen/spacing_xmedium"
                 android:paddingRight="@dimen/spacing_xmedium"
@@ -133,7 +135,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Max. Range"
+                android:text="@string/max_range"
                 android:paddingBottom="@dimen/spacing_small"
                 android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
@@ -172,7 +174,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Resolution"
+                android:text="@string/resolution"
                 android:paddingBottom="@dimen/spacing_small"
                 android:paddingTop="@dimen/spacing_small"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"

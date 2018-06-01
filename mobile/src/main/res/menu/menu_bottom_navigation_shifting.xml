@@ -23,7 +23,7 @@
 
     <item
         android:id="@+id/navigation_archive"
-        android:icon="@drawable/ic_library_books"
+        android:icon="@drawable/ic_folder_multiple"
         android:title="Archive" />
 
 

@@ -1,1 +1,1 @@
-include ':mobile', ':wear', ':btmanager', ':common', ':sensorsmanager'
+include ':mobile', ':wear_old', ':btmanager', ':common', ':sensorsmanager'

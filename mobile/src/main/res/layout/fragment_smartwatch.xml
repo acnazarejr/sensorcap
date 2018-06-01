@@ -15,10 +15,32 @@
     progressActivity:errorButtonBackgroundColor="@color/teal_800"
     progressActivity:errorButtonTextColor="@color/grey_10">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Smartwatch" />
+        android:layout_height="match_parent">
+
+
+        <RelativeLayout
+            android:id="@+id/layout_smartwatch_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Smartwatch" />
+
+        </RelativeLayout>
+
+        <include layout="@layout/layout_fragment_progress"
+            android:id="@+id/layout_smartwatch_progress"
+            android:visibility="gone"/>
+
+        <include layout="@layout/layout_smartwatch_fragment_error"
+            android:id="@+id/layout_smartwatch_error"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
 
 </com.vlonjatg.progressactivity.ProgressFrameLayout>

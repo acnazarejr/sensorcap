@@ -205,4 +205,12 @@
         <item name="colorControlNormal">@color/grey_40</item>
     </style>
 
+    <style name="BorderlessNoAllCaps" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="AppCompatButtonNoAllCaps" parent="Widget.AppCompat.Button">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
 </resources>

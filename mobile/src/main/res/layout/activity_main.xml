@@ -43,6 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingBottom="@dimen/spacing_xxxlarge"
+                android:background="@color/grey_10"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,8 +58,8 @@
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="@color/teal_800"
-        app:itemIconTint="@drawable/color_state_white_2"
-        app:itemTextColor="@drawable/color_state_white_2"
+        app:itemIconTint="@drawable/color_state_bottom_navigation"
+        app:itemTextColor="@drawable/color_state_bottom_navigation"
         app:menu="@menu/menu_bottom_navigation_shifting" />
 
 </android.support.design.widget.CoordinatorLayout>

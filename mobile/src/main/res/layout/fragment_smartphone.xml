@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/grey_10"
+    tools:context=".fragment.SmartphoneFragment">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <LinearLayout
-            android:id="@+id/layout_smartphone_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-            <LinearLayout
+                android:id="@+id/layout_smartphone_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingRight="@dimen/spacing_large"
                 android:orientation="vertical">
 
 
@@ -26,43 +28,47 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_large"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingLeft="@dimen/spacing_large"
-                    android:paddingRight="@dimen/spacing_large">
-
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Available Sensors"
+                        android:text="@string/available_sensors"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                        android:textColor="@color/smartphone" />
+                        android:textColor="@color/smartphone_primary" />
 
 
                     <Button
-                        style="@style/Widget.AppCompat.Button.Borderless"
+                        style="@style/BorderlessNoAllCaps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:minWidth="0dp"
-                        android:text="RESET"
+                        android:text="@string/reset_to_defaults"
                         android:textColor="@color/grey_60" />
 
                 </LinearLayout>
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/sensorsRecyclerView"
+                <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scrollbars="vertical"
-                    android:scrollingCache="true" />
+                    android:padding="@dimen/spacing_medium"
+                    android:visibility="visible"
+                    app:cardCornerRadius="2dp"
+                    app:cardElevation="2dp">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/sensorsRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scrollbars="vertical"
+                        android:scrollingCache="true" />
+
+                </android.support.v7.widget.CardView>
 
 
             </LinearLayout>
-
-
-        </LinearLayout>
 
         <include layout="@layout/layout_fragment_progress"
             android:id="@+id/layout_smartphone_progress" />

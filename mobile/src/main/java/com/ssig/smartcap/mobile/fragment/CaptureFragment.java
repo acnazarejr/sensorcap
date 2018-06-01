@@ -3,6 +3,7 @@ package com.ssig.smartcap.mobile.fragment;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.SwitchCompat;
 import android.view.View;
@@ -26,7 +27,12 @@ public class CaptureFragment extends AbstractMainFragment {
     private String gender = "male";
 
     public CaptureFragment(){
-        super("Capture Mode", R.drawable.ic_running, R.color.capture, R.layout.fragment_capture);
+        super(R.layout.fragment_capture);
+    }
+
+    @Override
+    public void setViews() {
+        return;
     }
 
     @Override
@@ -35,47 +41,68 @@ public class CaptureFragment extends AbstractMainFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        findViewsById();
-        implementListeners();
+    public String getTitle() {
+        return "Capture Mode";
     }
 
-    private void findViewsById() {
-        input_name = getActivity().findViewById(R.id.input_name);
-        input_weight = getActivity().findViewById(R.id.input_weight);
-        input_age = getActivity().findViewById(R.id.input_age);
-        input_height = getActivity().findViewById(R.id.input_height);
-
-        switch_gender = getActivity().findViewById(R.id.switch_gender);
-        img_gender = getActivity().findViewById(R.id.img_gender);
-
-        switch_wear = getActivity().findViewById(R.id.switch_wear);
+    @Override
+    public int getIcon() {
+        return R.drawable.ic_running;
     }
 
-    private void implementListeners() {
-        switch_gender.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(gender.equals("Male")){
-                    img_gender.setImageResource(R.drawable.ic_human_male);
-                }else{
-                    img_gender.setImageResource(R.drawable.ic_human_female);
-                }
-                gender = (gender.equals("Male")) ? "Female" : "Male";
-            }
-        });
-        switch_wear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(switch_wear.getText().equals("Enabled")){
-                    switch_wear.setText("Disabled");
-                }else{
-                    switch_wear.setText("Enabled");
-                }
-            }
-        });
-        input_weight.setEnabled(true);
+    @Override
+    public int getPrimaryColor() {
+        return R.color.capture_primary;
     }
+
+    @Override
+    public int getSecondaryColor() {
+        return R.color.capture_secondary;
+    }
+
+
+//    @Override
+//    public void onViewCreated(View view, Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+//
+//        findViewsById();
+//        implementListeners();
+//    }
+//
+//    private void findViewsById() {
+//        input_name = getActivity().findViewById(R.id.input_name);
+//        input_weight = getActivity().findViewById(R.id.input_weight);
+//        input_age = getActivity().findViewById(R.id.input_age);
+//        input_height = getActivity().findViewById(R.id.input_height);
+//
+//        switch_gender = getActivity().findViewById(R.id.switch_gender);
+//        img_gender = getActivity().findViewById(R.id.img_gender);
+//
+//        switch_wear = getActivity().findViewById(R.id.switch_wear);
+//    }
+//
+//    private void implementListeners() {
+//        switch_gender.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(gender.equals("Male")){
+//                    img_gender.setImageResource(R.drawable.ic_human_male);
+//                }else{
+//                    img_gender.setImageResource(R.drawable.ic_human_female);
+//                }
+//                gender = (gender.equals("Male")) ? "Female" : "Male";
+//            }
+//        });
+//        switch_wear.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(switch_wear.getText().equals("Enabled")){
+//                    switch_wear.setText("Disabled");
+//                }else{
+//                    switch_wear.setText("Enabled");
+//                }
+//            }
+//        });
+//        input_weight.setEnabled(true);
+//    }
 }

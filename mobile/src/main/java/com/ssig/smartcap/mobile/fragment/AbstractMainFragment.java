@@ -1,59 +1,76 @@
 package com.ssig.smartcap.mobile.fragment;
 
-import android.graphics.drawable.Drawable;
+
 import android.os.Bundle;
-import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.design.widget.TabLayout;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
-import com.ssig.smartcap.mobile.R;
 import com.ssig.smartcap.mobile.utils.ViewAnimation;
 
 public abstract class AbstractMainFragment extends Fragment {
 
-    public String title;
-    public int icon;
-    public int color;
     View view;
+    protected View progressView;
+    protected View contentView;
+    protected View errorView;
 
-    private int resource;
+
+    private int layout;
 
 
-    public AbstractMainFragment(String title, int icon, int color, @LayoutRes int resource) {
-        this.title = title;
-        this.resource = resource;
-        this.icon = icon;
-        this.color = color;
+    public AbstractMainFragment(@LayoutRes int layout) {
+        this.layout = layout;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.view = inflater.inflate(this.resource, container, false);
+        this.view = inflater.inflate(this.layout, container, false);
+
+        this.progressView = null;
+        this.contentView = null;
+        this.errorView = null;
+
         return this.view;
     }
 
-    public void reload(@NonNull View progress, @NonNull View content, View error){
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        this.setViews();
+    }
 
-        progress.setVisibility(View.GONE);
-        content.setVisibility(View.GONE);
-        content.setVisibility(View.GONE);
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.reload();
+    }
 
-        progress.setVisibility(View.VISIBLE);
-        progress.setAlpha(1.0f);
-        boolean loaded = this.makeContent();
-        if(!loaded && error != null) {
-            this.swapViews(progress, error);
-        }else{
-            this.swapViews(progress, content);
+    public void reload(){
+
+        if (contentView != null && progressView == null) {
+            contentView.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        if (contentView != null && progressView != null){
+            progressView.setVisibility(View.GONE);
+            contentView.setVisibility(View.GONE);
+            if (errorView != null)
+                errorView.setVisibility(View.GONE);
+
+            progressView.setVisibility(View.VISIBLE);
+            boolean loaded = this.makeContent();
+            if(!loaded && errorView != null) {
+                this.swapViews(progressView, errorView);
+            }else{
+                this.swapViews(progressView, contentView);
+            }
+            return;
         }
 
     }
@@ -74,7 +91,12 @@ public abstract class AbstractMainFragment extends Fragment {
         }).run();
     }
 
+    public abstract void setViews();
     public abstract boolean makeContent();
+    public abstract String getTitle();
+    public abstract int getIcon();
+    public abstract int getPrimaryColor();
+    public abstract int getSecondaryColor();
 
 
 }
