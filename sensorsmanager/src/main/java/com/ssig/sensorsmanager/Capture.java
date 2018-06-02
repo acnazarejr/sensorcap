@@ -22,7 +22,6 @@ public class Capture implements Serializable, SensorEventListener {
     public Capture(CaptureConfig captureConfig, Context c){
         this.manager = (SensorManager)c.getSystemService(Context.SENSOR_SERVICE);
         this.captureConfig = captureConfig;
-        //System.currentTimeMillis();
     }
 
     public void start(){
@@ -52,7 +51,7 @@ public class Capture implements Serializable, SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-
+        /*     TODO - Know which sensor was activated     */
     }
 
     @Override
