@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/lyt_parent"
+    android:id="@+id/layout_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:id="@+id/lyt_title"
+        android:id="@+id/layout_title"
         android:clickable="true"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/white"
@@ -24,14 +24,13 @@
             android:layout_marginRight="@dimen/spacing_medium"
             android:id="@+id/icon"/>
 
-
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/grey_80" />
+            android:textColor="@color/colorGreyDark" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/sensor_enable"
@@ -44,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/grey_60"
+            android:tint="@color/colorGrey"
             android:layout_marginLeft="@dimen/spacing_medium"
             android:layout_marginRight="@dimen/spacing_medium"
             app:srcCompat="@drawable/ic_expand_arrow" />
@@ -52,21 +51,16 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/lyt_expand"
+        android:id="@+id/layout_expand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/grey_3"
+        android:background="@color/colorBackgroundViewDark"
         android:orientation="vertical"
-        android:visibility="gone"
         android:padding="@dimen/spacing_large">
 
         <include layout="@layout/layout_sensor_details"/>
 
         <include layout="@layout/layout_sensor_frequency"/>
-
-
-
-
 
     </LinearLayout>
 

@@ -8,6 +8,7 @@
     android:orientation="vertical"
     android:padding="@dimen/spacing_small">
 
+    <!--Title-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,10 +19,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/sensor_frequency"
+            android:text="@string/sensor_frequency_title"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/grey_90"
+            android:textColor="@color/colorGrey"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -38,11 +39,10 @@
             android:id="@+id/sensor_min_frequency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
             android:paddingBottom="@dimen/spacing_small"
             android:paddingTop="@dimen/spacing_small"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_60"
+            android:textColor="@color/colorGrey"
             android:textStyle="bold"/>
 
         <com.warkiz.widget.IndicatorSeekBar
@@ -51,16 +51,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             app:isb_indicator_stay="true"
-            app:isb_indicator_text_color="@color/grey_10"
+            app:isb_indicator_color="@color/colorSecondaryText"
+            app:isb_indicator_text_color="@color/colorAccent"
             app:isb_min="0"
             app:isb_max="100"
             app:isb_progress="90"
             app:isb_seek_bar_type="continuous"
             app:isb_show_indicator="true"
             app:isb_thumb_width="22dp"
+            app:isb_thumb_color="@color/colorAccent"
             app:isb_track_background_bar_size="5dp"
-            app:isb_track_background_bar_color="@color/grey_400"
-            app:isb_track_progress_bar_size="5dp"/>
+            app:isb_track_background_bar_color="@color/colorAccentLight"
+            app:isb_track_progress_bar_size="5dp"
+            app:isb_track_progress_bar_color="@color/colorAccent"/>
 
         <TextView
             android:id="@+id/sensor_max_frequency"
@@ -70,7 +73,7 @@
             android:paddingBottom="@dimen/spacing_small"
             android:paddingTop="@dimen/spacing_small"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_60"
+            android:textColor="@color/colorGrey"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -88,10 +91,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/frequency_not_available"
+            android:text="@string/sensor_frequency_not_available"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_60"
+            android:textColor="@color/colorGrey"
             android:textStyle="bold|italic" />
 
     </LinearLayout>

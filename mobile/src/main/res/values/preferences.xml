@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preference_key_ntp_pool">ntp_pool</string>
+    <string name="preference_default_ntp_pool">pool.ntp.br</string>
+
+    <string name="preference_key_qrcode_fps">qrcode_fps</string>
+    <integer name="preference_default_qrcode_fps">30</integer>
+</resources>

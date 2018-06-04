@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_10"
+    android:paddingBottom="@dimen/bottom_navigation_height"
+    android:background="@color/colorBackgroundView"
     tools:context=".fragment.SmartphoneFragment">
 
 
-    <RelativeLayout
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
 
         <LinearLayout
@@ -34,9 +37,9 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/available_sensors"
+                        android:text="@string/smartphone_available_sensors_tile"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                        android:textColor="@color/smartphone_primary" />
+                        android:textColor="@color/colorPrimary" />
 
 
                     <Button
@@ -45,8 +48,8 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:minWidth="0dp"
-                        android:text="@string/reset_to_defaults"
-                        android:textColor="@color/grey_60" />
+                        android:text="@string/button_reset_to_defaults"
+                        android:textColor="@color/colorGrey" />
 
                 </LinearLayout>
 
@@ -67,12 +70,8 @@
 
                 </android.support.v7.widget.CardView>
 
-
             </LinearLayout>
 
-        <include layout="@layout/layout_fragment_progress"
-            android:id="@+id/layout_smartphone_progress" />
-
-    </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

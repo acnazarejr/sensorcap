@@ -1,0 +1,9 @@
+<resources>
+    <string name="capability_smartcap_phone">capability_smartcap_phone</string>
+    <string name="capability_smartcap_wear">capability_smartcap_wear</string>
+
+    <string name="message_path_service_prefix">/service</string>
+    <string name="message_path_open_watch_activity">/service/open-activity</string>
+    <string name="message_path_request_watch_sensorinfo">/service/request-sensorinfo</string>
+
+</resources>

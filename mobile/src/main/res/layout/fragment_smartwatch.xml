@@ -1,46 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.vlonjatg.progressactivity.ProgressFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:progressActivity="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/progressSmartwatchFragment"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center"
-    tools:context=".fragment.SmartwatchFragment"
-    progressActivity:errorImageHeight="220dp"
-    progressActivity:errorImageWidth="150dp"
-    progressActivity:errorTitleTextSize="8dp"
-    progressActivity:errorTitleTextColor="@color/teal_800"
-    progressActivity:errorContentTextSize="4dp"
-    progressActivity:errorButtonBackgroundColor="@color/teal_800"
-    progressActivity:errorButtonTextColor="@color/grey_10">
+    android:paddingBottom="@dimen/bottom_navigation_height"
+    android:background="@color/colorBackgroundView"
+    tools:context=".fragment.SmartwatchFragment">
 
+    <include layout="@layout/layout_smartwatch_error"
+        android:visibility="gone"
+        android:id="@+id/layout_smartwatch_fragment_error" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
-        <RelativeLayout
-            android:id="@+id/layout_smartwatch_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Smartwatch" />
-
-        </RelativeLayout>
-
-        <include layout="@layout/layout_fragment_progress"
-            android:id="@+id/layout_smartwatch_progress"
-            android:visibility="gone"/>
-
-        <include layout="@layout/layout_smartwatch_fragment_error"
-            android:id="@+id/layout_smartwatch_error"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
-
-</com.vlonjatg.progressactivity.ProgressFrameLayout>
+</android.support.design.widget.CoordinatorLayout>

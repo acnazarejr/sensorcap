@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.ArchiveFragment">
+    android:paddingBottom="@dimen/bottom_navigation_height"
+    android:background="@color/colorBackgroundView"
+    tools:context=".fragment.TimeToolFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Archive" />
+        android:backgroundTint="@color/colorAccent"
+        android:fillViewport="true">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/teste"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="300dp"
+            android:paddingBottom="500dp"
+            android:text="Archive" />
+
+    </android.support.v4.widget.NestedScrollView>
+
+
+
+</android.support.design.widget.CoordinatorLayout>
