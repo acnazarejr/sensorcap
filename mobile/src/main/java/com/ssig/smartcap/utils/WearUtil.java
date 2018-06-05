@@ -1,7 +1,6 @@
 package com.ssig.smartcap.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,6 +20,7 @@ import com.ssig.smartcap.common.Serialization;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 public class WearUtil implements MessageClient.OnMessageReceivedListener{
@@ -39,7 +39,9 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
 
     private List<Node> clientNodes;
     private Node node;
+
     private Map<SensorType, SensorInfo> clientSensorInfo;
+    private CountDownLatch requestSensorInfoLatch;
 
     public static WearUtil get() {
         if (ourInstance.context == null)
@@ -51,6 +53,7 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
         this.clientNodes = new ArrayList<>();
         this.node = null;
         this.clientSensorInfo = null;
+        this.requestSensorInfoLatch = null;
         this.context = null;
     }
 
@@ -70,16 +73,12 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
         return DeviceTools.hasApp(context, context.getString(R.string.util_wear_package));
     }
 
-    public boolean hasWearClientNodes() {
-        return !this.clientNodes.isEmpty();
+    public boolean isConnected() {
+        return (this.node != null);
     }
 
-    public List<Node> getClientNodes() {
-        return this.clientNodes;
-    }
-
-    public Map<SensorType, SensorInfo> getClientSensorInfo() {
-        return this.clientSensorInfo;
+    public String getClientID(){
+        return (this.node != null) ? this.node.getId() : null;
     }
 
 
@@ -127,8 +126,15 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
         this.sendMessage(this.context.getString(R.string.message_path_open_watch_activity));
     }
 
-    public void requestClientSensorInfo() {
+    public Map<SensorType, SensorInfo> requestClientSensorInfo() {
+        this.requestSensorInfoLatch = new CountDownLatch(1);
         this.sendMessage(this.context.getString(R.string.message_path_request_watch_sensorinfo));
+        try {
+            this.requestSensorInfoLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return this.clientSensorInfo;
     }
 
     @Override
@@ -137,6 +143,7 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
         if (path.equals(this.context.getString(R.string.message_path_response_watch_sensorinfo))) {
             byte[] data = messageEvent.getData();
             this.clientSensorInfo = Serialization.deserializeObject(data);
+            this.requestSensorInfoLatch.countDown();
         }
     }
 

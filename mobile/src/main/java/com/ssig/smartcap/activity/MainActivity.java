@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     }
 
     public void updateWearMenuItem(){
-        if (WearUtil.get().hasWearClientNodes())
+        if (WearUtil.get().isConnected())
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch);
         else
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_off);
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.ntpPool = sharedPreferences.getString(getString(R.string.preference_key_ntp_pool), getString(R.string.preference_default_ntp_pool));
+            this.ntpPool = sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool));
             this.dialog = new MaterialDialog.Builder(this.mainActivity.get())
                 .title(R.string.dialog_ntp_synchronization_title)
                 .content(getString(R.string.dialog_ntp_synchronization_content) + " " + ntpPool)

@@ -128,15 +128,16 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
             decimalFormatSymbols.setDecimalSeparator('.');
-            DecimalFormat decimalFormat = new DecimalFormat("0.00", decimalFormatSymbols);
-            String maxRange = decimalFormat.format(sensorListItem.getMaximumRange());
+            DecimalFormat twoDecimalFormat = new DecimalFormat("0.00", decimalFormatSymbols);
+            DecimalFormat eightDecimalFormat = new DecimalFormat("0.00000000", decimalFormatSymbols);
+            String maxRange = twoDecimalFormat.format(sensorListItem.getMaximumRange());
             String sensorUnit = sensorListItem.getSensorType().unit();
             if (sensorUnit != null){
                 maxRange += " " + sensorUnit;
             }
-            view.sensorPower.setText(String.format("%s mA", decimalFormat.format(sensorListItem.getPower())));
+            view.sensorPower.setText(String.format("%s mA", twoDecimalFormat.format(sensorListItem.getPower())));
             view.sensorMaxRange.setText(maxRange);
-            view.sensorResolution.setText(String.valueOf(sensorListItem.getResolution()));
+            view.sensorResolution.setText(eightDecimalFormat.format(sensorListItem.getResolution()));
 
             if ((sensorListItem.getReportingMode() == Sensor.REPORTING_MODE_CONTINUOUS || sensorListItem.getReportingMode() == Sensor.REPORTING_MODE_ON_CHANGE) && (sensorListItem.getMaxFrequency() > sensorListItem.getMinFrequency()) ){
                 view.sensorMinFrequency.setText(String.format("%s Hz", String.valueOf(sensorListItem.getMinFrequency())));
@@ -260,7 +261,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
 
     private void displayTextIcon(Context ctx, MaterialLetterIcon icon, String text, boolean enabled){
-        icon.setLetterSize(14);
+        icon.setLetterSize(11);
         icon.setLetterTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         if (enabled)
             icon.setShapeColor(ContextCompat.getColor(ctx, R.color.colorPrimaryLight));

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="preference_key_ntp_pool">ntp_pool</string>
-    <string name="preference_default_ntp_pool">pool.ntp.br</string>
+    <string name="preference_main_default_key_ntp_pool">ntp_pool</string>
+    <string name="preference_main_default_ntp_pool">pool.ntp.br</string>
 
-    <string name="preference_key_qrcode_fps">qrcode_fps</string>
-    <integer name="preference_default_qrcode_fps">30</integer>
+    <string name="preference_main_key_qrcode_fps">qrcode_fps</string>
+    <integer name="preference_main_default_qrcode_fps">30</integer>
+
+    <string name="preference_smartphone_file_id">SMARTPHONE_PREFERENCES</string>
+    <string name="preference_smartwatch_file_id">SMARTWATCH_PREFERENCES</string>
+    <string name="preference_sensor_enabled_suffix">_ENABLED</string>
+    <string name="preference_sensor_frequency_suffix">_FREQUENCY</string>
+
 </resources>

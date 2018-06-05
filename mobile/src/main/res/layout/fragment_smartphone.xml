@@ -43,6 +43,7 @@
 
 
                     <Button
+                        android:id="@+id/button_reset_defaults"
                         style="@style/BorderlessNoAllCaps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -62,7 +63,7 @@
                     app:cardElevation="2dp">
 
                     <android.support.v7.widget.RecyclerView
-                        android:id="@+id/sensorsRecyclerView"
+                        android:id="@+id/sensors_recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scrollbars="vertical"

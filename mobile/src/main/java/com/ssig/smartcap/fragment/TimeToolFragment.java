@@ -78,7 +78,7 @@ public class TimeToolFragment extends AbstractMainFragment {
         super.onViewCreated(view, savedInstanceState);
 
         this.simpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format));
-        int fps = this.getActivity().getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_key_qrcode_fps), getResources().getInteger(R.integer.preference_default_qrcode_fps));
+        int fps = this.getActivity().getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps));
         this.delayUpdateMillis = (1000/fps);
 
         this.initUI();

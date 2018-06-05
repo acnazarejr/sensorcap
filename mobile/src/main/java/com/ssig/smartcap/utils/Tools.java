@@ -1,7 +1,9 @@
 package com.ssig.smartcap.utils;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -11,15 +13,31 @@ import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
+import com.ssig.smartcap.adapter.AdapterListSensor;
+import com.ssig.smartcap.model.SensorListItem;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 public class Tools {
@@ -281,6 +299,62 @@ public class Tools {
 //                Math.min(g,255),
 //                Math.min(b,255));
 //    }
-//
+
+    public static AdapterListSensor populateSensorsList(Context context, RecyclerView recyclerView, String preferencesName, Map<SensorType, SensorInfo> sensors){
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.addItemDecoration(new com.ssig.smartcap.mobile.widget.LineItemDecoration(Objects.requireNonNull(context), LinearLayout.VERTICAL));
+        recyclerView.setHasFixedSize(true);
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
+
+        List<SensorListItem> items = new ArrayList<>();
+        for (Map.Entry<SensorType, SensorInfo> entry : sensors.entrySet()) {
+            SensorInfo sensorInfo = entry.getValue();
+            if (sensorInfo != null) {
+                SensorListItem sensorListItem = new SensorListItem(sensorInfo);
+                sensorListItem.enabled = sharedPreferences.getBoolean(sensorListItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_enabled_suffix), true);
+                sensorListItem.frequency = sharedPreferences.getInt(sensorListItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_frequency_suffix), sensorListItem.getDefaultFrequency());
+                items.add(sensorListItem);
+            }
+        }
+
+        AdapterListSensor adapterListSensor = new AdapterListSensor(context, items);
+        recyclerView.setAdapter(adapterListSensor);
+        return adapterListSensor;
+    }
+
+    public static void saveSensorsPreferences(Context context, AdapterListSensor adapterListSensor, String preferencesName){
+        SharedPreferences sharedPreferences = Objects.requireNonNull(context).getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
+        List<SensorListItem> sensorsSensorListItems = adapterListSensor.getSensorListItems();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for(SensorListItem sensorListItem : sensorsSensorListItems){
+            editor.putBoolean(sensorListItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_enabled_suffix), sensorListItem.enabled);
+            editor.putInt(sensorListItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_frequency_suffix), sensorListItem.frequency);
+        }
+        editor.apply();
+    }
+
+    public static void resetSensorsPreferences(Context context, final AdapterListSensor adapterListSensor){
+        new MaterialDialog.Builder(context)
+                .title(R.string.dialog_reset_defaults_title)
+                .content(R.string.dialog_reset_defaults_content)
+                .icon(Tools.changeDrawableColor(context.getDrawable(R.drawable.ic_smartphone), ContextCompat.getColor(context, R.color.colorPrimary)))
+                .cancelable(true)
+                .positiveText(R.string.button_yes)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        List<SensorListItem> sensorsSensorListItems = adapterListSensor.getSensorListItems();
+                        for(SensorListItem sensorListItem : sensorsSensorListItems){
+                            sensorListItem.enabled = true;
+                            sensorListItem.frequency = sensorListItem.getDefaultFrequency();
+                        }
+                        adapterListSensor.notifyDataSetChanged();
+                    }
+                })
+                .negativeText(R.string.button_no)
+                .show();
+    }
 
 }

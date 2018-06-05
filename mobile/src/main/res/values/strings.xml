@@ -44,11 +44,8 @@
 
     <string name="smartphone_available_sensors_tile">Available Sensors</string>
 
-
-    <string name="smartwatch_devices_error_title">Wear Device Error</string>
-    <string name="smartwatch_devices_error_content">No devices paired or connected with this device. Please open Wear OS App and connect to a wear device.</string>
-    <string name="smartwatch_smartcap_error_title">Wear Smartcap Error</string>
-    <string name="smartwatch_smartcap_error_content">No devices with Smartcap app installed. Please install the Smartcap on wear devices.</string>
+    <string name="smartwatch_error_title">Wear Device Error</string>
+    <string name="smartwatch_error_content">No devices paired or connected. Please open the Wear OS App and connect to a wear device with SmartCap installed.</string>
 
     <string name="sensor_details_title">Sensor Details</string>
     <string name="sensor_details_power">Power</string>
@@ -65,6 +62,10 @@
     <string name="time_tool_ntp_not_initialized_title">NTP Not Available</string>
     <string name="time_tool_dummy_hour">--:--:--.--</string>
     <string name="time_tool_dummy_value">----------</string>
+    <string name="button_yes">Yes</string>
+    <string name="dialog_reset_defaults_title">Reset to Defaults</string>
+    <string name="dialog_reset_defaults_content">Do you want to reset the preference values to defaults?</string>
+    <string name="button_no">No</string>
 
 
     <!--<string name="qr_code_image">QR Code Image</string>-->

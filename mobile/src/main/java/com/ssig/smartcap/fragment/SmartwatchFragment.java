@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -15,6 +15,7 @@ import com.ssig.sensorsmanager.SensorInfo;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
+import com.ssig.smartcap.adapter.AdapterListSensor;
 import com.ssig.smartcap.utils.Tools;
 import com.ssig.smartcap.utils.WearUtil;
 
@@ -24,8 +25,11 @@ import java.util.Objects;
 
 public class SmartwatchFragment extends AbstractMainFragment {
 
-    private MainActivity mainActivity;
+    private AdapterListSensor adapterListSensor;
     private View layoutSmartwatchError;
+    private View layoutSmartwatchContent;
+
+
 
     public SmartwatchFragment(){
         super(R.layout.fragment_smartwatch);
@@ -44,42 +48,64 @@ public class SmartwatchFragment extends AbstractMainFragment {
 
     @Override
     public void onShow() {
-        this.checkWearNodes();
+
     }
 
     private void initUI(){
-        this.mainActivity = (MainActivity) getActivity();
-        this.layoutSmartwatchError = this.mainActivity.findViewById(R.id.layout_smartwatch_fragment_error);
+        this.layoutSmartwatchError = getActivity().findViewById(R.id.layout_smartwatch_fragment_error);
+        this.layoutSmartwatchContent = getActivity().findViewById(R.id.layout_smartwatch_fragment_content);
+        Button layoutSmartwatchErrorButton = this.layoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_button);
+
+        layoutSmartwatchErrorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity) Objects.requireNonNull(getActivity())).startWearSynchronization();
+            }
+        });
+
+        this.layoutSmartwatchContent.findViewById(R.id.button_reset_defaults).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Tools.resetSensorsPreferences(getActivity(), adapterListSensor);
+            }
+        });
+        this.checkWearNodes();
+    }
+
+    @Override
+    public void onHide() {
+        super.onHide();
+        if(WearUtil.get().isConnected()) {
+            String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.get().getClientID();
+            Tools.saveSensorsPreferences(getContext(), this.adapterListSensor, preferencesName);
+        }
     }
 
     private void checkWearNodes() {
         this.layoutSmartwatchError.setVisibility(View.GONE);
-        if (!WearUtil.get().hasWearClientNodes()) {
+        this.layoutSmartwatchContent.setVisibility(View.GONE);
+
+        if (!WearUtil.get().isConnected()) {
             layoutSmartwatchError.setVisibility(View.VISIBLE);
-            ((TextView)this.layoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_title)).setText(R.string.smartwatch_smartcap_error_title);
-            ((TextView)this.layoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_content)).setText(R.string.smartwatch_smartcap_error_content);
-            Button layoutSmartwatchErrorButton = this.layoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_button);
-            layoutSmartwatchErrorButton.setText(R.string.button_try_again);
-            layoutSmartwatchErrorButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ((MainActivity) Objects.requireNonNull(getActivity())).startWearSynchronization();
-                }
-            });
         } else {
             new WearRequestSensorInfoTask((MainActivity) this.getActivity()).execute();
+            this.layoutSmartwatchContent.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void configureSensorList(Map<SensorType, SensorInfo> smartwatchSensors){
+        RecyclerView recyclerView = this.getView().findViewById(R.id.sensors_recycler_view);
+        String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.get().getClientID();
+        this.adapterListSensor = Tools.populateSensorsList(getContext(), recyclerView, preferencesName, smartwatchSensors);
     }
 
     private class WearRequestSensorInfoTask extends AsyncTask< Void, Void, Map<SensorType, SensorInfo>> {
 
         private MaterialDialog dialog;
         private final WeakReference<MainActivity> mainActivity;
-        Map<SensorType, SensorInfo> smartwatchSensorInfo;
 
         public WearRequestSensorInfoTask(MainActivity mainActivity){
             this.mainActivity = new WeakReference<>(mainActivity);
-            this.smartwatchSensorInfo = null;
         }
 
         @Override
@@ -96,62 +122,16 @@ public class SmartwatchFragment extends AbstractMainFragment {
 
         @Override
         protected Map<SensorType, SensorInfo> doInBackground(Void... voids) {
-            WearUtil.get().requestClientSensorInfo();
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while(true){
-                        smartwatchSensorInfo = WearUtil.get().getClientSensorInfo();
-                        if (smartwatchSensorInfo == null) {
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException e) {}
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-            });
-            thread.start();
-            return smartwatchSensorInfo;
+            return WearUtil.get().requestClientSensorInfo();
         }
 
         @Override
         protected void onPostExecute(Map<SensorType, SensorInfo> sensorTypeSensorInfoMap) {
             super.onPostExecute(sensorTypeSensorInfoMap);
+            configureSensorList(sensorTypeSensorInfoMap);
             this.dialog.dismiss();
             Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_sensorinfo_success), Toast.LENGTH_LONG).show();
         }
-
-        //        @Override
-//        protected void onPostExecute(WearUtil.SynchronizationResponse synchronizationResponse) {
-//            super.onPostExecute(synchronizationResponse);
-//            switch (synchronizationResponse){
-//                case UNKNOWN_ERROR:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
-//                    break;
-//                case NO_WEAR_APP:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
-//                    break;
-//                case BLUETOOTH_DISABLED:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_bluetooth_error), Toast.LENGTH_LONG).show();
-//                    break;
-//                case NO_PAIRED_DEVICES:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_paired_error), Toast.LENGTH_LONG).show();
-//                    break;
-//                case NO_CAPABLE_DEVICES:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
-//                    break;
-//                case SUCCESS:
-//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_success), Toast.LENGTH_LONG).show();
-//                    WearUtil.get().openClientActivity();
-//                    break;
-//            }
-//            this.dialog.dismiss();
-//            this.mainActivity.get().updateWearMenuItem();
-//            this.mainActivity.get().refreshCurrentFragment();
-//        }
 
     }
 
