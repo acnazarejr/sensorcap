@@ -1,15 +1,14 @@
 package com.ssig.smartcap.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
@@ -23,17 +22,9 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.SensorInfoFactory;
-import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.ViewPagerAdapter;
 import com.ssig.smartcap.fragment.AbstractMainFragment;
@@ -44,17 +35,11 @@ import com.ssig.smartcap.fragment.TimeToolFragment;
 import com.ssig.smartcap.utils.DeviceTools;
 import com.ssig.smartcap.utils.TimeUtils;
 import com.ssig.smartcap.utils.Tools;
+import com.ssig.smartcap.utils.WearUtil;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 
 public class MainActivity extends AppCompatActivity implements CapabilityClient.OnCapabilityChangedListener {
@@ -64,23 +49,19 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     private MenuItem wearMenuItem;
     private AHBottomNavigationViewPager viewPager;
     private AHBottomNavigation bottomNavigation;
-    protected List<Node> wearClientNodes;
-    protected List<Node> wearSmartcapClientNodes;
-    protected Node wearNode;
+
 
     private ViewPagerAdapter viewPagerAdapter;
     private AHBottomNavigationAdapter bottomNavigationAdapter;
     private SharedPreferences sharedPreferences;
-    private AbstractMainFragment currentFragment;
+//    private AbstractMainFragment currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.sharedPreferences = this.getPreferences(MODE_PRIVATE);
-        this.wearClientNodes = null;
-        this.wearSmartcapClientNodes = null;
-        this.wearNode = null;
+        WearUtil.initialize(getApplicationContext());
         this.initUI();
     }
 
@@ -103,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     private void initToolbar() {
         this.toolbar = findViewById(R.id.appbar_toolbar);
         this.setSupportActionBar(this.toolbar);
-        Tools.setSystemBarColor(this, R.color.colorGreyLight);
+        Tools.setSystemBarColor(this, R.color.colorGreyMediumLight);
         Tools.setSystemBarLight(this);
     }
 
@@ -131,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     }
 
     public void updateWearMenuItem(){
-        if (this.hasWearClientNodes() && this.hasWearSmartClientNodes())
+        if (WearUtil.get().hasWearClientNodes())
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch);
         else
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_off);
@@ -149,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                     startWearSynchronization();
                     break;
                 case R.id.action_settings:
-                    this.sendMessage(this.wearNode, "TESTE");
+//                    this.sendMessage(this.wearNode, "TESTE");
                     Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
                     break;
                 case R.id.action_about:
@@ -169,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
 
         this.bottomNavigation = findViewById(R.id.bottom_navigation);
 
-
         this.bottomNavigationAdapter = new AHBottomNavigationAdapter(this, R.menu.menu_bottom_navigation);
         this.bottomNavigationAdapter.setupWithBottomNavigation(this.bottomNavigation);
 
@@ -180,30 +160,11 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         this.bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-
-                if (currentFragment == null) {
-                    currentFragment = viewPagerAdapter.getCurrentFragment();
-                }
-
                 if (wasSelected) {
-                    currentFragment.refresh();
+                    refreshCurrentFragment();
                     return true;
                 }
-
-                if (currentFragment != null) {
-                    currentFragment.willBeHidden();
-                }
-
                 setCurrentFragment(position);
-                viewPager.setCurrentItem(position, false);
-
-                if (currentFragment == null) {
-                    return true;
-                }
-
-                currentFragment = viewPagerAdapter.getCurrentFragment();
-                currentFragment.refresh();
-                currentFragment.willBeDisplayed();
                 return true;
             }
         });
@@ -225,20 +186,29 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         this.viewPagerAdapter.add(new ArchiveFragment());
 
         this.viewPager.setAdapter(viewPagerAdapter);
+        this.viewPager.setOffscreenPageLimit(5);
     }
 
     public void setCurrentFragment(int position){
+
+        AbstractMainFragment currentFragment = this.viewPagerAdapter.getCurrentFragment();
+        currentFragment.hide();
+
         String fragmentTitle = this.bottomNavigation.getItem(position).getTitle(this);
         Drawable fragmentIcon = this.bottomNavigation.getItem(position).getDrawable(this);
         this.toolbar.setTitle(fragmentTitle);
         this.toolbar.setNavigationIcon(fragmentIcon);
         Objects.requireNonNull(this.toolbar.getNavigationIcon()).setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         this.viewPager.setCurrentItem(position, false);
+
+        currentFragment = this.viewPagerAdapter.getCurrentFragment();
+        currentFragment.show();
     }
 
     public void refreshCurrentFragment(){
-        if (this.currentFragment != null)
-            this.currentFragment.refresh();
+        AbstractMainFragment currentFragment = this.viewPagerAdapter.getCurrentFragment();
+        if (currentFragment != null)
+            currentFragment.refresh();
     }
 
 
@@ -310,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            Toast.makeText(this.mainActivity.get(), getString(R.string.dialog_ntp_synchronization_success), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.mainActivity.get(), getString(R.string.toast_ntp_synchronization_success), Toast.LENGTH_LONG).show();
             this.dialog.dismiss();
             this.mainActivity.get().updateNTPMenuItem();
             this.mainActivity.get().refreshCurrentFragment();
@@ -334,9 +304,23 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     }
 
     public void startWearSynchronization(){
-        if (DeviceTools.isBlueetothEnabled()) {
-            new WearSynchronizationTask(this).execute();
-        } else{
+        if (!WearUtil.get().hasWearOS()) {
+            new MaterialDialog.Builder(this)
+                    .title(R.string.dialog_wear_os_error_title)
+                    .content(R.string.dialog_wear_os_error_content)
+                    .icon(Tools.changeDrawableColor(getDrawable(R.drawable.ic_wear_os_color), ContextCompat.getColor(this, R.color.colorPrimary)))
+                    .cancelable(true)
+                    .neutralText(R.string.button_cancel)
+                    .positiveText(R.string.dialog_wear_os_error_button)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent goToMarket = new Intent(Intent.ACTION_VIEW).setData(Uri.parse(String.format("market://details?id=%s", getString(R.string.util_wear_package))));
+                            startActivity(goToMarket);
+                        }
+                    })
+                    .show();
+        } else if (!DeviceTools.isBlueetothEnabled()) {
             new MaterialDialog.Builder(this)
                     .title(R.string.dialog_bluetooth_error_title)
                     .content(R.string.dialog_bluetooth_error_content)
@@ -351,10 +335,12 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
                         }
                     })
                     .show();
+        } else{
+            new WearSynchronizationTask(this).execute();
         }
     }
 
-    private class WearSynchronizationTask extends AsyncTask< Void, Void, Pair< List<Node>, List<Node> > >{
+    private class WearSynchronizationTask extends AsyncTask< Void, Void, WearUtil.SynchronizationResponse >{
 
         private MaterialDialog dialog;
         private final WeakReference<MainActivity> mainActivity;
@@ -376,43 +362,33 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         }
 
         @Override
-        protected Pair< List<Node>, List<Node> > doInBackground(Void... voids) {
-            List<Node> wearClientNodes = null;
-            Map<String, CapabilityInfo> wearSmartcapClientCapabilities = null;
-            Task<List<Node>> wearClientNodeListTask = Wearable.getNodeClient(getApplicationContext()).getConnectedNodes();
-            Task<Map<String, CapabilityInfo>> wearSmartcapClientCapabilitiesListTask = Wearable.getCapabilityClient(getApplicationContext()).getAllCapabilities(CapabilityClient.FILTER_ALL);
-            try {
-                wearClientNodes = Tasks.await(wearClientNodeListTask);
-                wearSmartcapClientCapabilities = Tasks.await(wearSmartcapClientCapabilitiesListTask);
-                int a = 0;
-            } catch (InterruptedException | ExecutionException e) {
-                Toast.makeText(this.mainActivity.get(), e.toString(), Toast.LENGTH_LONG).show();
-            }
-            if (wearClientNodes != null && wearClientNodes.size() == 0)
-                wearClientNodes = null;
-            List<Node> wearSmartcapClientNodes = null;
-            if (wearSmartcapClientCapabilities != null && wearSmartcapClientCapabilities.size() >= 0) {
-                for (Map.Entry<String, CapabilityInfo> entry : wearSmartcapClientCapabilities.entrySet()) {
-                    if (entry.getKey().equals(getString(R.string.capability_smartcap_wear)) && !entry.getValue().getNodes().isEmpty()) {
-                        wearSmartcapClientNodes = new ArrayList<>(entry.getValue().getNodes());
-                    }
-                }
-            }
-            return new Pair<>(wearClientNodes, wearSmartcapClientNodes);
+        protected WearUtil.SynchronizationResponse doInBackground(Void... voids) {
+            return WearUtil.get().synchronize();
         }
 
         @Override
-        protected void onPostExecute(Pair< List<Node>, List<Node> > nodes) {
-            super.onPostExecute(nodes);
-            this.mainActivity.get().wearClientNodes = nodes.first;
-            this.mainActivity.get().wearSmartcapClientNodes = nodes.second;
-            if(this.mainActivity.get().hasWearClientNodes() && this.mainActivity.get().hasWearSmartClientNodes()) {
-                Toast.makeText(this.mainActivity.get(), getString(R.string.dialog_wear_synchronization_success), Toast.LENGTH_LONG).show();
-                this.mainActivity.get().wearNode = this.mainActivity.get().wearSmartcapClientNodes.get(0);
-                this.mainActivity.get().sendMessage(this.mainActivity.get().wearNode, getString(R.string.message_path_open_watch_activity));
-                this.mainActivity.get().sendData(this.mainActivity.get().wearNode);
-            }else {
-                Toast.makeText(this.mainActivity.get(), getString(R.string.dialog_wear_synchronization_not_success), Toast.LENGTH_LONG).show();
+        protected void onPostExecute(WearUtil.SynchronizationResponse synchronizationResponse) {
+            super.onPostExecute(synchronizationResponse);
+            switch (synchronizationResponse){
+                case UNKNOWN_ERROR:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
+                    break;
+                case NO_WEAR_APP:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
+                    break;
+                case BLUETOOTH_DISABLED:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_bluetooth_error), Toast.LENGTH_LONG).show();
+                    break;
+                case NO_PAIRED_DEVICES:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_paired_error), Toast.LENGTH_LONG).show();
+                    break;
+                case NO_CAPABLE_DEVICES:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
+                    break;
+                case SUCCESS:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_success), Toast.LENGTH_LONG).show();
+                    WearUtil.get().openClientActivity();
+                    break;
             }
             this.dialog.dismiss();
             this.mainActivity.get().updateWearMenuItem();
@@ -421,62 +397,67 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
 
     }
 
-    public boolean hasWearClientNodes() {
-        return (this.wearClientNodes != null);
-    }
-
-    public boolean hasWearSmartClientNodes() {
-        return (this.wearSmartcapClientNodes != null);
-    }
-
-    public void sendMessage(final Node nodeToSend, final String path){
-//        Thread thread = new Thread(new Runnable() {
+//    public void sendMessage(final Node nodeToSend, final String path){
+////        Thread thread = new Thread(new Runnable() {
+////            @Override
+////            public void run() {
+////                Task<Integer> sendMessageTask = Wearable.getMessageClient(MainActivity.this).sendMessage(nodeToSend.getId(), path, new byte[0]);
+////                try {
+////                    Tasks.await(sendMessageTask);
+////                } catch (ExecutionException|InterruptedException e) {}
+////            }
+////        });
+////        thread.start();
+//        Task<Integer> sendMessageTask = Wearable.getMessageClient(MainActivity.this).sendMessage(nodeToSend.getId(), path, new byte[0]);
+//        sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
 //            @Override
-//            public void run() {
-//                Task<Integer> sendMessageTask = Wearable.getMessageClient(MainActivity.this).sendMessage(nodeToSend.getId(), path, new byte[0]);
-//                try {
-//                    Tasks.await(sendMessageTask);
-//                } catch (ExecutionException|InterruptedException e) {}
+//            public void onSuccess(Integer integer) {
+//
 //            }
 //        });
-//        thread.start();
-        Task<Integer> sendMessageTask = Wearable.getMessageClient(MainActivity.this).sendMessage(nodeToSend.getId(), path, new byte[0]);
-        sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
-            @Override
-            public void onSuccess(Integer integer) {
+//    }
+//
+//    public void sendData(final Node nodeToSend){
+//
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        ObjectOutput out = null;
+//        try {
+//            out = new ObjectOutputStream(bos);
+//            out.writeObject(SensorInfoFactory.getSensorInfo(this, SensorType.TYPE_ACCELEROMETER));
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        byte[] yourBytes = bos.toByteArray();
+//        PutDataRequest putDataRequest = PutDataRequest.create("/teste");
+//        putDataRequest.setData(yourBytes);
+//        putDataRequest.setUrgent();
+//        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
+//        dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
+//            @Override
+//            public void onSuccess(DataItem dataItem) {}
+//        });
+//
+//    }
+//
+//
+//
+//
 
-            }
-        });
+
+    @Override
+    public void onBackPressed() {
+        doExitApp();
     }
 
-    public void sendData(final Node nodeToSend){
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(SensorInfoFactory.getSensorInfo(this, SensorType.TYPE_ACCELEROMETER));
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private long exitTime = 0;
+    public void doExitApp() {
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(this, "Press again to exit app", Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        } else {
+            finish();
         }
-        byte[] yourBytes = bos.toByteArray();
-        PutDataRequest putDataRequest = PutDataRequest.create("/teste");
-        putDataRequest.setData(yourBytes);
-        putDataRequest.setUrgent();
-        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
-        dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
-            @Override
-            public void onSuccess(DataItem dataItem) {}
-        });
-
     }
-
-
-
-    public List<Node> getWearClientNodes(){
-        return this.wearClientNodes;
-    }
-
 
 }

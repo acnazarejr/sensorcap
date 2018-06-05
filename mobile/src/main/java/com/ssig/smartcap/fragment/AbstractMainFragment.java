@@ -42,72 +42,38 @@ public abstract class AbstractMainFragment extends Fragment {
         return this.view;
     }
 
-    //
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        this.reload();
-//    }
-//
-//    public void reload(){
-//
-//        if (contentView != null && progressView == null) {
-//            contentView.setVisibility(View.VISIBLE);
-//            return;
-//        }
-//
-//        if (contentView != null && progressView != null){
-//            progressView.setVisibility(View.GONE);
-//            contentView.setVisibility(View.GONE);
-//            if (errorView != null)
-//                errorView.setVisibility(View.GONE);
-//
-//            progressView.setVisibility(View.VISIBLE);
-//            boolean loaded = this.makeContent();
-//            if(!loaded && errorView != null) {
-//                this.swapViews(progressView, errorView);
-//            }else{
-//                this.swapViews(progressView, contentView);
-//            }
-//            return;
-//        }
-//
-//    }
-//
-//
-//    private void swapViews(@NonNull final View outView, @NonNull final View inView){
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                ViewAnimation.fadeOut(outView);
-//            }
-//        }).run();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                ViewAnimation.fadeIn(inView);
-//            }
-//        }).run();
-//    }
-//
-//    public abstract void setViews();
-//    public abstract boolean makeContent();
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        this.show();
+    }
 
-    public void willBeDisplayed() {
+    @Override
+    public void onStop() {
+        super.onStop();
+        this.hide();
+    }
+
+    public void show(){
         if (this.fragmentContainer != null) {
             Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in);
             this.fragmentContainer.startAnimation(fadeIn);
         }
+        this.onShow();
     }
 
-    public void willBeHidden() {
+
+    public void hide() {
         if (this.fragmentContainer != null) {
             Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_out);
             this.fragmentContainer.startAnimation(fadeOut);
         }
+        this.onHide();
     }
 
-    public abstract void refresh();
+    public void refresh(){}
+    public void onShow(){}
+    public void onHide(){}
 
 }

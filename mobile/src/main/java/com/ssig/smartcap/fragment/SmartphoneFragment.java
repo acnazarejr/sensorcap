@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -11,10 +12,10 @@ import android.widget.LinearLayout;
 
 
 import com.ssig.sensorsmanager.SensorInfo;
-import com.ssig.sensorsmanager.SensorInfoFactory;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.AdapterListSensor;
+import com.ssig.smartcap.common.Serialization;
 import com.ssig.smartcap.model.SensorListItem;
 import com.ssig.smartcap.mobile.widget.LineItemDecoration;
 
@@ -33,20 +34,15 @@ public class SmartphoneFragment extends AbstractMainFragment {
 
 
     @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         this.initUI();
-    }
-
-    @Override
-    public void refresh() {
-
     }
 
 
     public void initUI() {
 
-        Map<SensorType, SensorInfo> smartphoneSensors = SensorInfoFactory.getAllSensorInfo(this.getContext());
+        Map<SensorType, SensorInfo> smartphoneSensors = SensorInfo.getAll(this.getContext());
         RecyclerView recyclerView = Objects.requireNonNull(getActivity()).findViewById(R.id.sensorsRecyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -66,15 +62,14 @@ public class SmartphoneFragment extends AbstractMainFragment {
             }
         }
 
-        //set data and list adapter
         this.adapterListSensor = new AdapterListSensor(this.getContext(), items);
         recyclerView.setAdapter(this.adapterListSensor);
 
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onHide() {
+        super.onHide();
         SharedPreferences sharedPreferences = Objects.requireNonNull(getContext()).getSharedPreferences("smartphone", Context.MODE_PRIVATE);
         List<SensorListItem> sensorsSensorListItems = this.adapterListSensor.getSensorListItems();
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -84,14 +79,5 @@ public class SmartphoneFragment extends AbstractMainFragment {
         }
         editor.apply();
     }
-
-
-//    private void setTextViewDrawableColor(TextView textView) {
-//        for (Drawable drawable : textView.getCompoundDrawables()) {
-//            if (drawable != null) {
-//                drawable.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this.getContext(), R.color.teal_800), PorterDuff.Mode.SRC_IN));
-//            }
-//        }
-//    }
 
 }

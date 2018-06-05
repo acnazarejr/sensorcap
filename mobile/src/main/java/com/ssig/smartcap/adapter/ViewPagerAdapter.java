@@ -11,16 +11,15 @@ import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 
-    private ArrayList<Fragment> fragments = new ArrayList<>();
+    private ArrayList<AbstractMainFragment> fragments = new ArrayList<>();
     private AbstractMainFragment currentFragment;
 
-    public ViewPagerAdapter(FragmentManager fm) {
-        super(fm);
+    public ViewPagerAdapter(FragmentManager fragmentManager) {
+        super(fragmentManager);
     }
 
-    public void add(Fragment frag) {
-        this.fragments.add(frag);
-
+    public void add(AbstractMainFragment fragment) {
+        this.fragments.add(fragment);
     }
 
     @Override

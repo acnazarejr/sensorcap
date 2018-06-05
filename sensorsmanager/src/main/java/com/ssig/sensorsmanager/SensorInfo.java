@@ -1,8 +1,12 @@
 package com.ssig.sensorsmanager;
 
+import android.content.Context;
 import android.hardware.Sensor;
+import android.hardware.SensorManager;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SensorInfo implements Serializable{
 
@@ -18,7 +22,6 @@ public class SensorInfo implements Serializable{
     protected int minDelay;
     protected float resolution;
     protected int reportingMode;
-
 
     public SensorInfo(SensorType sensorType){
         this.sensorType = sensorType;
@@ -44,7 +47,6 @@ public class SensorInfo implements Serializable{
     public void setMaximumRange(float maximumRange) {
         this.maximumRange = maximumRange;
     }
-
 
     public String getVendor() {
         return vendor;
@@ -127,5 +129,39 @@ public class SensorInfo implements Serializable{
     public void setReportingMode(int reportingMode) {
         this.reportingMode = reportingMode;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // STATIC FACTORY METHODS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static SensorInfo get(Context context, SensorType sensorType){
+
+        SensorManager sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        Sensor defaultSensor = sensorManager.getDefaultSensor(sensorType.androidType());
+        if (defaultSensor != null){
+            SensorInfo sensorInfo = new SensorInfo((sensorType));
+            sensorInfo.setModel(defaultSensor.getName());
+            sensorInfo.setVendor(defaultSensor.getVendor());
+            sensorInfo.setVersion(defaultSensor.getVersion());
+            sensorInfo.setPower(defaultSensor.getPower());
+            sensorInfo.setMaximumRange(defaultSensor.getMaximumRange());
+            sensorInfo.setMaxDelay(defaultSensor.getMaxDelay());
+            sensorInfo.setMinDelay(defaultSensor.getMinDelay());
+            sensorInfo.setResolution(defaultSensor.getResolution());
+            sensorInfo.setReportingMode(defaultSensor.getReportingMode());
+            return sensorInfo;
+        }
+        return null;
+    }
+
+    public static Map<SensorType, SensorInfo> getAll(Context context) {
+        Map<SensorType, SensorInfo> allSensors = new TreeMap<>();
+        for(SensorType sensorType : SensorType.values()){
+            allSensors.put(sensorType, SensorInfo.get(context, sensorType));
+        }
+        return  allSensors;
+    }
+
 
 }

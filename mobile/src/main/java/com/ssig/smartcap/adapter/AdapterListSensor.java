@@ -265,7 +265,7 @@ public class AdapterListSensor extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (enabled)
             icon.setShapeColor(ContextCompat.getColor(ctx, R.color.colorPrimaryLight));
         else
-            icon.setShapeColor(ContextCompat.getColor(ctx, R.color.colorGreyLight));
+            icon.setShapeColor(ContextCompat.getColor(ctx, R.color.colorGreyMediumLight));
         icon.setLettersNumber(3);
         icon.setLetter(text);
     }

@@ -2,8 +2,11 @@
     <string name="capability_smartcap_phone">capability_smartcap_phone</string>
     <string name="capability_smartcap_wear">capability_smartcap_wear</string>
 
-    <string name="message_path_service_prefix">/service</string>
-    <string name="message_path_open_watch_activity">/service/open-activity</string>
-    <string name="message_path_request_watch_sensorinfo">/service/request-sensorinfo</string>
+    <string name="message_path_service_prefix">/client-service</string>
+    <string name="message_path_open_watch_activity">/client-service/open-activity</string>
+    <string name="message_path_request_watch_sensorinfo">/client-service/request-sensorinfo</string>
+
+    <string name="message_path_wearutil_prefix">/wearutil</string>
+    <string name="message_path_response_watch_sensorinfo">/wearutil/response-sensorinfo</string>
 
 </resources>

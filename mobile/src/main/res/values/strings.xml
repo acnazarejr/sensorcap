@@ -10,14 +10,27 @@
     <string name="dialog_network_error_content">No internet connections found.</string>
     <string name="dialog_ntp_synchronization_title">NTP Synchronization</string>
     <string name="dialog_ntp_synchronization_content">Synchronizing NTP Service with</string>
-    <string name="dialog_ntp_synchronization_success">NTP successfully synchronized</string>
+    <string name="toast_ntp_synchronization_success">NTP successfully synchronized</string>
 
     <string name="dialog_bluetooth_error_title">Bluetooth Error</string>
     <string name="dialog_bluetooth_error_content">No bluetooth connections found.</string>
+    <string name="dialog_wear_os_error_title">Wear OS Error</string>
+    <string name="dialog_wear_os_error_content">The Android Wear App is not installed. Please, install it.</string>
+    <string name="dialog_wear_os_error_button">Install Wear OS</string>
     <string name="dialog_wear_synchronization_title">Wear Synchronization</string>
     <string name="dialog_wear_synchronization_content">Find paired and connected wear devices.</string>
-    <string name="dialog_wear_synchronization_success">Wear successfully synchronized</string>
-    <string name="dialog_wear_synchronization_not_success">No wear device found</string>
+
+    <string name="dialog_wear_sensorinfo_title">Smartwatch Sensors</string>
+    <string name="dialog_wear_sensorinfo_content">Requesting smartwatch sensor details.</string>
+    <string name="toast_wear_sensorinfo_success">Sensor details successfully received</string>
+
+    <string name="toast_wear_synchronization_success">Wear successfully synchronized</string>
+    <string name="toast_wear_synchronization_bluetooth_error">No bluetooth connections found</string>
+    <string name="toast_wear_synchronization_wear_error">The Android Wear App is not installed.</string>
+    <string name="toast_wear_synchronization_no_paired_error">No devices paired or connected with this device</string>
+    <string name="toast_wear_synchronization_no_capable_error">No devices with Smartcap app installed</string>
+    <string name="toast_wear_synchronization_unknown_error">A unknown error has ocurred</string>
+
 
     <string name="button_try_again">Try Again</string>
     <string name="button_cancel">Cancel</string>
@@ -31,9 +44,7 @@
 
     <string name="smartphone_available_sensors_tile">Available Sensors</string>
 
-    <string name="smartwatch_wearos_error_title">Wear OS Error</string>
-    <string name="smartwatch_wearos_error_content">The Android Wear App is not installed. It is required for smartwatch communication.</string>
-    <string name="smartwatch_wearos_error_button">Install Wear OS</string>
+
     <string name="smartwatch_devices_error_title">Wear Device Error</string>
     <string name="smartwatch_devices_error_content">No devices paired or connected with this device. Please open Wear OS App and connect to a wear device.</string>
     <string name="smartwatch_smartcap_error_title">Wear Smartcap Error</string>
