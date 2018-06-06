@@ -154,11 +154,11 @@
                         android:layout_height="wrap_content"
                         app:isw_icon_left="@drawable/ic_earth"
                         app:isw_icon_right="@drawable/ic_smartphone"
-                        app:isw_inactive_tint_icon_left="@color/colorGreyDark"
+                        app:isw_inactive_tint_icon_left="@color/colorGreyMediumDark"
                         app:isw_active_tint_icon_left="@color/colorGreyLight"
-                        app:isw_inactive_tint_icon_right="@color/colorGreyDark"
+                        app:isw_inactive_tint_icon_right="@color/colorGreyMediumDark"
                         app:isw_active_tint_icon_right="@color/colorGreyLight"
-                        app:isw_background_color="@color/colorAccentLight"
+                        app:isw_background_color="@color/colorGreyLight"
                         app:isw_thumb_color_left="@color/colorAccent"
                         app:isw_thumb_color_right="@color/colorAccent"/>
 

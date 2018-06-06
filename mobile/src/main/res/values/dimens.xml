@@ -24,4 +24,6 @@
     <dimen name="spacing_xxxlarge">55dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
 
+    <dimen name="options_text">16sp</dimen>
+
 </resources>

@@ -29,6 +29,7 @@ import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.ViewPagerAdapter;
 import com.ssig.smartcap.fragment.AbstractMainFragment;
 import com.ssig.smartcap.fragment.ArchiveFragment;
+import com.ssig.smartcap.fragment.CaptureFragment;
 import com.ssig.smartcap.fragment.SmartphoneFragment;
 import com.ssig.smartcap.fragment.SmartwatchFragment;
 import com.ssig.smartcap.fragment.TimeToolFragment;
@@ -172,6 +173,9 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
     }
 
 
+
+
+
     // ---------------------------------------------------------------------------------------------
     // PAGE VIEWER STUFFS
     // ---------------------------------------------------------------------------------------------
@@ -179,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         this.viewPager = findViewById(R.id.view_pager);
 
         this.viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        this.viewPagerAdapter.add(new ArchiveFragment());
+        this.viewPagerAdapter.add(new CaptureFragment());
         this.viewPagerAdapter.add(new SmartphoneFragment());
         this.viewPagerAdapter.add(new SmartwatchFragment());
         this.viewPagerAdapter.add(new TimeToolFragment());
