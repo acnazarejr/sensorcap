@@ -66,6 +66,17 @@
     <string name="dialog_reset_defaults_title">Reset to Defaults</string>
     <string name="dialog_reset_defaults_content">Do you want to reset the preference values to defaults?</string>
     <string name="button_no">No</string>
+    <string name="capture_devices_section_title">Capture Devices</string>
+    <string name="capture_smartphone_position">Smartphone Position</string>
+    <string name="capture_smartphone_side">Smartphone Side</string>
+    <string name="capture_smartwatch_side">Smartwatch Side</string>
+    <string name="capture_subject_section_title">Capture Subject</string>
+    <string name="capture_subject_name_hint">Subject Name</string>
+    <string name="capture_gender_female">Female</string>
+    <string name="capture_age_title">Age</string>
+    <string name="capture_height_title">Height (cm)</string>
+    <string name="capture_weight_title">Weight (Kg)</string>
+    <string name="button_start">Start</string>
 
 
     <!--<string name="qr_code_image">QR Code Image</string>-->

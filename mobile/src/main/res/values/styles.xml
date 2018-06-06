@@ -30,10 +30,10 @@
         <!--<item name="android:textColor">@android:color/white</item>-->
     <!--</style>-->
 
-    <!--<style name="Button.Accent" parent="@style/Widget.AppCompat.Button.Colored">-->
-        <!--<item name="colorButtonNormal">@color/colorAccent</item>-->
-        <!--<item name="android:textColor">@android:color/white</item>-->
-    <!--</style>-->
+    <style name="Button.Accent" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="android:textColor">@color/colorGreyLight</item>
+    </style>
 
     <!--<style name="Button.Green" parent="@style/Widget.AppCompat.Button.Colored">-->
         <!--<item name="colorButtonNormal">@color/light_green_500</item>-->
@@ -72,17 +72,17 @@
         <!--<item name="android:textColor">@color/colorAccent</item>-->
     <!--</style>-->
 
-    <!--&lt;!&ndash;style for ripple library&ndash;&gt;-->
-    <!--<style name="RippleStyleWhite">-->
-        <!--<item name="mrl_rippleOverlay">true</item>-->
-        <!--<item name="mrl_rippleColor">#80FFFFFF</item>-->
-        <!--<item name="mrl_rippleHover">true</item>-->
-        <!--<item name="mrl_rippleAlpha">0.2</item>-->
-    <!--</style>-->
+    <!--style for ripple library-->
+    <style name="RippleStyleWhite">
+        <item name="mrl_rippleOverlay">true</item>
+        <item name="mrl_rippleColor">#80FFFFFF</item>
+        <item name="mrl_rippleHover">true</item>
+        <item name="mrl_rippleAlpha">0.2</item>
+    </style>
 
-    <!--<style name="RippleStyleBlack" parent="RippleStyleWhite">-->
-        <!--<item name="mrl_rippleColor">#8096989A</item>-->
-    <!--</style>-->
+    <style name="RippleStyleBlack" parent="RippleStyleWhite">
+        <item name="mrl_rippleColor">#8096989A</item>
+    </style>
 
     <!--<style name="RippleStyleDark" parent="RippleStyleWhite">-->
         <!--<item name="mrl_rippleColor">#80000000</item>-->

@@ -21,13 +21,12 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <RelativeLayout
-            android:id="@+id/layout_timetool_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <android.support.v7.widget.CardView
-                android:id="@+id/temp3"
+                android:id="@+id/capture_devices_section_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_middle"
@@ -52,7 +51,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Capture Devices"
+                            android:text="@string/capture_devices_section_title"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                             android:textColor="@color/colorPrimary"
                             android:textStyle="bold" />
@@ -72,7 +71,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Smartwatch Position"
+                            android:text="@string/capture_smartphone_position"
                             android:textColor="@color/colorGreyMediumDark"
                             android:textSize="@dimen/options_text" />
 
@@ -81,6 +80,7 @@
                             android:layout_height="@dimen/spacing_small" />
 
                         <co.ceryle.radiorealbutton.RadioRealButtonGroup
+                            android:id="@+id/switch_smartphone_location"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:rrbg_animateDrawables_enter="overshoot"
@@ -171,7 +171,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Smartwatch Side"
+                                android:text="@string/capture_smartphone_side"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -180,6 +180,7 @@
                                 android:layout_height="@dimen/spacing_small" />
 
                             <co.ceryle.radiorealbutton.RadioRealButtonGroup
+                                android:id="@+id/switch_smartphone_side"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:elevation="2dp"
@@ -228,7 +229,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Smartwatch Side"
+                                android:text="@string/capture_smartwatch_side"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -237,6 +238,7 @@
                                 android:layout_height="@dimen/spacing_small" />
 
                             <co.ceryle.radiorealbutton.RadioRealButtonGroup
+                                android:id="@+id/switch_smartwatch_side"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:elevation="2dp"
@@ -278,14 +280,14 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
-                android:id="@+id/temp2"
+                android:id="@+id/capture_subject_section_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_middle"
                 android:layout_marginLeft="@dimen/spacing_middle"
                 android:layout_marginRight="@dimen/spacing_middle"
                 android:visibility="visible"
-                android:layout_below="@id/temp3"
+                android:layout_below="@id/capture_devices_section_layout"
                 app:cardCornerRadius="2dp"
                 app:cardElevation="2dp">
 
@@ -303,7 +305,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Capture Info"
+                            android:text="@string/capture_subject_section_title"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                             android:textColor="@color/colorPrimary"
                             android:textStyle="bold" />
@@ -317,21 +319,23 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:baselineAligned="false"
                         android:orientation="horizontal">
 
                         <android.support.design.widget.TextInputLayout
-                        android:id="@+id/input_name"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textColorHint="@color/colorGrey"
-                        android:layout_weight="3">
-
-                        <android.support.v7.widget.AppCompatEditText
-                            android:layout_width="match_parent"
+                            android:id="@+id/subject_name_input"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:inputType="text"
-                            android:maxLines="1"
-                            android:hint="Name" />
+
+                            android:layout_weight="3">
+
+                            <android.support.v7.widget.AppCompatEditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:maxLines="1"
+                                android:textColor="@color/colorGreyMediumDark"
+                                android:hint="@string/capture_subject_name_hint" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -342,7 +346,7 @@
                             android:orientation="vertical">
 
                             <com.polyak.iconswitch.IconSwitch
-                                android:id="@+id/switch_temp"
+                                android:id="@+id/switch_gender"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 app:isw_icon_left="@drawable/ic_male"
@@ -357,9 +361,9 @@
                                 app:isw_thumb_color_right="@color/colorAccent"/>
 
                             <TextView
+                                android:id="@+id/gender_text"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Female"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -387,7 +391,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Height"
+                                android:text="@string/capture_age_title"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -396,15 +400,15 @@
                                 android:layout_height="@dimen/spacing_small" />
 
                             <com.shawnlin.numberpicker.NumberPicker
-                                android:id="@+id/number_picker"
+                                android:id="@+id/number_picker_age"
                                 android:layout_width="match_parent"
                                 android:layout_height="35dp"
                                 android:backgroundTint="@color/colorGreyLight"
                                 android:background="@drawable/shape_rounded"
                                 app:np_dividerColor="@color/colorAccent"
                                 app:np_dividerDistance="@dimen/spacing_xmlarge"
-                                app:np_min="60"
-                                app:np_max="210"
+                                app:np_min="1"
+                                app:np_max="100"
                                 app:np_wheelItemCount="3"
                                 app:np_wrapSelectorWheel="false"
                                 app:np_dividerThickness="0dp"
@@ -413,7 +417,7 @@
                                 app:np_selectedTextSize="@dimen/spacing_smlarge"
                                 app:np_textColor="@color/colorAccentLight"
                                 app:np_textSize="@dimen/spacing_xmiddle"
-                                app:np_value="100" />
+                                app:np_value="25" />
 
                         </LinearLayout>
 
@@ -431,7 +435,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Height"
+                                android:text="@string/capture_height_title"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -440,14 +444,14 @@
                                 android:layout_height="@dimen/spacing_small" />
 
                             <com.shawnlin.numberpicker.NumberPicker
-                                android:id="@+id/number_picker"
+                                android:id="@+id/number_picker_height"
                                 android:layout_width="match_parent"
                                 android:layout_height="35dp"
                                 android:backgroundTint="@color/colorGreyLight"
                                 android:background="@drawable/shape_rounded"
                                 app:np_dividerColor="@color/colorAccent"
                                 app:np_dividerDistance="@dimen/spacing_xmlarge"
-                                app:np_min="60"
+                                app:np_min="50"
                                 app:np_max="210"
                                 app:np_wheelItemCount="3"
                                 app:np_wrapSelectorWheel="false"
@@ -457,7 +461,7 @@
                                 app:np_selectedTextSize="@dimen/spacing_smlarge"
                                 app:np_textColor="@color/colorAccentLight"
                                 app:np_textSize="@dimen/spacing_xmiddle"
-                                app:np_value="100" />
+                                app:np_value="170" />
 
                         </LinearLayout>
 
@@ -475,7 +479,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Height"
+                                android:text="@string/capture_weight_title"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -501,7 +505,7 @@
                                 app:np_selectedTextSize="@dimen/spacing_smlarge"
                                 app:np_textColor="@color/colorAccentLight"
                                 app:np_textSize="@dimen/spacing_xmiddle"
-                                app:np_value="100" />
+                                app:np_value="70" />
 
                         </LinearLayout>
 
@@ -514,38 +518,24 @@
             </android.support.v7.widget.CardView>
 
             <LinearLayout
-                android:id="@+id/temp"
+                android:id="@+id/capture_control_section_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_below="@id/temp2">
+                android:layout_below="@id/capture_subject_section_layout">
 
                 <android.support.v7.widget.AppCompatButton
                     android:id="@+id/tempb"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/spacing_middle"
-                    android:text="Start"
-                    android:background="@drawable/shape_rounded"
-                    android:backgroundTint="@color/colorAccent"
-                    android:textColor="@android:color/white" />
+                    android:padding="@dimen/spacing_smlarge"
+                    android:text="@string/button_start"
+                    android:textColor="@color/colorGreyLight"
+                    android:theme="@style/Button.Accent" />
 
             </LinearLayout>
 
-
-
-
-
-            <!--<android.support.v7.widget.AppCompatButton-->
-                <!--android:layout_width="150dp"-->
-                <!--android:layout_marginTop="80dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="center"-->
-                <!--android:background="@drawable/shape_rounded"-->
-                <!--android:backgroundTint="@color/colorAccent"-->
-                <!--android:text="START"-->
-                <!--android:textColor="@android:color/white" />-->
 
         </RelativeLayout>
 

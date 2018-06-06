@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         }
     }
 
-    private class NTPSynchronizationTask extends AsyncTask<Void, Void, Boolean>{
+    private class NTPSynchronizationTask extends AsyncTask<Void, Void, String>{
 
         private String ntpPool;
         private MaterialDialog dialog;
@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
         }
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
             boolean response = false;
             TimeUtils.clearNTPCache(this.mainActivity.get());
             try {
@@ -276,18 +276,21 @@ public class MainActivity extends AppCompatActivity implements CapabilityClient.
             try {
                 response = TimeUtils.initializeNTP(this.mainActivity.get(), this.ntpPool);
             } catch (IOException e) {
-                Toast.makeText(this.mainActivity.get(), e.toString(), Toast.LENGTH_LONG).show();
+                return e.getMessage();
             }
-            return response;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            Toast.makeText(this.mainActivity.get(), getString(R.string.toast_ntp_synchronization_success), Toast.LENGTH_LONG).show();
+        protected void onPostExecute(String message) {
+            super.onPostExecute(message);
             this.dialog.dismiss();
+            boolean refresh = (message == null);
+            message = message == null ? this.mainActivity.get().getString(R.string.toast_ntp_synchronization_success) : message;
+            Toast.makeText(this.mainActivity.get(), message, Toast.LENGTH_LONG).show();
             this.mainActivity.get().updateNTPMenuItem();
-            this.mainActivity.get().refreshCurrentFragment();
+            if (refresh)
+                this.mainActivity.get().refreshCurrentFragment();
         }
     }
 
