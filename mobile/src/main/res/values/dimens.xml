@@ -26,5 +26,7 @@
     <dimen name="appbar_padding_top">8dp</dimen>
 
     <dimen name="options_text">16sp</dimen>
+    <dimen name="countdown_text">200sp</dimen>
+    <dimen name="chronometer_text">60sp</dimen>
 
 </resources>

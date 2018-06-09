@@ -1,18 +1,13 @@
 package com.ssig.smartcap.utils;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,14 +16,11 @@ import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.AdapterListSensor;
@@ -52,12 +44,10 @@ public class Tools {
 //    }
 
     public static void setSystemBarColor(Activity act, @ColorRes int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = act.getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            window.setStatusBarColor(act.getResources().getColor(color));
-        }
+        Window window = act.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(ContextCompat.getColor(act, color));
     }
 
     public static void setSystemBarLight(Activity act) {
@@ -204,17 +194,15 @@ public class Tools {
 //        }
 //    }
 
-    public static boolean toggleArrow(boolean show, View view) {
-        return toggleArrow(show, view, true);
+    public static void toggleArrow(boolean show, View view) {
+        toggleArrow(show, view, true);
     }
 
-    public static boolean toggleArrow(boolean show, View view, boolean delay) {
+    public static void toggleArrow(boolean show, View view, boolean delay) {
         if (show) {
             view.animate().setDuration(delay ? 200 : 0).rotation(180);
-            return true;
         } else {
             view.animate().setDuration(delay ? 200 : 0).rotation(0);
-            return false;
         }
     }
 //
@@ -339,7 +327,7 @@ public class Tools {
         new MaterialDialog.Builder(context)
                 .title(R.string.dialog_reset_defaults_title)
                 .content(R.string.dialog_reset_defaults_content)
-                .icon(Tools.changeDrawableColor(context.getDrawable(R.drawable.ic_smartphone), ContextCompat.getColor(context, R.color.colorPrimary)))
+                .icon(Tools.changeDrawableColor(Objects.requireNonNull(context.getDrawable(R.drawable.ic_smartphone)), ContextCompat.getColor(context, R.color.colorPrimary)))
                 .cancelable(true)
                 .positiveText(R.string.button_yes)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {

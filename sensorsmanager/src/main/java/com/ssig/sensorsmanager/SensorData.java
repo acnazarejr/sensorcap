@@ -1,5 +1,8 @@
 package com.ssig.sensorsmanager;
 
+import com.ssig.sensorsmanager.config.SensorConfig;
+import com.ssig.sensorsmanager.info.SensorInfo;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +27,7 @@ public class SensorData implements Serializable {
 
     public SensorData(SensorConfig sensorConfig, SensorInfo sensorInfo, String file){
         this.sensorConfig = sensorConfig;
-        this.sensorType = sensorConfig.getSensortype();
+        this.sensorType = sensorConfig.getSensorType();
         this.sensorInfo = sensorInfo;
         this.sensorFilePath = file;
         getValuesFromFile();

@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">SmartCap</string>
     <string name="start_screen">Sensor Capture</string>
+    <string name="time_tool_dummy_hour">--:--:--.--</string>
+    <string name="time_tool_dummy_value">----------</string>
+    <string name="image_description">image_description</string>
+    <string name="util_time_format">HH:mm:ss.SSS</string>
 </resources>

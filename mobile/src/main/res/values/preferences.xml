@@ -6,6 +6,15 @@
     <string name="preference_main_key_qrcode_fps">qrcode_fps</string>
     <integer name="preference_main_default_qrcode_fps">30</integer>
 
+    <string name="preference_main_key_countdown_capture">countdown</string>
+    <integer name="preference_main_default_countdown_capture">3</integer>
+
+    <string name="preference_main_key_has_sound">has_sound</string>
+    <bool name="preference_main_default_has_sound">false</bool>
+
+    <string name="preference_main_key_has_vibration">has_vibration</string>
+    <bool name="preference_main_default_has_vibration">false</bool>
+
     <string name="preference_smartphone_file_id">SMARTPHONE_PREFERENCES</string>
     <string name="preference_smartwatch_file_id">SMARTWATCH_PREFERENCES</string>
     <string name="preference_sensor_enabled_suffix">_ENABLED</string>

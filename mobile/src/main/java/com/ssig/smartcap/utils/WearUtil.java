@@ -12,7 +12,7 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.Serialization;
@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 
 public class WearUtil implements MessageClient.OnMessageReceivedListener{
 
-    public enum SynchronizationResponse{
+    public enum ConnectionResponse {
         SUCCESS,
         NO_WEAR_APP,
         BLUETOOTH_DISABLED,
@@ -34,117 +34,118 @@ public class WearUtil implements MessageClient.OnMessageReceivedListener{
         UNKNOWN_ERROR
     }
 
-    private static final WearUtil ourInstance = new WearUtil();
-    private Context context;
+    private static Node smartcapClientNode = null;
 
-    private List<Node> clientNodes;
-    private Node node;
+    private static Map<SensorType, SensorInfo> clientSensorInfoResponse;
+    private static CountDownLatch requestSensorInfoLatch;
 
-    private Map<SensorType, SensorInfo> clientSensorInfo;
-    private CountDownLatch requestSensorInfoLatch;
+    private static String MESSAGE_PATH_CONNECTION_DONE;
+    private static String MESSAGE_PATH_REQUEST_WATCH_SENSORINFO;
+    private static String MESSAGE_PATH_RESPONSE_WATCH_SENSORINFO;
+    private static String MESSAGE_PATH_SYNC_NTP;
+    private static String MESSAGE_PATH_DISCONNECT;
 
-    public static WearUtil get() {
-        if (ourInstance.context == null)
-            return null;
-        return ourInstance;
+    @Override
+    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
+        String path = messageEvent.getPath();
+
+        if (path.equals(WearUtil.MESSAGE_PATH_RESPONSE_WATCH_SENSORINFO)) {
+            byte[] data = messageEvent.getData();
+            WearUtil.clientSensorInfoResponse = Serialization.deserializeObject(data);
+            WearUtil.requestSensorInfoLatch.countDown();
+        }
     }
-
-    private WearUtil() {
-        this.clientNodes = new ArrayList<>();
-        this.node = null;
-        this.clientSensorInfo = null;
-        this.requestSensorInfoLatch = null;
-        this.context = null;
-    }
-
-    private void setContext(Context context){
-        if (this.context != null)
-            return;
-        this.context = context;
-        Wearable.getMessageClient(this.context).addListener(this);
-    }
-
 
     public static void initialize(Context context){
-        ourInstance.setContext(context);
+        MESSAGE_PATH_CONNECTION_DONE = context.getString(R.string.message_path_connection_done);
+        MESSAGE_PATH_REQUEST_WATCH_SENSORINFO = context.getString(R.string.message_path_request_watch_sensorinfo);
+        MESSAGE_PATH_RESPONSE_WATCH_SENSORINFO = context.getString(R.string.message_path_response_watch_sensorinfo);
+        MESSAGE_PATH_SYNC_NTP = context.getString(R.string.message_path_sync_ntp);
+        MESSAGE_PATH_DISCONNECT = context.getString(R.string.message_path_disconnect);
+        Wearable.getMessageClient(context).addListener(new WearUtil());
     }
 
-    public boolean hasWearOS(){
+    public static boolean hasWearOS(Context context){
         return DeviceTools.hasApp(context, context.getString(R.string.util_wear_package));
     }
 
-    public boolean isConnected() {
-        return (this.node != null);
+    public static boolean isConnected() {
+        return (WearUtil.smartcapClientNode != null);
     }
 
-    public String getClientID(){
-        return (this.node != null) ? this.node.getId() : null;
+    public static String getClientID(){
+        return (WearUtil.smartcapClientNode != null) ? WearUtil.smartcapClientNode.getId() : null;
     }
 
-
-    public SynchronizationResponse synchronize(){
-        this.clientNodes = new ArrayList<>();
-        this.node = null;
+    public static ConnectionResponse synchronize(Context context){
+        WearUtil.smartcapClientNode = null;
 
         if (!DeviceTools.isBlueetothEnabled())
-            return SynchronizationResponse.BLUETOOTH_DISABLED;
+            return ConnectionResponse.BLUETOOTH_DISABLED;
 
-        if (!this.hasWearOS())
-            return SynchronizationResponse.NO_WEAR_APP;
+        if (!WearUtil.hasWearOS(context))
+            return ConnectionResponse.NO_WEAR_APP;
 
         try {
 
             Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(context).getCapability(context.getString(R.string.capability_smartcap_wear), CapabilityClient.FILTER_REACHABLE);
             CapabilityInfo capabilityInfo = Tasks.await(capabilityInfoTask);
             if (!capabilityInfo.getNodes().isEmpty()){
-                this.clientNodes = new ArrayList<>(capabilityInfo.getNodes());
-                this.node = this.clientNodes.get(0);
-                return SynchronizationResponse.SUCCESS;
+                List<Node> foundedCientNodes = new ArrayList<>(capabilityInfo.getNodes());
+                WearUtil.smartcapClientNode = foundedCientNodes.get(0);
+                return ConnectionResponse.SUCCESS;
             }
 
-            Task<List<Node>> nodeListTask = Wearable.getNodeClient(context).getConnectedNodes();
-            List<Node> nodeList = Tasks.await(nodeListTask);
-            return nodeList.isEmpty() ?  SynchronizationResponse.NO_PAIRED_DEVICES : SynchronizationResponse.NO_CAPABLE_DEVICES;
+            Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(context).getConnectedNodes();
+            List<Node> nodeList = Tasks.await(connectedNodesTask);
+            return nodeList.isEmpty() ?  ConnectionResponse.NO_PAIRED_DEVICES : ConnectionResponse.NO_CAPABLE_DEVICES;
 
         } catch (ExecutionException | InterruptedException e) {
-            return SynchronizationResponse.UNKNOWN_ERROR;
+            return ConnectionResponse.UNKNOWN_ERROR;
         }
 
     }
 
-    public void sendMessage(final String path){
-        if (this.node == null)
+    public static void sendMessage(Context context, final String path, final byte[] data){
+        if (WearUtil.smartcapClientNode == null)
             return;
-        Task<Integer> sendMessageTask = Wearable.getMessageClient(context).sendMessage(this.node.getId(), path, new byte[0]);
+        Task<Integer> sendMessageTask = Wearable.getMessageClient(context).sendMessage(WearUtil.smartcapClientNode.getId(), path, data != null ? data : new byte[0]);
         sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
             @Override
             public void onSuccess(Integer integer) {}
         });
     }
 
-    public void openClientActivity(){
-        this.sendMessage(this.context.getString(R.string.message_path_open_watch_activity));
+    public static void connectionDone(Context context){
+        WearUtil.sendMessage(context, WearUtil.MESSAGE_PATH_CONNECTION_DONE, null);
     }
 
-    public Map<SensorType, SensorInfo> requestClientSensorInfo() {
-        this.requestSensorInfoLatch = new CountDownLatch(1);
-        this.sendMessage(this.context.getString(R.string.message_path_request_watch_sensorinfo));
+    public static void disconnect(Context context){
+        WearUtil.sendMessage(context, WearUtil.MESSAGE_PATH_DISCONNECT, null);
+        WearUtil.smartcapClientNode = null;
+    }
+
+    public static void syncClientNTP(Context context, String ntpPool){
+        if (DeviceTools.isNetworkConnected(context)) {
+            byte[] data = Serialization.serializeObject(ntpPool);
+            WearUtil.sendMessage(context, WearUtil.MESSAGE_PATH_SYNC_NTP, data);
+        }
+    }
+
+    public static Map<SensorType, SensorInfo> requestClientSensorInfo(Context context) {
+        if (WearUtil.requestSensorInfoLatch != null)
+            return null;
+
+        WearUtil.requestSensorInfoLatch = new CountDownLatch(1);
+
+        WearUtil.sendMessage(context, WearUtil.MESSAGE_PATH_REQUEST_WATCH_SENSORINFO, null);
         try {
-            this.requestSensorInfoLatch.await();
+            WearUtil.requestSensorInfoLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return this.clientSensorInfo;
-    }
-
-    @Override
-    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
-        String path = messageEvent.getPath();
-        if (path.equals(this.context.getString(R.string.message_path_response_watch_sensorinfo))) {
-            byte[] data = messageEvent.getData();
-            this.clientSensorInfo = Serialization.deserializeObject(data);
-            this.requestSensorInfoLatch.countDown();
-        }
+        WearUtil.requestSensorInfoLatch = null;
+        return WearUtil.clientSensorInfoResponse;
     }
 
 }

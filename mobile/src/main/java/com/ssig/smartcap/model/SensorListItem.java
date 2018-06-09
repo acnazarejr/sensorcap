@@ -1,6 +1,6 @@
 package com.ssig.smartcap.model;
 
-import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.info.SensorInfo;
 
 import java.io.Serializable;
 

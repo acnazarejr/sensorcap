@@ -23,6 +23,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:focusableInTouchMode="true"
             android:orientation="vertical">
 
             <android.support.v7.widget.CardView
@@ -41,6 +42,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/spacing_middle"
+                    android:focusableInTouchMode="true"
+                    android:descendantFocusability="blocksDescendants"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -323,13 +326,14 @@
                         android:orientation="horizontal">
 
                         <android.support.design.widget.TextInputLayout
-                            android:id="@+id/subject_name_input"
+                            android:id="@+id/subject_name_input_layout"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
 
                             android:layout_weight="3">
 
                             <android.support.v7.widget.AppCompatEditText
+                                android:id="@+id/subject_name_input_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="text"
@@ -364,6 +368,7 @@
                                 android:id="@+id/gender_text"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:text="@string/capture_gender_male"
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:textSize="@dimen/options_text"/>
 
@@ -488,7 +493,7 @@
                                 android:layout_height="@dimen/spacing_small" />
 
                             <com.shawnlin.numberpicker.NumberPicker
-                                android:id="@+id/number_picker"
+                                android:id="@+id/number_picker_weight"
                                 android:layout_width="match_parent"
                                 android:layout_height="35dp"
                                 android:backgroundTint="@color/colorGreyLight"
@@ -517,24 +522,94 @@
 
             </android.support.v7.widget.CardView>
 
-            <LinearLayout
+            <android.support.v7.widget.CardView
                 android:id="@+id/capture_control_section_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_below="@id/capture_subject_section_layout">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_middle"
+                android:layout_marginLeft="@dimen/spacing_middle"
+                android:layout_marginRight="@dimen/spacing_middle"
+                android:visibility="visible"
+                android:layout_below="@id/capture_subject_section_layout"
+                app:cardCornerRadius="2dp"
+                app:cardElevation="2dp">
 
-                <android.support.v7.widget.AppCompatButton
-                    android:id="@+id/tempb"
-                    android:layout_width="200dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/spacing_smlarge"
-                    android:text="@string/button_start"
-                    android:textColor="@color/colorGreyLight"
-                    android:theme="@style/Button.Accent" />
+                    android:paddingLeft="@dimen/spacing_middle"
+                    android:paddingRight="@dimen/spacing_middle"
+                    android:paddingTop="@dimen/spacing_medium"
+                    android:paddingBottom="@dimen/spacing_medium"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioGroup
+                            android:id="@+id/radio_group_devices"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:id="@+id/radio_option_smartphone"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableTint="@color/colorGreyMediumDark"
+                                android:drawableStart="@drawable/ic_smartphone" />
+
+                            <View
+                                android:layout_width="@dimen/spacing_middle"
+                                android:layout_height="match_parent" />
+
+
+                            <RadioButton
+                                android:id="@+id/radio_option_smartwatch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableTint="@color/colorGreyMediumDark"
+                                android:drawableStart="@drawable/ic_smartwatch" />
+
+                            <View
+                                android:layout_width="@dimen/spacing_middle"
+                                android:layout_height="match_parent" />
+
+                            <RadioButton
+                                android:id="@+id/radio_option_both"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableTint="@color/colorGreyMediumDark"
+                                android:drawableStart="@drawable/ic_smartphone"
+                                android:drawableEnd="@drawable/ic_smartwatch"/>
+
+
+                        </RadioGroup>
+
+
+                </LinearLayout>
+
+                    <View
+                        android:layout_width="@dimen/spacing_mlarge"
+                        android:layout_height="match_parent" />
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/button_capture_start"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/spacing_smlarge"
+                        android:text="@string/button_start"
+                        android:textColor="@color/colorGreyLight"
+                        android:textStyle="bold"
+                        android:theme="@style/Button.Accent" />
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
 
 
         </RelativeLayout>

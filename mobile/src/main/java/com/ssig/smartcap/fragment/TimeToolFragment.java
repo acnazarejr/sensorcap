@@ -22,7 +22,8 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.polyak.iconswitch.IconSwitch;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
-import com.ssig.smartcap.utils.TimeUtils;
+import com.ssig.sensorsmanager.time.NTPTime;
+import com.ssig.sensorsmanager.time.SystemTime;
 
 
 import java.text.SimpleDateFormat;
@@ -55,6 +56,9 @@ public class TimeToolFragment extends AbstractMainFragment {
     private TextView textTimestampDevice;
     private View layoutNtpNotAvailable;
 
+    private SystemTime systemTime;
+    private NTPTime ntpTime;
+
     private ButtonState buttonState;
     private ModeState modeState;
     private Timer updateTimer;
@@ -70,6 +74,10 @@ public class TimeToolFragment extends AbstractMainFragment {
         this.simpleDateFormat = null;
         this.updateTimer = null;
         this.delayUpdateMillis = null;
+
+        this.systemTime = new SystemTime();
+        this.ntpTime = new NTPTime();
+
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -78,7 +86,7 @@ public class TimeToolFragment extends AbstractMainFragment {
         super.onViewCreated(view, savedInstanceState);
 
         this.simpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format));
-        int fps = this.getActivity().getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps));
+        int fps = Objects.requireNonNull(this.getActivity()).getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps));
         this.delayUpdateMillis = (1000/fps);
 
         this.initUI();
@@ -89,25 +97,26 @@ public class TimeToolFragment extends AbstractMainFragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (this.updateTimer != null){
-            this.updateTimer.cancel();
-            this.updateTimer.purge();
-            this.updateTimerTask = null;
-            this.updateTimer = null;
-        }
+        this.stopQRCodeGeneration();
+        this.resetViews();
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        this.stopQRCodeGeneration();
     }
 
     @Override
     public void refresh() {
         if (this.modeState == ModeState.NTP) {
             if (this.buttonState == ButtonState.STOP)
-                this.stopDisplay();
+                this.stopQRCodeGeneration();
             this.setNTPMode();
         }
     }
 
-    public void initUI(){
+    private void initUI(){
         this.imgQRCode = Objects.requireNonNull(getActivity()).findViewById(R.id.img_qrcode);
         this.textQRCodeNotAvailable = getActivity().findViewById(R.id.text_qrcode_not_available);
         this.switchTimestampMode = getActivity().findViewById(R.id.switch_timestamp_mode);
@@ -124,7 +133,7 @@ public class TimeToolFragment extends AbstractMainFragment {
         this.resetViews();
         this.modeState = ModeState.NTP;
         this.switchTimestampMode.setChecked(IconSwitch.Checked.LEFT);
-        boolean ntpIsInitialized = TimeUtils.ntpIsInitialized();
+        boolean ntpIsInitialized = NTPTime.isInitialized();
         this.changeButtonState(ntpIsInitialized ? ButtonState.PLAY : ButtonState.PLAY_DISABLED);
         this.layoutNtpNotAvailable.setVisibility(ntpIsInitialized ? View.GONE : View.VISIBLE);
         this.textTimestampMode.setText(R.string.time_tool_timestamp_ntp_mode);
@@ -181,20 +190,22 @@ public class TimeToolFragment extends AbstractMainFragment {
                     @Override
                     public void run() {
 
-                        Long unixTimestampDevice = System.currentTimeMillis();
+                        Long unixTimestampDevice = systemTime.now();
+                        Long unixTimestampNTP = ntpTime.now();
+
                         String stringUnixTimestampDevice = String.valueOf(unixTimestampDevice);
                         Date dateTimestampDevice = new Date(unixTimestampDevice);
 
-                        Date dateTimestampNTP = TimeUtils.getNtpTime();
                         String stringUnixTimestampNTP = null;
-                        if (dateTimestampNTP != null){
-                            Long unixTimestampNTP = dateTimestampNTP.getTime();
+                        Date dateTimestampNTP = null;
+                        if (unixTimestampNTP != null){
+                            dateTimestampNTP = new Date(unixTimestampNTP);
                             stringUnixTimestampNTP = String.valueOf(unixTimestampNTP);
                         }
 
                         textDateDevice.setText(simpleDateFormat.format(dateTimestampDevice));
                         textTimestampDevice.setText(stringUnixTimestampDevice);
-                        if (dateTimestampNTP != null){
+                        if (unixTimestampNTP != null){
                             textDateNtp.setText(simpleDateFormat.format(dateTimestampNTP));
                             textTimestampNtp.setText(stringUnixTimestampNTP);
                         }
@@ -221,16 +232,18 @@ public class TimeToolFragment extends AbstractMainFragment {
         };
     }
 
-    private void stopDisplay(){
+    private void stopQRCodeGeneration(){
         changeButtonState(ButtonState.PLAY);
         switchTimestampMode.setVisibility(View.VISIBLE);
-        updateTimer.cancel();
-        updateTimer.purge();
-        updateTimerTask = null;
-        updateTimer = null;
+        if (this.updateTimer != null){
+            this.updateTimer.cancel();
+            this.updateTimer.purge();
+            this.updateTimerTask = null;
+            this.updateTimer = null;
+        }
     }
 
-    private void startDisplay() {
+    private void startQRCodeGeneration() {
         changeButtonState(ButtonState.STOP);
         switchTimestampMode.setVisibility(View.GONE);
         textQRCodeNotAvailable.setVisibility(View.GONE);
@@ -239,7 +252,6 @@ public class TimeToolFragment extends AbstractMainFragment {
         updateTimerTask = createUpdateTimerTask();
         updateTimer.scheduleAtFixedRate(updateTimerTask, 0, delayUpdateMillis);
     }
-
 
     private void registerListeners(){
 
@@ -258,9 +270,9 @@ public class TimeToolFragment extends AbstractMainFragment {
             public void onClick(View v) {
 
                 if(buttonState == ButtonState.PLAY) {
-                    startDisplay();
+                    startQRCodeGeneration();
                 }else{
-                    stopDisplay();
+                    stopQRCodeGeneration();
                 }
             }
         });
@@ -274,7 +286,5 @@ public class TimeToolFragment extends AbstractMainFragment {
         });
 
     }
-
-
 
 }

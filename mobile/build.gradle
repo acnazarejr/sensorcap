@@ -10,7 +10,6 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -46,10 +45,10 @@ dependencies {
     implementation 'com.polyak:icon-switch:1.0.0'
     implementation 'com.google.zxing:core:3.2.1'
     implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
-    implementation 'com.github.instacart.truetime-android:library-extension-rx:3.3'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'com.shawnlin:number-picker:2.4.6'
     implementation 'com.github.ceryle:RadioRealButton:v2.1.1'
+    implementation 'com.ncorti:slidetoact:0.3.0'
 
     wearApp project(':wear')
     implementation project(path: ':sensorsmanager')

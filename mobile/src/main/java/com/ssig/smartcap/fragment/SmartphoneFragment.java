@@ -1,28 +1,19 @@
 package com.ssig.smartcap.fragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.LinearLayout;
 
 
-import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.AdapterListSensor;
-import com.ssig.smartcap.model.SensorListItem;
-import com.ssig.smartcap.mobile.widget.LineItemDecoration;
 import com.ssig.smartcap.utils.Tools;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class SmartphoneFragment extends AbstractMainFragment {
 
@@ -58,4 +49,7 @@ public class SmartphoneFragment extends AbstractMainFragment {
         Tools.saveSensorsPreferences(getContext(), this.adapterListSensor, getString(R.string.preference_smartphone_file_id));
     }
 
+    public AdapterListSensor getAdapterListSensor() {
+        return adapterListSensor;
+    }
 }

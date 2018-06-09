@@ -1,5 +1,6 @@
 package com.ssig.smartcap.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,7 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.ssig.sensorsmanager.SensorInfo;
+import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
@@ -52,7 +53,7 @@ public class SmartwatchFragment extends AbstractMainFragment {
     }
 
     private void initUI(){
-        this.layoutSmartwatchError = getActivity().findViewById(R.id.layout_smartwatch_fragment_error);
+        this.layoutSmartwatchError = Objects.requireNonNull(getActivity()).findViewById(R.id.layout_smartwatch_fragment_error);
         this.layoutSmartwatchContent = getActivity().findViewById(R.id.layout_smartwatch_fragment_content);
         Button layoutSmartwatchErrorButton = this.layoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_button);
 
@@ -75,8 +76,8 @@ public class SmartwatchFragment extends AbstractMainFragment {
     @Override
     public void onHide() {
         super.onHide();
-        if(WearUtil.get().isConnected()) {
-            String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.get().getClientID();
+        if(WearUtil.isConnected()) {
+            String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.getClientID();
             Tools.saveSensorsPreferences(getContext(), this.adapterListSensor, preferencesName);
         }
     }
@@ -85,7 +86,7 @@ public class SmartwatchFragment extends AbstractMainFragment {
         this.layoutSmartwatchError.setVisibility(View.GONE);
         this.layoutSmartwatchContent.setVisibility(View.GONE);
 
-        if (!WearUtil.get().isConnected()) {
+        if (!WearUtil.isConnected()) {
             layoutSmartwatchError.setVisibility(View.VISIBLE);
         } else {
             new WearRequestSensorInfoTask((MainActivity) this.getActivity()).execute();
@@ -94,17 +95,18 @@ public class SmartwatchFragment extends AbstractMainFragment {
     }
 
     private void configureSensorList(Map<SensorType, SensorInfo> smartwatchSensors){
-        RecyclerView recyclerView = this.getView().findViewById(R.id.sensors_recycler_view);
-        String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.get().getClientID();
+        RecyclerView recyclerView = Objects.requireNonNull(this.getView()).findViewById(R.id.sensors_recycler_view);
+        String preferencesName = getString(R.string.preference_smartwatch_file_id) + WearUtil.getClientID();
         this.adapterListSensor = Tools.populateSensorsList(getContext(), recyclerView, preferencesName, smartwatchSensors);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class WearRequestSensorInfoTask extends AsyncTask< Void, Void, Map<SensorType, SensorInfo>> {
 
         private MaterialDialog dialog;
         private final WeakReference<MainActivity> mainActivity;
 
-        public WearRequestSensorInfoTask(MainActivity mainActivity){
+        WearRequestSensorInfoTask(MainActivity mainActivity){
             this.mainActivity = new WeakReference<>(mainActivity);
         }
 
@@ -114,7 +116,7 @@ public class SmartwatchFragment extends AbstractMainFragment {
             this.dialog = new MaterialDialog.Builder(this.mainActivity.get())
                     .title(R.string.dialog_wear_sensorinfo_title)
                     .content(R.string.dialog_wear_sensorinfo_content)
-                    .icon(Tools.changeDrawableColor(this.mainActivity.get().getDrawable(R.drawable.ic_smartphone), ContextCompat.getColor(this.mainActivity.get(), R.color.colorPrimary)))
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(this.mainActivity.get().getDrawable(R.drawable.ic_smartphone)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorPrimary)))
                     .cancelable(false)
                     .progress(true, 0)
                     .show();
@@ -122,17 +124,21 @@ public class SmartwatchFragment extends AbstractMainFragment {
 
         @Override
         protected Map<SensorType, SensorInfo> doInBackground(Void... voids) {
-            return WearUtil.get().requestClientSensorInfo();
+            return WearUtil.requestClientSensorInfo(this.mainActivity.get());
         }
 
         @Override
         protected void onPostExecute(Map<SensorType, SensorInfo> sensorTypeSensorInfoMap) {
             super.onPostExecute(sensorTypeSensorInfoMap);
             configureSensorList(sensorTypeSensorInfoMap);
-            this.dialog.dismiss();
             Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_sensorinfo_success), Toast.LENGTH_LONG).show();
+            this.dialog.dismiss();
         }
 
+    }
+
+    public AdapterListSensor getAdapterListSensor() {
+        return adapterListSensor;
     }
 
 }

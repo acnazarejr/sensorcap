@@ -3,8 +3,10 @@
     <string name="capability_smartcap_wear">capability_smartcap_wear</string>
 
     <string name="message_path_service_prefix">/client-service</string>
-    <string name="message_path_open_watch_activity">/client-service/open-activity</string>
+    <string name="message_path_connection_done">/client-service/connection-done</string>
+    <string name="message_path_sync_ntp">/client-service/sync-ntp</string>
     <string name="message_path_request_watch_sensorinfo">/client-service/request-sensorinfo</string>
+    <string name="message_path_disconnect">/client-service/disconnect</string>
 
     <string name="message_path_wearutil_prefix">/wearutil</string>
     <string name="message_path_response_watch_sensorinfo">/wearutil/response-sensorinfo</string>

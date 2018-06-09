@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ssig.smartcap.common" />
+    package="com.ssig.smartcap.common" >
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+</manifest>

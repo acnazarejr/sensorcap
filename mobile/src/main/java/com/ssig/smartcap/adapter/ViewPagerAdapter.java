@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import com.ssig.smartcap.fragment.AbstractMainFragment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 

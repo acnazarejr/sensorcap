@@ -22,6 +22,8 @@
     <color name="colorBackgroundViewDark">@color/md_grey_200</color>
     <color name="colorDisabled">@color/colorGreyMediumLight</color>
 
+    <color name="colorAlert">@color/md_red_300</color>
+
 
 
     <!-- google's material design colours from
