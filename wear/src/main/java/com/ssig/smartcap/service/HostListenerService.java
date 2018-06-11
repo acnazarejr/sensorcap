@@ -18,7 +18,6 @@ package com.ssig.smartcap.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -34,15 +33,18 @@ import com.ssig.smartcap.common.Serialization;
 import java.io.IOException;
 
 
-public class SmartcapListenerService extends WearableListenerService {
+public class HostListenerService extends WearableListenerService {
 
     public static boolean connectedOnHost = false;
+    public static String hostNodeId = null;
+    public static Context context = null;
     private Intent mainActivityIntent;
 
     @Override
     public void onCreate() {
         this.mainActivityIntent = new Intent(this, MainActivity.class);
         this.mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP );
+        HostListenerService.context = this;
         super.onCreate();
     }
 
@@ -67,24 +69,64 @@ public class SmartcapListenerService extends WearableListenerService {
 //        }
 //    }
 
+    public static void disconnect(){
+        sendMessageToHost(HostListenerService.context.getString(R.string.message_path_host_activity_disconnect));
+        HostListenerService.connectedOnHost = false;
+        HostListenerService.hostNodeId = null;
+    }
 
+    public static void startHostCapture(){
+        sendMessageToHost(HostListenerService.context.getString(R.string.message_path_host_capture_fragment_start_capture));
+    }
 
+    public static void stopHostCapture(){
+        sendMessageToHost(HostListenerService.context.getString(R.string.message_path_host_capture_fragment_stop_capture));
+    }
+
+    public static void sendMessageToHost(String path){
+        if (HostListenerService.connectedOnHost){
+            Task<Integer> sendMessageTask = Wearable.getMessageClient(HostListenerService.context).sendMessage(HostListenerService.hostNodeId, path, new byte[0]);
+            sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
+                @Override
+                public void onSuccess(Integer integer) {}
+            });
+        }
+    }
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         String path = messageEvent.getPath();
-        if (path.equals(getString(R.string.message_path_connection_done))) {
-            SmartcapListenerService.connectedOnHost = true;
+
+        if (path.equals(getString(R.string.message_path_client_service_connection_done))) {
+            HostListenerService.hostNodeId = messageEvent.getSourceNodeId();
+            HostListenerService.connectedOnHost = true;
             startActivity(mainActivityIntent);
-        }else if (path.equals(getString(R.string.message_path_request_watch_sensorinfo))) {
+        }
+
+        if (path.equals(getString(R.string.message_path_client_service_request_watch_sensorinfo))) {
             byte[] data = Serialization.serializeObject(SensorInfo.getAll(this));
-            this.sendMessageData(messageEvent.getSourceNodeId(), this.getString(R.string.message_path_response_watch_sensorinfo), data);
-        }else if (path.equals(getString(R.string.message_path_sync_ntp))){
+            this.sendMessageData(messageEvent.getSourceNodeId(), this.getString(R.string.message_path_host_service_response_watch_sensorinfo), data);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_service_sync_ntp))){
             byte[] data = messageEvent.getData();
             String ntpPool = Serialization.deserializeObject(data);
-            new NTPSynchronizationTask(this).execute(ntpPool);
-        }else if (path.equals(getString(R.string.message_path_disconnect))) {
-            SmartcapListenerService.connectedOnHost = false;
+            try {
+                NTPTime.initialize(this, ntpPool);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            startActivity(mainActivityIntent);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_service_close_ntp))){
+            NTPTime.close(this);
+            startActivity(mainActivityIntent);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_service_disconnect))) {
+            HostListenerService.connectedOnHost = false;
+            NTPTime.close(this);
             startActivity(mainActivityIntent);
         }
     }
@@ -99,45 +141,6 @@ public class SmartcapListenerService extends WearableListenerService {
     }
 
 
-    private class NTPSynchronizationTask extends AsyncTask<String, Void, String> {
-
-        private final Context context;
-
-        public NTPSynchronizationTask(Context context){
-            this.context = context;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... ntpPool) {
-            boolean response = false;
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            try {
-                response = NTPTime.initialize(context, ntpPool[0]);
-            } catch (IOException e) {
-                return e.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String message) {
-            super.onPostExecute(message);
-            startActivity(mainActivityIntent);
-//            this.dialog.dismiss();
-//            boolean refresh = (message == null);
-//            message = message == null ? "funcionou" : message;
-//            Toast.makeText(this.mainActivity.get(), message, Toast.LENGTH_LONG).show();
-        }
-    }
 
 
 }

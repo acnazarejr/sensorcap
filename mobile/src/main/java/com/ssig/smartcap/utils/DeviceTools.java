@@ -6,32 +6,29 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.util.Objects;
+
 public class DeviceTools {
 
     public static boolean isNetworkConnected(Context ctx) {
         ConnectivityManager cm = (ConnectivityManager) ctx.getSystemService (Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = cm.getActiveNetworkInfo();
-        return ni != null && ni.isConnectedOrConnecting();
+        NetworkInfo networkInfo = Objects.requireNonNull(cm).getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
-    public static boolean isBlueetothEnabled() {
+    public static boolean isBluetoothDisabled() {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            return false;
-        } else if (!mBluetoothAdapter.isEnabled()) {
-            return false;
-        }
-        return true;
+        return mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled();
     }
 
-    public static boolean hasApp(Context ctx, String uri) {
-        PackageManager pm = ctx.getPackageManager();
+    public static boolean isAppInstalled(Context ctx, String uri) {
+        PackageManager packageManager = ctx.getPackageManager();
         try {
-            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+            packageManager.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
             return true;
         } catch (PackageManager.NameNotFoundException e) {
+            return false;
         }
-        return false;
     }
 
 }

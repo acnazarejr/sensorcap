@@ -49,6 +49,7 @@ dependencies {
     implementation 'com.shawnlin:number-picker:2.4.6'
     implementation 'com.github.ceryle:RadioRealButton:v2.1.1'
     implementation 'com.ncorti:slidetoact:0.3.0'
+    implementation 'com.karumi:dexter:4.2.0'
 
     wearApp project(':wear')
     implementation project(path: ':sensorsmanager')

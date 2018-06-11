@@ -80,7 +80,7 @@
                             android:layout_width="70dp"
                             android:layout_height="70dp"
                             android:tint="@color/colorGreyMediumLight"
-                            app:srcCompat="@drawable/ic_earth_off"
+                            app:srcCompat="@drawable/ic_ntp_off"
                             android:contentDescription="@string/util_image_description"/>
 
                         <TextView
@@ -152,7 +152,7 @@
                         android:id="@+id/switch_timestamp_mode"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:isw_icon_left="@drawable/ic_earth"
+                        app:isw_icon_left="@drawable/ic_ntp_on"
                         app:isw_icon_right="@drawable/ic_smartphone"
                         app:isw_inactive_tint_icon_left="@color/colorGreyMediumDark"
                         app:isw_active_tint_icon_left="@color/colorGreyLight"
@@ -224,7 +224,7 @@
                             android:layout_height="35dp"
                             android:layout_centerInParent="true"
                             android:tint="@color/colorPrimary"
-                            app:srcCompat="@drawable/ic_earth"
+                            app:srcCompat="@drawable/ic_ntp_on"
                             android:contentDescription="@string/util_image_description"/>
 
                     </RelativeLayout>

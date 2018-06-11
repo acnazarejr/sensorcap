@@ -8,41 +8,38 @@ import android.view.ViewGroup;
 import com.ssig.smartcap.fragment.AbstractMainFragment;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 
-    private ArrayList<AbstractMainFragment> fragments = new ArrayList<>();
-    private AbstractMainFragment currentFragment;
+    private ArrayList<AbstractMainFragment> abstractMainFragments = new ArrayList<>();
+    private AbstractMainFragment mCurrentFragment;
 
     public ViewPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
 
     public void add(AbstractMainFragment fragment) {
-        this.fragments.add(fragment);
+        this.abstractMainFragments.add(fragment);
     }
 
     @Override
     public Fragment getItem(int position) {
-        return fragments.get(position);
+        return abstractMainFragments.get(position);
     }
 
     @Override
     public int getCount() {
-        return fragments.size();
+        return abstractMainFragments.size();
     }
 
     @Override
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
-        if (getCurrentFragment() != object) {
-            currentFragment = ((AbstractMainFragment) object);
-        }
+        if (getCurrentFragment() != object)
+            mCurrentFragment = ((AbstractMainFragment) object);
         super.setPrimaryItem(container, position, object);
     }
 
     public AbstractMainFragment getCurrentFragment() {
-        return currentFragment;
+        return mCurrentFragment;
     }
 }

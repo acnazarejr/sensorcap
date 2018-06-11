@@ -40,6 +40,7 @@ public class CaptureConfig implements Serializable {
     private Integer countdownStart;
     private Boolean hasSound;
     private Boolean hasVibration;
+    private String captureFolderName;
 
     public CaptureConfig(UUID uuid, String alias){
         this.uuid = (uuid == null) ? UUID.randomUUID() : uuid;
@@ -56,9 +57,10 @@ public class CaptureConfig implements Serializable {
         this.countdownStart = 3;
         this.hasSound = false;
         this.hasVibration = false;
+        this.captureFolderName = "smartcap";
     }
 
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 
@@ -175,6 +177,14 @@ public class CaptureConfig implements Serializable {
 
     public void setHasVibration(Boolean hasVibration) {
         this.hasVibration = hasVibration;
+    }
+
+    public String getCaptureFolderName() {
+        return captureFolderName;
+    }
+
+    public void setCaptureFolderName(String captureFolderName) {
+        this.captureFolderName = captureFolderName;
     }
 
 }

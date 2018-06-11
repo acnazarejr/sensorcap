@@ -34,7 +34,6 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 public class TimeToolFragment extends AbstractMainFragment {
 
     private enum ModeState{
@@ -45,39 +44,37 @@ public class TimeToolFragment extends AbstractMainFragment {
         PLAY, PLAY_DISABLED, STOP
     }
 
-    private ImageView imgQRCode;
-    private TextView textQRCodeNotAvailable;
-    private IconSwitch switchTimestampMode;
-    private TextView textTimestampMode;
-    private FloatingActionButton buttonPlay;
-    private TextView textDateNtp;
-    private TextView textTimestampNtp;
-    private TextView textDateDevice;
-    private TextView textTimestampDevice;
-    private View layoutNtpNotAvailable;
+    private ImageView mImageQRCode;
+    private TextView mTextQRCodeNotAvailable;
+    private IconSwitch mSwitchTimestampMode;
+    private TextView mTextTimestampMode;
+    private FloatingActionButton mButtonPlay;
+    private TextView mTextDateNtp;
+    private TextView mTextTimestampNtp;
+    private TextView mTextDateDevice;
+    private TextView mTextTimestampDevice;
+    private View mLayoutNtpNotAvailable;
 
-    private SystemTime systemTime;
-    private NTPTime ntpTime;
+    private SystemTime mSystemTime;
+    private NTPTime mNTPTime;
 
-    private ButtonState buttonState;
-    private ModeState modeState;
-    private Timer updateTimer;
-    private TimerTask updateTimerTask;
-    private SimpleDateFormat simpleDateFormat;
+    private ButtonState mButtonState;
+    private ModeState mModeState;
+    private Timer mUpdateTimer;
+    private TimerTask mUpdateTimerTask;
+    private SimpleDateFormat mSimpleDateFormat;
 
-    private Integer delayUpdateMillis;
+    private Integer mDelayUpdateMillis;
 
     public TimeToolFragment(){
         super(R.layout.fragment_time_tool);
-        this.buttonState = ButtonState.PLAY;
-        this.modeState = null;
-        this.simpleDateFormat = null;
-        this.updateTimer = null;
-        this.delayUpdateMillis = null;
-
-        this.systemTime = new SystemTime();
-        this.ntpTime = new NTPTime();
-
+        this.mButtonState = ButtonState.PLAY;
+        this.mModeState = null;
+        this.mSimpleDateFormat = null;
+        this.mUpdateTimer = null;
+        this.mDelayUpdateMillis = null;
+        this.mSystemTime = new SystemTime();
+        this.mNTPTime = new NTPTime();
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -85,96 +82,95 @@ public class TimeToolFragment extends AbstractMainFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        this.simpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format));
-        int fps = Objects.requireNonNull(this.getActivity()).getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps));
-        this.delayUpdateMillis = (1000/fps);
+        final int fps = Objects.requireNonNull(this.getActivity()).getPreferences(Context.MODE_PRIVATE).getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps));
+        this.mDelayUpdateMillis = (1000/fps);
+        this.mSimpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format));
 
         this.initUI();
         this.registerListeners();
-        this.setNTPMode();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onShow() {
+        this.setNTPMode();
+        super.onShow();
+    }
+
+    @Override
+    public void onHide() {
+        super.onHide();
         this.stopQRCodeGeneration();
         this.resetViews();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        this.stopQRCodeGeneration();
-    }
-
-    @Override
     public void refresh() {
-        if (this.modeState == ModeState.NTP) {
-            if (this.buttonState == ButtonState.STOP)
+        if (this.mModeState == ModeState.NTP) {
+            if (this.mButtonState == ButtonState.STOP)
                 this.stopQRCodeGeneration();
             this.setNTPMode();
         }
     }
 
     private void initUI(){
-        this.imgQRCode = Objects.requireNonNull(getActivity()).findViewById(R.id.img_qrcode);
-        this.textQRCodeNotAvailable = getActivity().findViewById(R.id.text_qrcode_not_available);
-        this.switchTimestampMode = getActivity().findViewById(R.id.switch_timestamp_mode);
-        this.textTimestampMode = getActivity().findViewById(R.id.text_timestamp_mode);
-        this.buttonPlay = getActivity().findViewById(R.id.button_play);
-        this.textDateNtp = getActivity().findViewById(R.id.text_date_ntp);
-        this.textTimestampNtp = getActivity().findViewById(R.id.text_timestamp_ntp);
-        this.textDateDevice = getActivity().findViewById(R.id.text_date_device);
-        this.textTimestampDevice = getActivity().findViewById(R.id.text_timestamp_device);
-        this.layoutNtpNotAvailable = getActivity().findViewById(R.id.layout_ntp_not_available);
+        this.mImageQRCode = Objects.requireNonNull(getActivity()).findViewById(R.id.img_qrcode);
+        this.mTextQRCodeNotAvailable = getActivity().findViewById(R.id.text_qrcode_not_available);
+        this.mSwitchTimestampMode = getActivity().findViewById(R.id.switch_timestamp_mode);
+        this.mTextTimestampMode = getActivity().findViewById(R.id.text_timestamp_mode);
+        this.mButtonPlay = getActivity().findViewById(R.id.button_play);
+        this.mTextDateNtp = getActivity().findViewById(R.id.text_date_ntp);
+        this.mTextTimestampNtp = getActivity().findViewById(R.id.text_timestamp_ntp);
+        this.mTextDateDevice = getActivity().findViewById(R.id.text_date_device);
+        this.mTextTimestampDevice = getActivity().findViewById(R.id.text_timestamp_device);
+        this.mLayoutNtpNotAvailable = getActivity().findViewById(R.id.layout_ntp_not_available);
     }
 
     private void setNTPMode() {
         this.resetViews();
-        this.modeState = ModeState.NTP;
-        this.switchTimestampMode.setChecked(IconSwitch.Checked.LEFT);
+        this.mModeState = ModeState.NTP;
+        this.mSwitchTimestampMode.setChecked(IconSwitch.Checked.LEFT);
         boolean ntpIsInitialized = NTPTime.isInitialized();
         this.changeButtonState(ntpIsInitialized ? ButtonState.PLAY : ButtonState.PLAY_DISABLED);
-        this.layoutNtpNotAvailable.setVisibility(ntpIsInitialized ? View.GONE : View.VISIBLE);
-        this.textTimestampMode.setText(R.string.time_tool_timestamp_ntp_mode);
+        this.mLayoutNtpNotAvailable.setVisibility(ntpIsInitialized ? View.GONE : View.VISIBLE);
+        this.mTextTimestampMode.setText(R.string.time_tool_timestamp_ntp_mode);
     }
 
     private void setDeviceMode() {
         this.resetViews();
-        this.modeState = ModeState.DEVICE;
-        this.switchTimestampMode.setChecked(IconSwitch.Checked.RIGHT);
+        this.mModeState = ModeState.DEVICE;
+        this.mSwitchTimestampMode.setChecked(IconSwitch.Checked.RIGHT);
         this.changeButtonState(ButtonState.PLAY);
-        this.layoutNtpNotAvailable.setVisibility(View.GONE);
-        this.textTimestampMode.setText(R.string.time_tool_timestamp_device_mode);
+        this.mLayoutNtpNotAvailable.setVisibility(View.GONE);
+        this.mTextTimestampMode.setText(R.string.time_tool_timestamp_device_mode);
     }
 
     private void resetViews() {
-        this.textQRCodeNotAvailable.setVisibility(View.VISIBLE);
-        this.imgQRCode.setVisibility(View.GONE);
-        this.layoutNtpNotAvailable.setVisibility(View.GONE);
-        this.textDateNtp.setText(R.string.time_tool_dummy_hour);
-        this.textDateDevice.setText(R.string.time_tool_dummy_hour);
-        this.textTimestampNtp.setText(R.string.time_tool_dummy_value);
-        this.textTimestampDevice.setText(R.string.time_tool_dummy_value);
+        this.mTextQRCodeNotAvailable.setVisibility(View.VISIBLE);
+        this.mImageQRCode.setVisibility(View.GONE);
+        this.mLayoutNtpNotAvailable.setVisibility(View.GONE);
+        this.mTextDateNtp.setText(R.string.time_tool_dummy_hour);
+        this.mTextDateDevice.setText(R.string.time_tool_dummy_hour);
+        this.mTextTimestampNtp.setText(R.string.time_tool_dummy_value);
+        this.mTextTimestampDevice.setText(R.string.time_tool_dummy_value);
     }
 
     private void changeButtonState(ButtonState state) {
-        this.buttonState = state;
-        switch (this.buttonState){
+        this.mButtonState = state;
+        switch (this.mButtonState){
             case PLAY:
-                this.buttonPlay.setEnabled(true);
-                this.buttonPlay.setImageResource(R.drawable.ic_play);
-                this.buttonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorAccent)));
+                this.mButtonPlay.setEnabled(true);
+                this.mButtonPlay.setImageResource(R.drawable.ic_play);
+                this.mButtonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorAccent)));
                 break;
             case PLAY_DISABLED:
-                this.buttonPlay.setEnabled(false);
-                this.buttonPlay.setImageResource(R.drawable.ic_play);
-                this.buttonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorDisabled)));
+                this.mButtonPlay.setEnabled(false);
+                this.mButtonPlay.setImageResource(R.drawable.ic_play);
+                this.mButtonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorDisabled)));
                 break;
             case STOP:
-                this.buttonPlay.setEnabled(true);
-                this.buttonPlay.setImageResource(R.drawable.ic_stop);
-                this.buttonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorAccent)));
+                this.mButtonPlay.setEnabled(true);
+                this.mButtonPlay.setImageResource(R.drawable.ic_stop);
+                this.mButtonPlay.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(Objects.requireNonNull(this.getContext()), R.color.colorAccent)));
                 break;
         }
 
@@ -190,8 +186,8 @@ public class TimeToolFragment extends AbstractMainFragment {
                     @Override
                     public void run() {
 
-                        Long unixTimestampDevice = systemTime.now();
-                        Long unixTimestampNTP = ntpTime.now();
+                        Long unixTimestampDevice = mSystemTime.now();
+                        Long unixTimestampNTP = mNTPTime.now();
 
                         String stringUnixTimestampDevice = String.valueOf(unixTimestampDevice);
                         Date dateTimestampDevice = new Date(unixTimestampDevice);
@@ -203,14 +199,14 @@ public class TimeToolFragment extends AbstractMainFragment {
                             stringUnixTimestampNTP = String.valueOf(unixTimestampNTP);
                         }
 
-                        textDateDevice.setText(simpleDateFormat.format(dateTimestampDevice));
-                        textTimestampDevice.setText(stringUnixTimestampDevice);
+                        mTextDateDevice.setText(mSimpleDateFormat.format(dateTimestampDevice));
+                        mTextTimestampDevice.setText(stringUnixTimestampDevice);
                         if (unixTimestampNTP != null){
-                            textDateNtp.setText(simpleDateFormat.format(dateTimestampNTP));
-                            textTimestampNtp.setText(stringUnixTimestampNTP);
+                            mTextDateNtp.setText(mSimpleDateFormat.format(dateTimestampNTP));
+                            mTextTimestampNtp.setText(stringUnixTimestampNTP);
                         }
 
-                        String stringToEncode = modeState == ModeState.NTP ? "ntp:" + stringUnixTimestampNTP : "device:" + stringUnixTimestampDevice;
+                        String stringToEncode = mModeState == ModeState.NTP ? "ntp:" + stringUnixTimestampNTP : "device:" + stringUnixTimestampDevice;
 
                         MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
                         Map<EncodeHintType, Object> hints = new EnumMap<>(EncodeHintType.class);
@@ -220,7 +216,7 @@ public class TimeToolFragment extends AbstractMainFragment {
 
                             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                             Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-                            imgQRCode.setImageBitmap(bitmap);
+                            mImageQRCode.setImageBitmap(bitmap);
                         } catch (WriterException e) {
                             e.printStackTrace();
                         }
@@ -234,28 +230,28 @@ public class TimeToolFragment extends AbstractMainFragment {
 
     private void stopQRCodeGeneration(){
         changeButtonState(ButtonState.PLAY);
-        switchTimestampMode.setVisibility(View.VISIBLE);
-        if (this.updateTimer != null){
-            this.updateTimer.cancel();
-            this.updateTimer.purge();
-            this.updateTimerTask = null;
-            this.updateTimer = null;
+        mSwitchTimestampMode.setVisibility(View.VISIBLE);
+        if (this.mUpdateTimer != null){
+            this.mUpdateTimer.cancel();
+            this.mUpdateTimer.purge();
+            this.mUpdateTimerTask = null;
+            this.mUpdateTimer = null;
         }
     }
 
     private void startQRCodeGeneration() {
         changeButtonState(ButtonState.STOP);
-        switchTimestampMode.setVisibility(View.GONE);
-        textQRCodeNotAvailable.setVisibility(View.GONE);
-        imgQRCode.setVisibility(View.VISIBLE);
-        updateTimer = new Timer();
-        updateTimerTask = createUpdateTimerTask();
-        updateTimer.scheduleAtFixedRate(updateTimerTask, 0, delayUpdateMillis);
+        mSwitchTimestampMode.setVisibility(View.GONE);
+        mTextQRCodeNotAvailable.setVisibility(View.GONE);
+        mImageQRCode.setVisibility(View.VISIBLE);
+        mUpdateTimer = new Timer();
+        mUpdateTimerTask = createUpdateTimerTask();
+        mUpdateTimer.scheduleAtFixedRate(mUpdateTimerTask, 0, mDelayUpdateMillis);
     }
 
     private void registerListeners(){
 
-        this.switchTimestampMode.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
+        this.mSwitchTimestampMode.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
             @Override
             public void onCheckChanged(IconSwitch.Checked current) {
                 if(current == IconSwitch.Checked.LEFT)
@@ -265,11 +261,11 @@ public class TimeToolFragment extends AbstractMainFragment {
             }
         });
 
-        buttonPlay.setOnClickListener(new View.OnClickListener() {
+        mButtonPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(buttonState == ButtonState.PLAY) {
+                if(mButtonState == ButtonState.PLAY) {
                     startQRCodeGeneration();
                 }else{
                     stopQRCodeGeneration();
@@ -277,10 +273,10 @@ public class TimeToolFragment extends AbstractMainFragment {
             }
         });
 
-        layoutNtpNotAvailable.setOnClickListener(new View.OnClickListener() {
+        mLayoutNtpNotAvailable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) Objects.requireNonNull(getActivity())).startNTPSynchronization();
+                ((MainActivity) Objects.requireNonNull(getActivity())).doNTPSynchronization();
                 setNTPMode();
             }
         });

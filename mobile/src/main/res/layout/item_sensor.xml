@@ -39,7 +39,7 @@
             android:checked="true"/>
 
         <ImageButton
-            android:id="@+id/bt_expand"
+            android:id="@+id/buttom_expand"
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/selectableItemBackgroundBorderless"

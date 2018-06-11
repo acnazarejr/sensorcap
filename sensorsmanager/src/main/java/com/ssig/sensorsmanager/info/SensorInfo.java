@@ -108,19 +108,19 @@ public class SensorInfo implements Serializable{
 
     public int getMinFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return maxDelay>0?1_000_000/maxDelay:1;
+            return Math.max(maxDelay>0?1_000_000/maxDelay:1, 1);
         return -1;
     }
 
     public int getMaxFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return minDelay>0?1_000_000/minDelay:1;
+            return Math.max(minDelay>0?1_000_000/minDelay:1, 1);
         return -1;
     }
 
     public int getDefaultFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return (int)(0.9*getMaxFrequency());
+            return  Math.max((int)(0.9*getMaxFrequency()), 1);
         return -1;
     }
 

@@ -1,14 +1,27 @@
 <resources>
     <string name="capability_smartcap_phone">capability_smartcap_phone</string>
     <string name="capability_smartcap_wear">capability_smartcap_wear</string>
+    <string name="capability_smartcap_capture">capability_smartcap_capture</string>
 
-    <string name="message_path_service_prefix">/client-service</string>
-    <string name="message_path_connection_done">/client-service/connection-done</string>
-    <string name="message_path_sync_ntp">/client-service/sync-ntp</string>
-    <string name="message_path_request_watch_sensorinfo">/client-service/request-sensorinfo</string>
-    <string name="message_path_disconnect">/client-service/disconnect</string>
+    <string name="message_path_client_service_prefix">/client-service</string>
+    <string name="message_path_client_service_connection_done">/client-service/connection-done</string>
+    <string name="message_path_client_service_sync_ntp">/client-service/sync-ntp</string>
+    <string name="message_path_client_service_close_ntp">/client-service/close-ntp</string>
+    <string name="message_path_client_service_request_watch_sensorinfo">/client-service/request-sensorinfo</string>
+    <string name="message_path_client_service_disconnect">/client-service/disconnect</string>
 
-    <string name="message_path_wearutil_prefix">/wearutil</string>
-    <string name="message_path_response_watch_sensorinfo">/wearutil/response-sensorinfo</string>
+    <string name="message_path_client_activity_prefix">/client-activity</string>
+    <string name="message_path_client_activity_start_capture">/client-activity/start-capture</string>
+    <string name="message_path_client_activity_stop_capture">/client-activity/stop-capture</string>
+
+    <string name="message_path_host_service_prefix">/host-service</string>
+    <string name="message_path_host_service_response_watch_sensorinfo">/host-service/response-sensorinfo</string>
+
+    <string name="message_path_host_activity_prefix">/host-activity</string>
+    <string name="message_path_host_activity_disconnect">/host-activity/disconnect</string>
+
+    <string name="message_path_host_capture_fragment_prefix">/host-capture</string>
+    <string name="message_path_host_capture_fragment_start_capture">/host-capture/start-capture</string>
+    <string name="message_path_host_capture_fragment_stop_capture">/host-capture/stop-capture</string>
 
 </resources>

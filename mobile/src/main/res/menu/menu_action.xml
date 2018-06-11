@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_ntp"
-        android:icon="@drawable/ic_earth_off"
+        android:icon="@drawable/ic_ntp_off"
         android:orderInCategory="100"
         android:title="@string/action_ntp"
         android:iconTint="@color/colorGreyDark"

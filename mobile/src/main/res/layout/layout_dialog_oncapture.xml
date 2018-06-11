@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorBackgroundView"
     android:orientation="vertical">
 
     <TextView
@@ -17,7 +18,7 @@
         android:text="10"/>
 
     <LinearLayout
-        android:id="@+id/layout_chronometer"
+        android:id="@+id/layout_during_capture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/spacing_xxlarge"
@@ -31,6 +32,7 @@
             android:textAlignment="center"
             android:textColor="@color/colorPrimary"
             android:textSize="@dimen/chronometer_text"
+            android:textStyle="bold"
             android:layout_marginBottom="@dimen/spacing_large"
             android:layout_height="wrap_content" />
 

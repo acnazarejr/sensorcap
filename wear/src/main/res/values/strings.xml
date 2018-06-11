@@ -5,4 +5,5 @@
     <string name="time_tool_dummy_value">----------</string>
     <string name="image_description">image_description</string>
     <string name="util_time_format">HH:mm:ss.SSS</string>
+    <string name="toast_press_hold">Press and hold the button</string>
 </resources>

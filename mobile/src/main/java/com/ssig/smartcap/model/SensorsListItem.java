@@ -4,7 +4,7 @@ import com.ssig.sensorsmanager.info.SensorInfo;
 
 import java.io.Serializable;
 
-public class SensorListItem extends SensorInfo implements Serializable {
+public class SensorsListItem extends SensorInfo implements Serializable {
 
     static final long serialVersionUID = 123456789123456789L;
 
@@ -13,10 +13,7 @@ public class SensorListItem extends SensorInfo implements Serializable {
     public boolean enabled = true;
     public int frequency;
 
-    // flag when item swiped
-    public boolean swiped = false;
-
-    public SensorListItem(SensorInfo sensorInfo) {
+    public SensorsListItem(SensorInfo sensorInfo) {
         super(sensorInfo.getSensorType());
         this.sensorType = sensorInfo.getSensorType();
         this.model = sensorInfo.getModel();

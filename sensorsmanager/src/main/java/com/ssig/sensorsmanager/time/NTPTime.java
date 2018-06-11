@@ -39,7 +39,7 @@ public class NTPTime implements Time {
         return NTPTime.isInitialized();
     }
 
-    public static void clear(Context context){
+    public static void close(Context context){
         TrueTime.clearCachedInfo(context);
         NTPTime.initialized = false;
     }

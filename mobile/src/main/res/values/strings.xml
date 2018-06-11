@@ -40,6 +40,7 @@
     <string name="button_start">Start</string>
     <string name="button_yes">Yes</string>
     <string name="button_no">No</string>
+    <string name="button_exit">Exit App</string>
 
     <string name="util_time_format">HH:mm:ss.SSS</string>
     <string name="util_image_description">image</string>
@@ -60,6 +61,9 @@
     <string name="capture_dialog_ntp_alert_content">The NTP is not synchronized. Do you want to continue anyway?</string>
     <string name="capture_dialog_wear_alert_title">Smartwatch Connection</string>
     <string name="capture_dialog_wear_alert_content">No devices paired or connected. Do you want to continue anyway?</string>
+
+    <string name="dialog_permissions_failed_title">Permissions Denied</string>
+    <string name="dialog_permissions_failed_content">You must provide all permissions for this application to work properly.</string>
 
     <string name="smartphone_available_sensors_tile">Available Sensors</string>
 

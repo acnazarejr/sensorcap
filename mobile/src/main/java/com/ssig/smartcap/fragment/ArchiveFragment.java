@@ -9,7 +9,6 @@ public class ArchiveFragment extends AbstractMainFragment {
         super(R.layout.fragment_archive);
     }
 
-
     @Override
     public void refresh() { }
 }

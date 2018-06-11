@@ -3,6 +3,7 @@ package com.ssig.smartcap.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -17,9 +18,13 @@ import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.wearable.MessageClient;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
 import com.ncorti.slidetoact.SlideToActView;
 import com.polyak.iconswitch.IconSwitch;
 import com.shawnlin.numberpicker.NumberPicker;
@@ -29,33 +34,47 @@ import com.ssig.sensorsmanager.config.SensorConfig;
 import com.ssig.sensorsmanager.info.PersonInfo;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
-import com.ssig.smartcap.adapter.AdapterListSensor;
+import com.ssig.smartcap.adapter.AdapterSensorsList;
 import com.ssig.smartcap.common.CountDownAnimation;
-import com.ssig.smartcap.model.SensorListItem;
+import com.ssig.smartcap.model.SensorsListItem;
 import com.ssig.sensorsmanager.time.NTPTime;
+import com.ssig.smartcap.service.WearService;
 import com.ssig.smartcap.utils.Tools;
-import com.ssig.smartcap.utils.WearUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 import co.ceryle.radiorealbutton.RadioRealButtonGroup;
 
-public class CaptureFragment extends AbstractMainFragment {
+public class CaptureFragment extends AbstractMainFragment implements MessageClient.OnMessageReceivedListener{
 
-    private RadioRealButtonGroup switchSmartphoneLocation;
-    private RadioRealButtonGroup switchSmartphoneSide;
-    private RadioRealButtonGroup switchSmartwatchSide;
+    private enum CaptureState{
+        IDLE, CAPTURING
+    }
 
-    private AppCompatEditText inputSubjectName;
-    private IconSwitch switchSubjectGender;
-    private TextView textGender;
-    private NumberPicker numberPickerAge;
-    private NumberPicker numberPickerHeight;
-    private NumberPicker numberPickerWeight;
-    private AppCompatButton buttonCaptureStart;
-    private RadioGroup radioGroupDevices;
+    private RadioRealButtonGroup mSwitchSmartphoneLocation;
+    private RadioRealButtonGroup mSwitchSmartphoneSide;
+    private RadioRealButtonGroup mSwitchSmartwatchSide;
+
+    private AppCompatEditText mInputSubjectName;
+    private IconSwitch mSwitchSubjectGender;
+    private TextView mTextGender;
+    private NumberPicker mNumberPickerAge;
+    private NumberPicker mNumberPickerHeight;
+    private NumberPicker mNumberPickerWeight;
+    private AppCompatButton mButtonCaptureStart;
+    private RadioGroup mRadioGroupDevices;
+
+    private MaterialDialog mDialogOnCapture;
+    private TextView mTextCountdown;
+    private View mLayoutDuringCapture;
+    private Chronometer mChronometerCapture;
+    private SlideToActView mButtonCaptureStop;
+
+    private CaptureRunner captureRunner;
+    private CaptureState captureState;
 
     public CaptureFragment(){
         super(R.layout.fragment_capture);
@@ -64,9 +83,50 @@ public class CaptureFragment extends AbstractMainFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        this.captureRunner = null;
+        this.captureState = CaptureState.IDLE;
         this.initUi();
         this.registerListeners();
         this.checkRadioGroupLogic();
+        final String uri = String.format("wear://*%s", getString(R.string.message_path_host_capture_fragment_prefix));
+        Wearable.getMessageClient(this.getContext()).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
+    }
+
+    @Override
+    public void onDestroy() {
+        Wearable.getMessageClient(this.getContext()).removeListener(this);
+        super.onDestroy();
+    }
+
+
+    @Override
+    public void onShow() {
+        super.onShow();
+        WearService wearService = ((MainActivity) Objects.requireNonNull(getActivity())).getWearService();
+        if (wearService != null)
+            wearService.setCaptureCapability(true);
+    }
+
+    @Override
+    public void onHide() {
+        super.onHide();
+        WearService wearService = ((MainActivity) Objects.requireNonNull(getActivity())).getWearService();
+        if (wearService != null && this.captureState == CaptureState.IDLE)
+            wearService.setCaptureCapability(false);
+    }
+
+    @Override
+    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
+        WearService wearService = ((MainActivity) Objects.requireNonNull(getActivity())).getWearService();
+        if (!(wearService != null && wearService.isConnected()))
+            return;
+        String path = messageEvent.getPath();
+        if (path.equals(getString(R.string.message_path_host_capture_fragment_start_capture))){
+            this.startCapture();
+        }
+        if (path.equals(getString(R.string.message_path_host_capture_fragment_stop_capture))){
+            this.stopCapture();
+        }
     }
 
     @Override
@@ -75,84 +135,73 @@ public class CaptureFragment extends AbstractMainFragment {
     }
 
     private void initUi(){
-        if (this.getView()==null)
-            return;
-        this.switchSmartphoneLocation = this.getView().findViewById(R.id.switch_smartphone_location);
-        this.switchSmartphoneSide = this.getView().findViewById(R.id.switch_smartphone_side);
-        this.switchSmartwatchSide = this.getView().findViewById(R.id.switch_smartwatch_side);
-        this.inputSubjectName = this.getView().findViewById(R.id.subject_name_input_text);
-        this.switchSubjectGender = this.getView().findViewById(R.id.switch_gender);
-        this.numberPickerAge = this.getView().findViewById(R.id.number_picker_age);
-        this.numberPickerHeight = this.getView().findViewById(R.id.number_picker_height);
-        this.numberPickerWeight = this.getView().findViewById(R.id.number_picker_weight);
-        this.buttonCaptureStart = this.getView().findViewById(R.id.button_capture_start);
-        this.textGender = this.getView().findViewById(R.id.gender_text);
-        this.radioGroupDevices = this.getView().findViewById(R.id.radio_group_devices);
+        this.mSwitchSmartphoneLocation = Objects.requireNonNull(this.getView()).findViewById(R.id.switch_smartphone_location);
+        this.mSwitchSmartphoneSide = this.getView().findViewById(R.id.switch_smartphone_side);
+        this.mSwitchSmartwatchSide = this.getView().findViewById(R.id.switch_smartwatch_side);
+        this.mInputSubjectName = this.getView().findViewById(R.id.subject_name_input_text);
+        this.mSwitchSubjectGender = this.getView().findViewById(R.id.switch_gender);
+        this.mNumberPickerAge = this.getView().findViewById(R.id.number_picker_age);
+        this.mNumberPickerHeight = this.getView().findViewById(R.id.number_picker_height);
+        this.mNumberPickerWeight = this.getView().findViewById(R.id.number_picker_weight);
+        this.mButtonCaptureStart = this.getView().findViewById(R.id.button_capture_start);
+        this.mTextGender = this.getView().findViewById(R.id.gender_text);
+        this.mRadioGroupDevices = this.getView().findViewById(R.id.radio_group_devices);
+
+        this.mDialogOnCapture =  new MaterialDialog.Builder(Objects.requireNonNull(this.getContext()))
+                .customView(R.layout.layout_dialog_oncapture, true)
+                .cancelable(false)
+                .canceledOnTouchOutside(false)
+                .build();
+        View mDialogOnCaptureView = this.mDialogOnCapture.getCustomView();
+        this.mTextCountdown = mDialogOnCaptureView.findViewById(R.id.text_countdown);
+        this.mLayoutDuringCapture = mDialogOnCaptureView.findViewById(R.id.layout_during_capture);
+        this.mChronometerCapture = mDialogOnCaptureView.findViewById(R.id.chronometer);
+        this.mButtonCaptureStop = mDialogOnCaptureView.findViewById(R.id.button_capture_stop);
+        this.mButtonCaptureStop.setOnSlideCompleteListener(new SlideToActView.OnSlideCompleteListener() {
+            @Override
+            public void onSlideComplete(SlideToActView slideToActView) {
+                stopCapture();
+            }
+        });
+        this.resetDialogOnCapture();
+    }
+
+    private void resetDialogOnCapture(){
+        this.mLayoutDuringCapture.setVisibility(View.GONE);
+        this.mTextCountdown.setVisibility(View.VISIBLE);
+        this.mButtonCaptureStop.resetSlider();
     }
 
     private void checkRadioGroupLogic(){
-        boolean wearConnected = WearUtil.isConnected();
-        this.radioGroupDevices.findViewById(R.id.radio_option_smartwatch).setEnabled(wearConnected);
-        this.radioGroupDevices.findViewById(R.id.radio_option_both).setEnabled(wearConnected);
-        ((RadioButton)this.radioGroupDevices.findViewById(wearConnected ? R.id.radio_option_both : R.id.radio_option_smartphone)).setChecked(true);
-    }
-
-    private void registerListeners(){
-        this.switchSubjectGender.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
-            @Override
-            public void onCheckChanged(IconSwitch.Checked current) {
-                if (current == IconSwitch.Checked.LEFT)
-                    textGender.setText(R.string.capture_gender_male);
-                else
-                    textGender.setText(R.string.capture_gender_female);
-            }
-        });
-
-        this.buttonCaptureStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new NTPCheckTask().execute();
-            }
-        });
-
-        for (int i=0; i<this.radioGroupDevices.getChildCount(); i++) {
-            View view = radioGroupDevices.getChildAt(i);
-            if (view instanceof RadioButton) {
-                ((RadioButton)view).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        int color = ContextCompat.getColor(getContext(), isChecked ? R.color.colorAccent : R.color.colorGreyMediumDark);
-                        for (Drawable drawable : buttonView.getCompoundDrawables()){
-                            if (drawable != null)
-                                Tools.changeDrawableColor(drawable, color);
-                        }
-                    }
-                });
-            }
-        }
+        WearService wearService = ((MainActivity) Objects.requireNonNull(getActivity())).getWearService();
+        boolean wearConnected = wearService != null && wearService.isConnected();
+        this.mRadioGroupDevices.findViewById(R.id.radio_option_smartwatch).setEnabled(wearConnected);
+        this.mRadioGroupDevices.findViewById(R.id.radio_option_both).setEnabled(wearConnected);
+        ((RadioButton)this.mRadioGroupDevices.findViewById(wearConnected ? R.id.radio_option_both : R.id.radio_option_smartphone)).setChecked(true);
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class NTPCheckTask extends AsyncTask<Void, Void, Boolean> {
+    private class NTPOffConfirmTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             if (NTPTime.isInitialized()) {
                 return true;
             }else{
-                getActivity().runOnUiThread(new Runnable() {
+                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         new MaterialDialog.Builder(getActivity())
                                 .title(R.string.capture_dialog_ntp_alert_title)
+                                .titleColorRes(R.color.colorAlert)
                                 .content(R.string.capture_dialog_ntp_alert_content)
-                                .icon(Tools.changeDrawableColor(getActivity().getDrawable(R.drawable.ic_earth_off), ContextCompat.getColor(getActivity(), R.color.colorPrimary)))
+                                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getActivity().getDrawable(R.drawable.ic_ntp_off)), ContextCompat.getColor(getActivity(), R.color.colorAlert)))
                                 .cancelable(true)
                                 .positiveText(R.string.button_yes)
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        new WearCheckTask().execute();
+                                        new WearOffConfirmTask().execute();
                                     }
                                 })
                                 .negativeText(R.string.button_no)
@@ -166,16 +215,16 @@ public class CaptureFragment extends AbstractMainFragment {
         @Override
         protected void onPostExecute(Boolean checked) {
             if (checked)
-                new WearCheckTask().execute();
+                new WearOffConfirmTask().execute();
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class WearCheckTask extends AsyncTask<Void, Void, Boolean> {
+    private class WearOffConfirmTask extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            if (WearUtil.isConnected()) {
+            if (((MainActivity) Objects.requireNonNull(getActivity())).getWearService().isConnected()) {
                 return true;
             }else{
                 getActivity().runOnUiThread(new Runnable() {
@@ -183,8 +232,9 @@ public class CaptureFragment extends AbstractMainFragment {
                     public void run() {
                         new MaterialDialog.Builder(getActivity())
                                 .title(R.string.capture_dialog_wear_alert_title)
+                                .titleColorRes(R.color.colorAlert)
                                 .content(R.string.capture_dialog_wear_alert_content)
-                                .icon(Tools.changeDrawableColor(getActivity().getDrawable(R.drawable.ic_smartwatch_off), ContextCompat.getColor(getActivity(), R.color.colorPrimary)))
+                                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getActivity().getDrawable(R.drawable.ic_smartwatch_off)), ContextCompat.getColor(getActivity(), R.color.colorAlert)))
                                 .cancelable(true)
                                 .positiveText(R.string.button_yes)
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -211,57 +261,51 @@ public class CaptureFragment extends AbstractMainFragment {
     public void startCapture(){
 
         CaptureConfig captureConfig = this.makeCaptureConfig();
-        final CaptureRunner captureRunner;
-        try {
-            captureRunner = new CaptureRunner(this.getContext(), captureConfig.getSmartphoneSensors(), new NTPTime(), "capturetemp");
+        if (captureConfig.isSmartphoneEnabled()) {
+            try {
+                this.captureRunner = new CaptureRunner(Objects.requireNonNull(this.getContext()), captureConfig.getSmartphoneSensors(), new NTPTime(), captureConfig.getCaptureFolderName());
+            } catch (FileNotFoundException e) {
+                Toast.makeText(this.getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
 
-
-        final MaterialDialog dialog =  new MaterialDialog.Builder(this.getContext())
-                .customView(R.layout.layout_dialog_oncapture, true)
-                .cancelable(false)
-                .canceledOnTouchOutside(false)
-                .build();
-
-        View view = dialog.getCustomView();
-
-        final View layoutChronometer = view.findViewById(R.id.layout_chronometer);
-        layoutChronometer.setVisibility(View.GONE);
-
-        final Chronometer chronometer = view.findViewById(R.id.chronometer);
-        chronometer.setBase(SystemClock.elapsedRealtime());
-
-        final TextView textCountdown =  view.findViewById(R.id.text_countdown);
-        CountDownAnimation countDownAnimation = new CountDownAnimation(getContext(), textCountdown, captureConfig.getCountdownStart(), captureConfig.hasSound(), captureConfig.hasVibration());
+        this.resetDialogOnCapture();
+        CountDownAnimation countDownAnimation = new CountDownAnimation(getContext(), this.mTextCountdown, captureConfig.getCountdownStart(), captureConfig.hasSound(), captureConfig.hasVibration());
         countDownAnimation.setCountDownListener(new CountDownAnimation.CountDownListener() {
             @Override
             public void onCountDownEnd(CountDownAnimation animation) {
-                chronometer.start();
-                layoutChronometer.setVisibility(View.VISIBLE);
-                captureRunner.start();
+                mChronometerCapture.setBase(SystemClock.elapsedRealtime());
+                mChronometerCapture.start();
+                mLayoutDuringCapture.setVisibility(View.VISIBLE);
+                if (captureRunner != null)
+                    captureRunner.start();
             }
         });
 
-        final SlideToActView buttonCaptureStop = view.findViewById(R.id.button_capture_stop);
-        buttonCaptureStop.setOnSlideCompleteListener(new SlideToActView.OnSlideCompleteListener() {
-            @Override
-            public void onSlideComplete(SlideToActView slideToActView) {
-                chronometer.stop();
-                dialog.dismiss();
-                try {
-                    captureRunner.finish();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        dialog.show();
+        if (((MainActivity)getActivity()).getWearService().isConnected())
+            ((MainActivity)getActivity()).getWearService().startCapture(captureConfig);
+        this.mDialogOnCapture.show();
         countDownAnimation.start();
+        this.captureState = CaptureState.CAPTURING;
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    }
+
+    public void stopCapture(){
+        this.mChronometerCapture.stop();
+        this.mDialogOnCapture.dismiss();
+        if (this.captureRunner != null){
+            try {
+                captureRunner.finish();
+            } catch (IOException e) {
+                Toast.makeText(this.getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
         }
-
+        if (((MainActivity)getActivity()).getWearService().isConnected())
+            ((MainActivity)getActivity()).getWearService().stopCapture();
+        this.captureRunner = null;
+        this.captureState = CaptureState.IDLE;
     }
 
     private CaptureConfig makeCaptureConfig(){
@@ -274,35 +318,35 @@ public class CaptureFragment extends AbstractMainFragment {
                 CaptureConfig.SmartphoneLocation.OTHER
         };
 
-        PersonInfo personInfo = new PersonInfo(this.inputSubjectName.getText().toString());
-        personInfo.setGender(this.switchSubjectGender.getChecked() == IconSwitch.Checked.LEFT ? PersonInfo.Gender.MALE : PersonInfo.Gender.FEMALE);
-        personInfo.setAge(this.numberPickerAge.getValue());
-        personInfo.setHeight(this.numberPickerHeight.getValue());
-        personInfo.setWeight(this.numberPickerWeight.getValue());
+        PersonInfo personInfo = new PersonInfo(this.mInputSubjectName.getText().toString());
+        personInfo.setGender(this.mSwitchSubjectGender.getChecked() == IconSwitch.Checked.LEFT ? PersonInfo.Gender.MALE : PersonInfo.Gender.FEMALE);
+        personInfo.setAge(this.mNumberPickerAge.getValue());
+        personInfo.setHeight(this.mNumberPickerHeight.getValue());
+        personInfo.setWeight(this.mNumberPickerWeight.getValue());
 
         CaptureConfig captureConfig = new CaptureConfig(UUID.randomUUID(), null);
 
         captureConfig.setPersonInfo(personInfo);
         captureConfig.setActivityName(null);
 
-        int radioGroupDevicesCheckedId = this.radioGroupDevices.getCheckedRadioButtonId();
+        int radioGroupDevicesCheckedId = this.mRadioGroupDevices.getCheckedRadioButtonId();
         captureConfig.setSmartphoneEnabled(radioGroupDevicesCheckedId == R.id.radio_option_smartphone || radioGroupDevicesCheckedId == R.id.radio_option_both);
         captureConfig.setSmartwatchEnabled(radioGroupDevicesCheckedId == R.id.radio_option_smartwatch || radioGroupDevicesCheckedId == R.id.radio_option_both);
 
 
         if (captureConfig.isSmartphoneEnabled()) {
-            captureConfig.setSmartphoneLocation(smartphoneLocations[this.switchSmartphoneLocation.getPosition()]);
-            captureConfig.setSmartphoneSide(this.switchSmartphoneSide.getPosition() == 0 ? CaptureConfig.SmartphoneSide.LEFT : CaptureConfig.SmartphoneSide.RIGHT);
-            AdapterListSensor adapterListSensorSmartphone = ((SmartphoneFragment)((MainActivity)getActivity()).smartphoneFragment).getAdapterListSensor();
-            for (SensorListItem item : adapterListSensorSmartphone.getSensorListItems()){
+            captureConfig.setSmartphoneLocation(smartphoneLocations[this.mSwitchSmartphoneLocation.getPosition()]);
+            captureConfig.setSmartphoneSide(this.mSwitchSmartphoneSide.getPosition() == 0 ? CaptureConfig.SmartphoneSide.LEFT : CaptureConfig.SmartphoneSide.RIGHT);
+            AdapterSensorsList adapterSensorsListSmartphone = ((SmartphoneFragment)((MainActivity) Objects.requireNonNull(getActivity())).smartphoneFragment).getAdapterSensorsList();
+            for (SensorsListItem item : adapterSensorsListSmartphone.getSensorsListItems()){
                 captureConfig.addSmartphoneSensor(item.getSensorType(), new SensorConfig(item.getSensorType(), item.enabled, item.frequency));
             }
         }
 
         if (captureConfig.isSmartwatchEnabled()) {
-            captureConfig.setSmartwatchSide(this.switchSmartwatchSide.getPosition() == 0 ? CaptureConfig.SmartwatchSide.LEFT : CaptureConfig.SmartwatchSide.RIGHT);
-            AdapterListSensor adapterListSensorSmartwatch = ((SmartwatchFragment)((MainActivity)getActivity()).smartwatchFragment).getAdapterListSensor();
-            for (SensorListItem item : adapterListSensorSmartwatch.getSensorListItems()){
+            captureConfig.setSmartwatchSide(this.mSwitchSmartwatchSide.getPosition() == 0 ? CaptureConfig.SmartwatchSide.LEFT : CaptureConfig.SmartwatchSide.RIGHT);
+            AdapterSensorsList adapterSensorsListSmartwatch = ((SmartwatchFragment)((MainActivity)getActivity()).smartwatchFragment).getAdapterSensorsList();
+            for (SensorsListItem item : adapterSensorsListSmartwatch.getSensorsListItems()){
                 captureConfig.addSmartwatchSensor(item.getSensorType(), new SensorConfig(item.getSensorType(), item.enabled, item.frequency));
             }
         }
@@ -316,6 +360,42 @@ public class CaptureFragment extends AbstractMainFragment {
         captureConfig.setHasVibration(hasVibration);
 
         return captureConfig;
+    }
+
+    private void registerListeners(){
+
+        this.mSwitchSubjectGender.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
+            @Override
+            public void onCheckChanged(IconSwitch.Checked current) {
+                if (current == IconSwitch.Checked.LEFT)
+                    mTextGender.setText(R.string.capture_gender_male);
+                else
+                    mTextGender.setText(R.string.capture_gender_female);
+            }
+        });
+
+        this.mButtonCaptureStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new NTPOffConfirmTask().execute();
+            }
+        });
+
+        for (int i = 0; i<this.mRadioGroupDevices.getChildCount(); i++) {
+            View view = mRadioGroupDevices.getChildAt(i);
+            if (view instanceof RadioButton) {
+                ((RadioButton)view).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        int color = ContextCompat.getColor(Objects.requireNonNull(getContext()), isChecked ? R.color.colorAccent : R.color.colorGreyMediumDark);
+                        for (Drawable drawable : buttonView.getCompoundDrawables()){
+                            if (drawable != null)
+                                Tools.changeDrawableColor(drawable, color);
+                        }
+                    }
+                });
+            }
+        }
     }
 
 }
