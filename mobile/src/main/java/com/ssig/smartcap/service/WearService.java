@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class WearService extends Service implements MessageClient.OnMessageReceivedListener{
 
@@ -45,6 +46,7 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         BLUETOOTH_DISABLED,
         NO_PAIRED_DEVICES,
         NO_CAPABLE_DEVICES,
+        TIMEOUT,
         UNKNOWN_ERROR
     }
 
@@ -87,9 +89,11 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
         String path = messageEvent.getPath();
         if (path.equals(getString(R.string.message_path_host_service_response_watch_sensorinfo))) {
-            byte[] data = messageEvent.getData();
-            this.mClientSensorInfo = Serialization.deserializeObject(data);
-            this.mRequestSensorInfoLatch.countDown();
+            if (this.mRequestSensorInfoLatch != null) {
+                byte[] data = messageEvent.getData();
+                this.mClientSensorInfo = Serialization.deserializeObject(data);
+                this.mRequestSensorInfoLatch.countDown();
+            }
         }
     }
 
@@ -112,9 +116,12 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
             if (!capabilityInfo.getNodes().isEmpty()){
                 List<Node> foundedClientNodes = new ArrayList<>(capabilityInfo.getNodes());
                 this.mClientNode = foundedClientNodes.get(0);
-                this.requestClientSensorInfo();
-                this.sendMessage(getString(R.string.message_path_client_service_connection_done));
-                return ConnectionResponse.SUCCESS;
+                if (this.requestClientSensorInfo()) {
+                    this.sendMessage(getString(R.string.message_path_client_service_connection_done));
+                    return ConnectionResponse.SUCCESS;
+                }else{
+                    return ConnectionResponse.TIMEOUT;
+                }
             }
 
             Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(this).getConnectedNodes();
@@ -200,13 +207,19 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         return DeviceTools.isAppInstalled(this, getString(R.string.util_wear_package));
     }
 
-    private void requestClientSensorInfo() throws InterruptedException, ApiException {
+    private boolean requestClientSensorInfo() throws ApiException {
         if (this.mRequestSensorInfoLatch != null)
-            return;
+            return false;
         this.mRequestSensorInfoLatch = new CountDownLatch(1);
         this.sendMessage(getString(R.string.message_path_client_service_request_watch_sensorinfo));
-        this.mRequestSensorInfoLatch.await();
+        try {
+            this.mRequestSensorInfoLatch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
         this.mRequestSensorInfoLatch = null;
+        return true;
     }
 
     private void reset(){

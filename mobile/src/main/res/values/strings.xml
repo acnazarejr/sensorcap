@@ -29,6 +29,7 @@
     <string name="toast_wear_synchronization_wear_error">The Android Wear App is not installed.</string>
     <string name="toast_wear_synchronization_no_paired_error">No devices paired or connected with this device</string>
     <string name="toast_wear_synchronization_no_capable_error">No devices with Smartcap app installed</string>
+    <string name="toast_wear_synchronization_timeout">Connection timeout</string>
     <string name="toast_wear_synchronization_unknown_error">A unknown error has ocurred</string>
 
 
@@ -43,6 +44,7 @@
     <string name="button_exit">Exit App</string>
 
     <string name="util_time_format">HH:mm:ss.SSS</string>
+    <string name="util_time_format_file">yyyyMMdd_HHmmss</string>
     <string name="util_image_description">image</string>
     <string name="util_wear_package">com.google.android.wearable.app</string>
 
@@ -61,6 +63,11 @@
     <string name="capture_dialog_ntp_alert_content">The NTP is not synchronized. Do you want to continue anyway?</string>
     <string name="capture_dialog_wear_alert_title">Smartwatch Connection</string>
     <string name="capture_dialog_wear_alert_content">No devices paired or connected. Do you want to continue anyway?</string>
+    <string name="capture_dialog_wear_sensors_title">Smartwatch Data</string>
+    <string name="capture_dialog_wear_sensors_content">Receiving smartwatch sensor files.</string>
+    <string name="capture_dialog_make_capture_data_title">Capture Data</string>
+    <string name="capture_dialog_make_capture_data_content">Creating and compressing capture data.</string>
+
 
     <string name="dialog_permissions_failed_title">Permissions Denied</string>
     <string name="dialog_permissions_failed_content">You must provide all permissions for this application to work properly.</string>

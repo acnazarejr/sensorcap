@@ -7,7 +7,6 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
 public final class Serialization {
 
@@ -46,7 +45,5 @@ public final class Serialization {
         }
         return object;
     }
-
-
 
 }

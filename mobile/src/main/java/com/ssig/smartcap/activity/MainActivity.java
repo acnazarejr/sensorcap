@@ -520,6 +520,9 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
                 case UNKNOWN_ERROR:
                     Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
                     break;
+                case TIMEOUT:
+                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
+                    break;
                 case NO_WEAR_APP:
                     Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
                     break;

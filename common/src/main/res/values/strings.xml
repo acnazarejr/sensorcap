@@ -23,5 +23,8 @@
     <string name="message_path_host_capture_fragment_prefix">/host-capture</string>
     <string name="message_path_host_capture_fragment_start_capture">/host-capture/start-capture</string>
     <string name="message_path_host_capture_fragment_stop_capture">/host-capture/stop-capture</string>
+    <string name="message_path_host_capture_fragment_sensor_files">/host-capture/sensor-files</string>
+    <string name="asset_sensors_smartwatch">asset_sensors_smartwatch</string>
+
 
 </resources>

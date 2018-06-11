@@ -2,12 +2,13 @@ package com.ssig.smartcap.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,12 +21,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
+import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.capture.CaptureRunner;
 import com.ssig.sensorsmanager.config.CaptureConfig;
 import com.ssig.sensorsmanager.time.NTPTime;
@@ -35,10 +42,12 @@ import com.ssig.smartcap.common.CountDownAnimation;
 import com.ssig.smartcap.common.Serialization;
 import com.ssig.smartcap.service.HostListenerService;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -251,8 +260,9 @@ public class MainActivity extends WearableActivity  implements
 
         if (captureConfig.isSmartwatchEnabled()) {
             try {
-                this.captureRunner = new CaptureRunner(Objects.requireNonNull(this), captureConfig.getSmartwatchSensors(), new NTPTime(), captureConfig.getCaptureFolderName());
-            } catch (FileNotFoundException e) {
+                String captureAlias = String.format("smartwatch_%s", captureConfig.getAlias());
+                this.captureRunner = new CaptureRunner(Objects.requireNonNull(this), captureConfig.getSmartwatchSensors(), captureConfig.getAppFolderName(), captureAlias);
+            } catch (IOException e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 return;
             }
@@ -283,7 +293,22 @@ public class MainActivity extends WearableActivity  implements
     private void stopCapture(){
         if (this.captureRunner != null){
             try {
-                captureRunner.finish();
+                final File captureCompressedFile = captureRunner.finish();
+                Asset asset = Asset.createFromUri(Uri.fromFile(captureCompressedFile));
+
+                PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(getString(R.string.message_path_host_capture_fragment_sensor_files));
+                putDataMapRequest.getDataMap().putAsset(getString(R.string.asset_sensors_smartwatch), asset);
+                PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
+                putDataRequest.setUrgent();
+
+                Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
+                dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
+                    @Override
+                    public void onSuccess(DataItem dataItem) {
+                        Toast.makeText(MainActivity.this, "Sensor files sent", Toast.LENGTH_LONG).show();
+                        captureCompressedFile.delete();
+                    }
+                });
             } catch (IOException e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 return;
@@ -296,7 +321,6 @@ public class MainActivity extends WearableActivity  implements
         mLayoutLogo.setVisibility(View.VISIBLE);
         updateStateButtonControlCapture(true);
     }
-
 
     private void registerListeners(){
         this.mButtonControlCapture.setOnClickListener(new View.OnClickListener() {
