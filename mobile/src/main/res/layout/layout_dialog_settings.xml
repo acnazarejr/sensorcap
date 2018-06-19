@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/ntp_pool_server_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/ntp_pool_server_input_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="@color/colorGreyMediumDark"
+            android:hint="@string/settings_ntp_pool_server_hint" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_middle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/settings_enable_sound"/>
+
+        <Switch
+            android:id="@+id/enable_sound_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_middle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/settings_enable_vibration"/>
+
+        <Switch
+            android:id="@+id/enable_vibration_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_middle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/settings_countdown_start"/>
+
+        <RadioGroup
+            android:id="@+id/countdown_start_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/countdown_start_3s_radio_option"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_countdown_start_3s"/>
+
+            <RadioButton
+                android:id="@+id/countdown_start_10_radio_option"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_countdown_start_10s"/>
+
+        </RadioGroup>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_middle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/spacing_medium"
+            android:gravity="center_horizontal"
+            android:text="@string/settings_timetool_fps"/>
+
+        <com.warkiz.widget.IndicatorSeekBar
+            android:id="@+id/timetool_qrcode_fps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:isb_progress="30"
+            app:isb_min="5"
+            app:isb_max="30"
+            app:isb_show_indicator="false"
+            app:isb_indicator_stay="false"
+            app:isb_tick_type="oval"
+            app:isb_tick_size="6dp"
+            app:isb_tick_num="6"
+            app:isb_tick_color="@color/colorAccentLight"
+            app:isb_text_color="@color/colorGrey"
+
+
+            app:isb_indicator_color="@color/colorAccent"
+            app:isb_indicator_text_color="@color/colorGreyLight"
+            app:isb_seek_bar_type="discrete_ticks_texts"
+            app:isb_thumb_color="@color/colorAccent"
+            app:isb_thumb_progress_stay="true"
+            app:isb_thumb_width="20dp"
+            app:isb_track_background_bar_color="@color/colorGrey"
+            app:isb_track_progress_bar_color="@color/colorAccent"/>
+
+
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

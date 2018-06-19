@@ -34,7 +34,7 @@
 //
 //    private void saveSensors() {
 //        for (Map.Entry<SensorType, SensorConfig> sensor : captureConfig.getSensors().entrySet()) {
-//            String path = captureConfig.getPersonInfo().getName() + "_" + sensor.getValue().getSensorType().abbrev() + "_" + System.currentTimeMillis() + ".txt";
+//            String path = captureConfig.getPersonInfo().getDeviceName() + "_" + sensor.getValue().getSensorType().abbrev() + "_" + System.currentTimeMillis() + ".txt";
 //            filesPath.add(path);
 //        }
 //    }

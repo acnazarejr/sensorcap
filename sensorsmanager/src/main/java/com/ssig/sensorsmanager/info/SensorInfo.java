@@ -120,7 +120,7 @@ public class SensorInfo implements Serializable{
 
     public int getDefaultFrequency() {
         if (reportingMode == Sensor.REPORTING_MODE_CONTINUOUS || reportingMode == Sensor.REPORTING_MODE_ON_CHANGE)
-            return  Math.max((int)(0.9*getMaxFrequency()), 1);
+            return  Math.max(getMaxFrequency(), 1);
         return -1;
     }
 

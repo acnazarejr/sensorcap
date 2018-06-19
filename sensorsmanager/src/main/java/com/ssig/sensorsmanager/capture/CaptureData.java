@@ -1,9 +1,9 @@
 package com.ssig.sensorsmanager.capture;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.config.CaptureConfig;
+import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.sensorsmanager.info.SensorInfo;
 
 import java.io.FileWriter;
@@ -17,13 +17,13 @@ public class CaptureData implements Serializable {
     static final long serialVersionUID = 719145489623562378L;
 
     private CaptureConfig captureConfig;
-    private Map<SensorType, SensorInfo> smartphoneSensorsInfo;
-    private Map<SensorType, SensorInfo> smartwatchSensorsInfo;
+    private DeviceInfo smartphoneDeviceInfo;
+    private DeviceInfo smartwatchDeviceInfo;
 
     public CaptureData(){
         this.captureConfig = null;
-        this.smartphoneSensorsInfo = null;
-        this.smartwatchSensorsInfo = null;
+        this.smartphoneDeviceInfo = null;
+        this.smartwatchDeviceInfo = null;
     }
 
     public CaptureConfig getCaptureConfig() {
@@ -34,20 +34,20 @@ public class CaptureData implements Serializable {
         this.captureConfig = captureConfig;
     }
 
-    public Map<SensorType, SensorInfo> getSmartphoneSensorsInfo() {
-        return smartphoneSensorsInfo;
+    public DeviceInfo getSmartphoneDeviceInfo() {
+        return smartphoneDeviceInfo;
     }
 
-    public void setSmartphoneSensorsInfo(Map<SensorType, SensorInfo> smartphoneSensorsInfo) {
-        this.smartphoneSensorsInfo = smartphoneSensorsInfo;
+    public void setSmartphoneDeviceInfo(DeviceInfo smartphoneDeviceInfo) {
+        this.smartphoneDeviceInfo = smartphoneDeviceInfo;
     }
 
-    public Map<SensorType, SensorInfo> getSmartwatchSensorsInfo() {
-        return smartwatchSensorsInfo;
+    public DeviceInfo getSmartwatchDeviceInfo() {
+        return smartwatchDeviceInfo;
     }
 
-    public void setSmartwatchSensorsInfo(Map<SensorType, SensorInfo> smartwatchSensorsInfo) {
-        this.smartwatchSensorsInfo = smartwatchSensorsInfo;
+    public void setSmartwatchDeviceInfo(DeviceInfo smartwatchDeviceInfo) {
+        this.smartwatchDeviceInfo = smartwatchDeviceInfo;
     }
 
     public void toJson(String fileName){

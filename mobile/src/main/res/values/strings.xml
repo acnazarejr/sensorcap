@@ -1,52 +1,151 @@
 <resources>
+
+    <!-- ******************** APP *************************** -->
     <string name="app_name">SmartCap</string>
 
-    <string name="action_ntp">NTP Synchronization</string>
-    <string name="action_wear">Wear Synchronization</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_about">About</string>
-
-    <string name="dialog_network_error_title">Network Error</string>
-    <string name="dialog_network_error_content">No internet connections found.</string>
-    <string name="dialog_ntp_synchronization_title">NTP Synchronization</string>
-    <string name="dialog_ntp_synchronization_content">Synchronizing NTP Service with</string>
-    <string name="toast_ntp_synchronization_success">NTP successfully synchronized</string>
-
-    <string name="dialog_bluetooth_error_title">Bluetooth Error</string>
-    <string name="dialog_bluetooth_error_content">No bluetooth connections found.</string>
-    <string name="dialog_wear_os_error_title">Wear OS Error</string>
-    <string name="dialog_wear_os_error_content">The Android Wear App is not installed. Please, install it.</string>
-    <string name="dialog_wear_os_error_button">Install Wear OS</string>
-    <string name="dialog_wear_synchronization_title">Wear Synchronization</string>
-    <string name="dialog_wear_synchronization_content">Find paired and connected wear devices.</string>
-
-    <string name="dialog_wear_sensorinfo_title">Smartwatch Sensors</string>
-    <string name="dialog_wear_sensorinfo_content">Requesting smartwatch sensor details.</string>
-    <string name="toast_wear_sensorinfo_success">Sensor details successfully received</string>
-
-    <string name="toast_wear_synchronization_success">Wear successfully synchronized</string>
-    <string name="toast_wear_synchronization_bluetooth_error">No bluetooth connections found</string>
-    <string name="toast_wear_synchronization_wear_error">The Android Wear App is not installed.</string>
-    <string name="toast_wear_synchronization_no_paired_error">No devices paired or connected with this device</string>
-    <string name="toast_wear_synchronization_no_capable_error">No devices with Smartcap app installed</string>
-    <string name="toast_wear_synchronization_timeout">Connection timeout</string>
-    <string name="toast_wear_synchronization_unknown_error">A unknown error has ocurred</string>
-
-
-    <string name="button_try_again">Try Again</string>
-    <string name="button_cancel">Cancel</string>
-    <string name="button_stop">Stop</string>
-    <string name="button_tap_to_retry">Tap to retry</string>
-    <string name="button_reset_to_defaults">Reset to Defaults</string>
-    <string name="button_start">Start</string>
-    <string name="button_yes">Yes</string>
-    <string name="button_no">No</string>
-    <string name="button_exit">Exit App</string>
-
+    <!-- ******************** UTIL STRINGS *************************** -->
     <string name="util_time_format">HH:mm:ss.SSS</string>
     <string name="util_time_format_file">yyyyMMdd_HHmmss</string>
     <string name="util_image_description">image</string>
     <string name="util_wear_package">com.google.android.wearable.app</string>
+    <string name="util_chronometer_format">H:MM:SS</string>
+    <string name="util_exit_app_message">Press again to exit app</string>
+
+    <!-- ******************** MENU ITEMS *************************** -->
+    <string name="menu_action_ntp">NTP Synchronization</string>
+    <string name="menu_action_wear">Wear Synchronization</string>
+    <string name="menu_action_settings">Settings</string>
+    <string name="menu_action_about">About</string>
+
+    <string name="menu_frequency_minimum">Minimum</string>
+    <string name="menu_frequency_slow_25">Slow (25%)</string>
+    <string name="menu_frequency_medium_50">Medium (50%)</string>
+    <string name="menu_frequency_fast_75">Fast (75%)</string>
+    <string name="menu_frequency_maximum_default">Maximum (Default)</string>
+
+    <!-- ******************** SETTINGS *************************** -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_ntp_pool_server_hint">NTP Pool Server</string>
+    <string name="settings_enable_sound">Enable Sound</string>
+    <string name="settings_enable_vibration">Enable Vibration</string>
+    <string name="settings_countdown_start">Countdown Start</string>
+    <string name="settings_countdown_start_3s">3s</string>
+    <string name="settings_countdown_start_10s">10s</string>
+    <string name="settings_timetool_fps">TimeTool QRCode FPS</string>
+
+    <!-- ******************** GENERIC BUTTONS *************************** -->
+    <string name="button_try_again">Try Again</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_stop">Stop</string>
+    <string name="button_tap_to_retry">Tap to retry</string>
+    <string name="button_start">Start</string>
+    <string name="button_yes">Yes</string>
+    <string name="button_no">No</string>
+    <string name="button_save">Save</string>
+    <string name="button_done">Done</string>
+
+    <!-- ******************** PERMISSIONS *************************** -->
+    <string name="permissions_dialog_failed_title">Permissions Denied</string>
+    <string name="permissions_dialog_failed_content">You must provide all permissions for this application to work properly.</string>
+    <string name="permissions_button_exit_app">Exit App</string>
+
+    <!-- ******************** NTP SYNCHRONIZATION *************************** -->
+    <string name="ntp_dialog_synchronization_while_title">NTP Synchronization</string>
+    <string name="ntp_dialog_synchronization_while_content">Synchronizing NTP Service with</string>
+    <string name="ntp_dialog_already_synchronized_error_title">NTP Synchronized</string>
+    <string name="ntp_dialog_already_synchronized_error_content">The NTP Service is already synchronized.</string>
+    <string name="ntp_dialog_network_error_title">Network Error</string>
+    <string name="ntp_dialog_network_error_content">No internet connections found.</string>
+    <string name="ntp_dialog_timeout_error_title">Synchronization Timeout</string>
+    <string name="ntp_dialog_timeout_error_content">A synchronization timeout is reached.</string>
+    <string name="ntp_dialog_synchronization_error_title">NTP Error</string>
+    <string name="ntp_dialog_synchronization_error_content_prefix">Error while NTP synchronizing:</string>
+    <string name="ntp_dialog_unknown_error_title">Unknown Error</string>
+    <string name="ntp_dialog_unknown_error_content">A unknown error has occurred:</string>
+    <string name="ntp_toast_synchronization_success">NTP successfully synchronized</string>
+
+
+    <!-- ******************** WEAR CONNECTION *************************** -->
+    <string name="wear_dialog_connection_while_title">Wear Connection</string>
+    <string name="wear_dialog_connection_while_content">Find paired and connected wear devices.</string>
+    <string name="wear_dialog_already_connected_error_title">Smartwatch Connected</string>
+    <string name="wear_dialog_already_connected_error_content">A wear smartwatch is already connected.</string>
+    <string name="wear_dialog_wearos_error_title">Wear OS Error</string>
+    <string name="wear_dialog_wearos_error_content">The Android Wear App is not installed. Please, install it.</string>
+    <string name="wear_dialog_wearos_error_button">Install Wear OS</string>
+    <string name="wear_dialog_bluetooth_error_title">Bluetooth Error</string>
+    <string name="wear_dialog_bluetooth_error_content">No bluetooth connections found.</string>
+    <string name="wear_dialog_no_paired_error_title">Nearby Paired Devices</string>
+    <string name="wear_dialog_no_paired_error_content">No nearby smartwatch paired or connected devices with this device. Only bluetooth connections is allowed.</string>
+    <string name="wear_dialog_no_capable_error_title">Nearby Capable Devices </string>
+    <string name="wear_dialog_no_capable_error_content">No nearby smartwatch capable devices with Smartcap app installed. Only bluetooth connections is allowed.</string>
+    <string name="wear_dialog_timeout_error_title">Connection Timeout</string>
+    <string name="wear_dialog_timeout_error_content">A connection timeout is reached.</string>
+    <string name="wear_dialog_no_deviceinfo_error_title">Device Info</string>
+    <string name="wear_dialog_no_deviceinfo_error_content">A unknown error has occurred during the smartwatch device info requesting.</string>
+    <string name="wear_dialog_unknown_error_title">Unknown Error</string>
+    <string name="wear_dialog_unknown_error_prefix_content">A unknown error has occurred:</string>
+    <string name="wear_toast_connection_success">Wear successfully connected</string>
+
+
+    <!--<string name="dialog_wear_sensorinfo_title">Smartwatch Sensors</string>-->
+    <!--<string name="dialog_wear_sensorinfo_content">Requesting smartwatch sensor details.</string>-->
+    <!--<string name="toast_wear_sensorinfo_success">Sensor details successfully received</string>-->
+
+    <!--<string name="toast_wear_synchronization_bluetooth_error">No bluetooth connections found</string>-->
+    <!--<string name="toast_wear_synchronization_wear_error">The Android Wear App is not installed.</string>-->
+
+
+
+
+
+
+
+    <!-- ******************** DEVICES *************************** -->
+    <string name="devices_device_info_title">Device Details</string>
+    <string name="devices_device_uuid">Device UUID</string>
+    <string name="devices_device_version">Android version</string>
+    <string name="devices_device_api">API</string>
+    <string name="devices_device_sensors_title">Available Sensors</string>
+    <string name="devices_device_sensors_button_global_frequency">Frequency</string>
+    <string name="devices_device_sensors_text_explanation">Click to view sensor details or a long click to enable and disable sensor. Red sensors are not available in this device.</string>
+    <string name="devices_sensor_details_title">Sensor Details</string>
+    <string name="devices_sensor_details_model">Model</string>
+    <string name="devices_sensor_details_version">Version</string>
+    <string name="devices_sensor_details_power">Power</string>
+    <string name="devices_sensor_details_vendor">Vendor</string>
+    <string name="devices_sensor_details_max_range">Max. Range</string>
+    <string name="devices_sensor_details_resolution">Resolution</string>
+    <string name="devices_sensor_details_frequency">Sensor Frequency</string>
+    <string name="devices_sensor_details_frequency_not_available">Not Available</string>
+
+    <!-- ******************** SMARTWATCH *************************** -->
+    <string name="smartwatch_error_title">Wear Device Error</string>
+    <string name="smartwatch_error_content">No devices paired or connected. Please open the Wear OS App and connect to a wear device with SmartCap installed.</string>
+
+
+    <!-- ******************** TIMETOOL *************************** -->
+    <string name="timetool_initial_message">Click on the play button to start the QRCode generation.</string>
+    <string name="timetool_timestamp_ntp_mode">NTP Mode</string>
+    <string name="timetool_timestamp_device_mode">Device Mode</string>
+    <string name="timetool_ntp_not_initialized_title">NTP Not Available</string>
+    <string name="timetool_ntp_not_initialized_message">The NTP Service is not synchronized.</string>
+    <string name="timetool_dummy_hour">--:--:--.--</string>
+    <string name="timetool_dummy_value">----------</string>
+    <string name="timetool_dialog_device_alert_title">Device Mode</string>
+    <string name="timetool_dialog_device_alert_content">The Device mode is selected. The NTP mode is more reliable. Do you want to continue anyway?</string>
+
+
+
+
+
+
+
+
+
+
+
+
 
     <string name="capture_devices_section_title">Capture Devices</string>
     <string name="capture_smartphone_position">Smartphone Position</string>
@@ -69,44 +168,23 @@
     <string name="capture_dialog_make_capture_data_content">Creating and compressing capture data.</string>
 
 
-    <string name="dialog_permissions_failed_title">Permissions Denied</string>
-    <string name="dialog_permissions_failed_content">You must provide all permissions for this application to work properly.</string>
-
-    <string name="smartphone_available_sensors_tile">Available Sensors</string>
-
-    <string name="smartwatch_error_title">Wear Device Error</string>
-    <string name="smartwatch_error_content">No devices paired or connected. Please open the Wear OS App and connect to a wear device with SmartCap installed.</string>
-
-    <string name="sensor_details_title">Sensor Details</string>
-    <string name="sensor_details_power">Power</string>
-    <string name="sensor_details_vendor">Vendor</string>
-    <string name="sensor_details_max_range">Max. Range</string>
-    <string name="sensor_details_resolution">Resolution</string>
-    <string name="sensor_frequency_title">Sensor Frequency</string>
-    <string name="sensor_frequency_not_available">Not Available</string>
-
-    <string name="time_tool_initial_message">Click on the play button to start the QRCode generation.</string>
-    <string name="time_tool_timestamp_ntp_mode">NTP Mode</string>
-    <string name="time_tool_timestamp_device_mode">Device Mode</string>
-    <string name="time_tool_ntp_not_initialized_message">The NTP Service is not synchronized.</string>
-    <string name="time_tool_ntp_not_initialized_title">NTP Not Available</string>
-    <string name="time_tool_dummy_hour">--:--:--.--</string>
-    <string name="time_tool_dummy_value">----------</string>
-    <string name="dialog_reset_defaults_title">Reset to Defaults</string>
-    <string name="dialog_reset_defaults_content">Do you want to reset the preference values to defaults?</string>
-    <string name="util_chronometer_format">H:MM:SS</string>
-    <string name="util_exit_app_message">Press again to exit app</string>
 
 
-    <!--<string name="qr_code_image">QR Code Image</string>-->
-    <!--<string name="dummy_hour">&#45;&#45;:&#45;&#45;:&#45;&#45;.&#45;&#45;</string>-->
-    <!--<string name="dummy_value">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</string>-->
-    <!--<string name="listen_new_connections">Listen New Connections</string>-->
-    <!--<string name="no_smartwatch_connected_message">No smartwatch founded. Check your bluetooth connection and listen new connections.</string>-->
-    <!--<string name="whoops">Whoops!</string>-->
-    <!--<string name="ntp_synchronization">NTP Synchronization</string>-->
 
-    <!--<string name="cancel">Cancel</string>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </resources>
 

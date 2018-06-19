@@ -18,19 +18,18 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.config.CaptureConfig;
-import com.ssig.sensorsmanager.info.SensorInfo;
+import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.Serialization;
 import com.ssig.smartcap.utils.DeviceTools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class WearService extends Service implements MessageClient.OnMessageReceivedListener{
 
@@ -40,22 +39,28 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         }
     }
 
-    public enum ConnectionResponse {
-        SUCCESS,
+    public enum WearConnectionResponse {
+        ALREADY_CONNECTED,
         NO_WEAR_APP,
         BLUETOOTH_DISABLED,
         NO_PAIRED_DEVICES,
         NO_CAPABLE_DEVICES,
         TIMEOUT,
+        DEVICE_INFO_ERROR,
+        SUCCESS,
         UNKNOWN_ERROR
     }
 
     private final IBinder mBinder = new WearBinder();
 
-    private Node mClientNode;
-    private Map<SensorType, SensorInfo> mClientSensorInfo;
-    private CountDownLatch mRequestSensorInfoLatch;
+    private Node clientNode;
+    private DeviceInfo clientDeviceInfo;
+    private CountDownLatch requestSensorInfoLatch;
+    private String lastExceptionMessage;
 
+    //----------------------------------------------------------------------------------------------
+    // Override Methods
+    //----------------------------------------------------------------------------------------------
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,6 +82,8 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     @Override
     public boolean onUnbind(Intent intent) {
         Wearable.getMessageClient(this).removeListener(this);
+        if (this.isConnected())
+            this.disconnect();
         return super.onUnbind(intent);
     }
 
@@ -85,74 +92,210 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         super.onDestroy();
     }
 
+
+    //----------------------------------------------------------------------------------------------
+    // Message Received
+    //----------------------------------------------------------------------------------------------
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
         String path = messageEvent.getPath();
         if (path.equals(getString(R.string.message_path_host_service_response_watch_sensorinfo))) {
-            if (this.mRequestSensorInfoLatch != null) {
+            if (this.requestSensorInfoLatch != null) {
                 byte[] data = messageEvent.getData();
-                this.mClientSensorInfo = Serialization.deserializeObject(data);
-                this.mRequestSensorInfoLatch.countDown();
+                this.clientDeviceInfo = Serialization.deserializeObject(data);
+                if (this.requestSensorInfoLatch != null)
+                    this.requestSensorInfoLatch.countDown();
             }
         }
     }
 
 
+    //----------------------------------------------------------------------------------------------
+    // Public Properties
+    //----------------------------------------------------------------------------------------------
+    public DeviceInfo getClientDeviceInfo() {
+        return clientDeviceInfo;
+    }
 
-    public ConnectionResponse connect(){
-        if (this.mClientNode != null)
-            return ConnectionResponse.SUCCESS;
+    public boolean isConnected() {
+        return this.clientNode != null;
+    }
+
+    public String getLastExceptionMessage(){
+        return this.lastExceptionMessage;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Generic STUFFS
+    //----------------------------------------------------------------------------------------------
+    private void reset(){
+        this.clientNode = null;
+        this.clientDeviceInfo = null;
+        this.requestSensorInfoLatch = null;
+        this.lastExceptionMessage = null;
+    }
+
+    private void sendMessage(final String path) throws ApiException {
+        this.sendMessage(path, new byte[0]);
+    }
+
+    private void sendMessage(final String path, final byte[] data) throws ApiException {
+        if (this.clientNode == null)
+            throw new ApiException(Status.RESULT_DEAD_CLIENT);
+        Task<Integer> sendMessageTask = Wearable.getMessageClient(this).sendMessage(this.clientNode.getId(), path, data);
+        sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
+            @Override
+            public void onSuccess(Integer integer) {}
+        });
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Connection STUFFS
+    //----------------------------------------------------------------------------------------------
+    public WearConnectionResponse connect(){
+
+        if (this.clientNode != null)
+            return WearConnectionResponse.ALREADY_CONNECTED;
+
+        this.reset();
+
+        if (!DeviceTools.isAppInstalled(this, getString(R.string.util_wear_package)))
+            return WearConnectionResponse.NO_WEAR_APP;
 
         if (DeviceTools.isBluetoothDisabled())
-            return ConnectionResponse.BLUETOOTH_DISABLED;
-
-        if (!this.hasWearOS())
-            return ConnectionResponse.NO_WEAR_APP;
+            return WearConnectionResponse.BLUETOOTH_DISABLED;
 
         try {
 
-            Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this).getCapability(getString(R.string.capability_smartcap_wear), CapabilityClient.FILTER_REACHABLE);
-            CapabilityInfo capabilityInfo = Tasks.await(capabilityInfoTask);
-            if (!capabilityInfo.getNodes().isEmpty()){
-                List<Node> foundedClientNodes = new ArrayList<>(capabilityInfo.getNodes());
-                this.mClientNode = foundedClientNodes.get(0);
-                if (this.requestClientSensorInfo()) {
-                    this.sendMessage(getString(R.string.message_path_client_service_connection_done));
-                    return ConnectionResponse.SUCCESS;
-                }else{
-                    return ConnectionResponse.TIMEOUT;
+            Node capableNode = this.getFirstCapableNode();
+
+            if (capableNode == null){
+                Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(this).getConnectedNodes();
+                List<Node> nodeList = Tasks.await(connectedNodesTask, 10, TimeUnit.SECONDS);
+                List<Node> nearbyNodeList = new ArrayList<>();
+                for (Node node : nodeList){
+                    if (node.isNearby())
+                        nearbyNodeList.add(node);
                 }
+                return nearbyNodeList.isEmpty() ?  WearConnectionResponse.NO_PAIRED_DEVICES : WearConnectionResponse.NO_CAPABLE_DEVICES;
             }
 
-            Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(this).getConnectedNodes();
-            List<Node> nodeList = Tasks.await(connectedNodesTask);
-            return nodeList.isEmpty() ?  ConnectionResponse.NO_PAIRED_DEVICES : ConnectionResponse.NO_CAPABLE_DEVICES;
+            this.clientNode = capableNode;
+            this.sendMessage(getString(R.string.message_path_client_service_connection_done));
+            if(requestClientSensorInfo()){
+                return WearConnectionResponse.SUCCESS;
+            }else{
+                this.disconnect();
+                return WearConnectionResponse.DEVICE_INFO_ERROR;
+            }
 
-        } catch (ExecutionException | InterruptedException | ApiException e) {
-            return ConnectionResponse.UNKNOWN_ERROR;
+        } catch (InterruptedException | ExecutionException | ApiException e) {
+            this.lastExceptionMessage = e.getMessage();
+            return WearConnectionResponse.UNKNOWN_ERROR;
+        } catch (TimeoutException e) {
+            return WearConnectionResponse.TIMEOUT;
         }
 
     }
 
-    public void disconnect(){
-        this.disconnect(true);
+    private Node getFirstCapableNode() throws InterruptedException, ExecutionException, TimeoutException {
+
+        Node foundedNode = null;
+        Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this).getCapability(getString(R.string.capability_smartcap_wear), CapabilityClient.FILTER_REACHABLE);
+        CapabilityInfo capabilityInfo = Tasks.await(capabilityInfoTask, 10, TimeUnit.SECONDS);
+        if (!capabilityInfo.getNodes().isEmpty()){
+            List<Node> foundedClientNodes = new ArrayList<>(capabilityInfo.getNodes());
+            if(foundedClientNodes.get(0).isNearby())
+                foundedNode = foundedClientNodes.get(0);
+        }
+        return foundedNode;
+
     }
 
-    public void disconnect(boolean sendDisconnectMessageToClient){
+    private boolean requestClientSensorInfo() throws ApiException, TimeoutException {
+        if (this.requestSensorInfoLatch != null)
+            return false;
+        this.requestSensorInfoLatch = new CountDownLatch(1);
+        this.sendMessage(getString(R.string.message_path_client_service_request_watch_sensorinfo));
+        try {
+            this.requestSensorInfoLatch.await(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            this.requestSensorInfoLatch = null;
+        }
+        this.requestSensorInfoLatch = null;
+        return this.clientDeviceInfo != null;
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+    // Disconnection STUFFS
+    //----------------------------------------------------------------------------------------------
+    public boolean disconnect(){
+        return this.disconnect(true);
+    }
+
+    public boolean disconnect(boolean sendDisconnectMessageToClient){
         if (sendDisconnectMessageToClient) {
             try {
                 this.sendMessage(getString(R.string.message_path_client_service_disconnect));
             } catch (ApiException e) {
                 e.printStackTrace();
+                return false;
             }
         }
         this.reset();
+        return true;
     }
+
+
+
+
+
+
+//    public WearConnectionResponse connect(){
+//
+//        if (this.clientNode != null)
+//            return WearConnectionResponse.SUCCESS;
+//
+//        if (!this.hasWearOS())
+//            return WearConnectionResponse.NO_WEAR_APP;
+//
+//        if (DeviceTools.isBluetoothDisabled())
+//            return WearConnectionResponse.BLUETOOTH_DISABLED;
+//
+//        try {
+//
+//            Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this).getCapability(getString(R.string.capability_smartcap_wear), CapabilityClient.FILTER_REACHABLE);
+//            CapabilityInfo capabilityInfo = Tasks.await(capabilityInfoTask, 10, TimeUnit.SECONDS);
+//            if (!capabilityInfo.getNodes().isEmpty()){
+//                List<Node> foundedClientNodes = new ArrayList<>(capabilityInfo.getNodes());
+//                this.clientNode = foundedClientNodes.get(0);
+//                if (this.requestClientSensorInfo()) {
+//                    this.sendMessage(getString(R.string.message_path_client_service_connection_done));
+//                    return WearConnectionResponse.SUCCESS;
+//                }else{
+//                    return WearConnectionResponse.TIMEOUT;
+//                }
+//            }
+//
+//            Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(this).getConnectedNodes();
+//            List<Node> nodeList = Tasks.await(connectedNodesTask);
+//            return nodeList.isEmpty() ?  WearConnectionResponse.NO_PAIRED_DEVICES : WearConnectionResponse.NO_CAPABLE_DEVICES;
+//
+//        } catch (ExecutionException | InterruptedException | ApiException e) {
+//            return WearConnectionResponse.UNKNOWN_ERROR;
+//        } catch (TimeoutException e) {
+//            return WearConnectionResponse.TIMEOUT;
+//        }
+//
+//    }
+
+
 
     public void syncClientNTP(String ntpPool){
         try {
             byte[] data = Serialization.serializeObject(ntpPool);
-            this.sendMessage(getString(R.string.message_path_client_service_sync_ntp), data);
+            this.sendMessage(getString(R.string.message_path_client_activity_sync_ntp), data);
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -160,7 +303,7 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
 
     public void closeClientNTP(){
         try {
-            this.sendMessage(getString(R.string.message_path_client_service_close_ntp));
+            this.sendMessage(getString(R.string.message_path_client_activity_close_ntp));
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -191,55 +334,17 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         }
     }
 
-    public Map<SensorType, SensorInfo> getClientSensorInfo() {
-        return mClientSensorInfo;
-    }
 
-    public boolean isConnected() {
-        return this.mClientNode != null;
-    }
 
-    public String getClientID(){
-        return (this.mClientNode != null) ? this.mClientNode.getId() : null;
-    }
+//    public String getClientID(){
+//        return (this.clientNode != null) ? this.clientNode.getId() : null;
+//    }
 
-    public boolean hasWearOS(){
-        return DeviceTools.isAppInstalled(this, getString(R.string.util_wear_package));
-    }
 
-    private boolean requestClientSensorInfo() throws ApiException {
-        if (this.mRequestSensorInfoLatch != null)
-            return false;
-        this.mRequestSensorInfoLatch = new CountDownLatch(1);
-        this.sendMessage(getString(R.string.message_path_client_service_request_watch_sensorinfo));
-        try {
-            this.mRequestSensorInfoLatch.await(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        }
-        this.mRequestSensorInfoLatch = null;
-        return true;
-    }
 
-    private void reset(){
-        this.mClientNode = null;
-        this.mClientSensorInfo = null;
-        this.mRequestSensorInfoLatch = null;
-    }
 
-    private void sendMessage(final String path) throws ApiException {
-        this.sendMessage(path, new byte[0]);
-    }
 
-    private void sendMessage(final String path, final byte[] data) throws ApiException {
-        if (this.mClientNode == null)
-            throw new ApiException(Status.RESULT_DEAD_CLIENT);
-        Task<Integer> sendMessageTask = Wearable.getMessageClient(this).sendMessage(this.mClientNode.getId(), path, data);
-        sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
-            @Override
-            public void onSuccess(Integer integer) {}
-        });
-    }
+
+
 
 }

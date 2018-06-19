@@ -78,7 +78,7 @@
 ////            Inbox obj;
 ////            HashMap<String, String> new_item;
 ////            ReadJsonFile jsonReader = new ReadJsonFile();
-////            new_item = jsonReader.ReadFile(f.getName());
+////            new_item = jsonReader.ReadFile(f.getDeviceName());
 ////            obj = setInboxObj(new_item, f);
 ////            items.add(obj);
 ////        }
@@ -89,7 +89,7 @@
 ////        obj.name = item.get("name");
 ////        obj.duration = item.get("duration");
 ////        obj.date = item.get("date");
-////        obj.file_name = f.getName();
+////        obj.file_name = f.getDeviceName();
 ////        return obj;
 ////    }
 ////
@@ -216,7 +216,7 @@
 ////            item = mAdapter.getItem(selectedItemPositions.get(i));
 ////            File[] files = dir.listFiles();
 ////            for(File f: files) {
-////                if(f.getName().equals(item.file_name)) {
+////                if(f.getDeviceName().equals(item.file_name)) {
 ////                    Uri uri = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", f);
 ////                    uri_files.add(uri);
 ////                }
@@ -233,7 +233,7 @@
 ////            item = mAdapter.getItem(selectedItemPositions.get(i));
 ////            File[] files = dir.listFiles();
 ////            for(File f: files) {
-////                if(f.getName().equals(item.file_name)){
+////                if(f.getDeviceName().equals(item.file_name)){
 ////                    boolean success = f.delete();
 ////                    if(success == true){
 ////                        mAdapter.removeData(selectedItemPositions.get(i));

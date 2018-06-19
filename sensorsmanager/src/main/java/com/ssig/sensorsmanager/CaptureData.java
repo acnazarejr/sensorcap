@@ -29,7 +29,7 @@
 //    }
 //
 //    class Header{
-//        String name = personInfo.getName();
+//        String name = personInfo.getDeviceName();
 //        Integer age = personInfo.getAge();
 //        Float weight = personInfo.getWeight();
 //        Float height = personInfo.getHeight();

@@ -6,7 +6,7 @@
         android:id="@+id/action_ntp"
         android:icon="@drawable/ic_ntp_off"
         android:orderInCategory="100"
-        android:title="@string/action_ntp"
+        android:title="@string/menu_action_ntp"
         android:iconTint="@color/colorGreyDark"
         app:showAsAction="always" />
 
@@ -14,7 +14,7 @@
         android:id="@+id/action_wear"
         android:icon="@drawable/ic_smartwatch_off"
         android:orderInCategory="150"
-        android:title="@string/action_wear"
+        android:title="@string/menu_action_wear"
         android:iconTint="@color/colorGreyDark"
         app:showAsAction="always" />
 
@@ -22,7 +22,7 @@
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:orderInCategory="200"
-        android:title="@string/action_settings"
+        android:title="@string/menu_action_settings"
         android:iconTint="@color/colorGreyDark"
         app:showAsAction="never" />
 
@@ -30,7 +30,7 @@
         android:id="@+id/action_about"
         android:icon="@drawable/ic_info"
         android:orderInCategory="300"
-        android:title="@string/action_about"
+        android:title="@string/menu_action_about"
         android:iconTint="@color/colorGreyDark"
         app:showAsAction="never" />
 

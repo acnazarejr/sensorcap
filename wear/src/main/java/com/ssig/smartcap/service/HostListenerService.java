@@ -24,7 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
-import com.ssig.sensorsmanager.info.SensorInfo;
+import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.smartcap.R;
@@ -104,24 +104,8 @@ public class HostListenerService extends WearableListenerService {
         }
 
         if (path.equals(getString(R.string.message_path_client_service_request_watch_sensorinfo))) {
-            byte[] data = Serialization.serializeObject(SensorInfo.getAll(this));
+            byte[] data = Serialization.serializeObject(DeviceInfo.get(this));
             this.sendMessageData(messageEvent.getSourceNodeId(), this.getString(R.string.message_path_host_service_response_watch_sensorinfo), data);
-        }
-
-        if (path.equals(getString(R.string.message_path_client_service_sync_ntp))){
-            byte[] data = messageEvent.getData();
-            String ntpPool = Serialization.deserializeObject(data);
-            try {
-                NTPTime.initialize(this, ntpPool);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            startActivity(mainActivityIntent);
-        }
-
-        if (path.equals(getString(R.string.message_path_client_service_close_ntp))){
-            NTPTime.close(this);
-            startActivity(mainActivityIntent);
         }
 
         if (path.equals(getString(R.string.message_path_client_service_disconnect))) {

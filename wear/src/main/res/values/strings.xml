@@ -6,4 +6,20 @@
     <string name="image_description">image_description</string>
     <string name="util_time_format">HH:mm:ss.SSS</string>
     <string name="toast_press_hold">Press and hold the button</string>
+
+
+
+    <string name="ntp_toast_already_synchronized_error">The NTP Service is already synchronized.</string>
+    <string name="ntp_toast_network_error">No internet connections found.</string>
+    <string name="ntp_toast_timeout_error">A synchronization timeout is reached.</string>
+    <string name="ntp_toast_synchronization_error_prefix">Error while NTP synchronizing:</string>
+    <string name="ntp_toast_unknown_error">A unknown error has occurred:</string>
+    <string name="ntp_toast_synchronization_success">NTP successfully synchronized</string>
+    <string name="ready_to_capture">Ready to Capture!</string>
+    <string name="waiting_connection">Waiting Connection...</string>
+    <string name="capturing">Capturing...</string>
+    <string name="sending_files">Sending Files...</string>
+    <string name="close">Close</string>
+    <string name="stop">Stop</string>
+
 </resources>

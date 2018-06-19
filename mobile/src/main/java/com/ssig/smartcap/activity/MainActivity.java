@@ -4,11 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,9 +16,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -45,39 +47,38 @@ import com.ssig.smartcap.fragment.SmartphoneFragment;
 import com.ssig.smartcap.fragment.SmartwatchFragment;
 import com.ssig.smartcap.fragment.TimeToolFragment;
 import com.ssig.smartcap.service.WearService;
-import com.ssig.smartcap.utils.DeviceTools;
 import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.utils.Tools;
-import com.ssig.smartcap.utils.WearUtil;
+import com.warkiz.widget.IndicatorSeekBar;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements MessageClient.OnMessageReceivedListener{
+public class MainActivity extends AppCompatActivity implements MessageClient.OnMessageReceivedListener {
 
     private SharedPreferences sharedPreferences;
     private long exitTime = 0;
 
-    private Toolbar mToolbar;
-    private MenuItem mNTPMenuItem;
-    private MenuItem mWearMenuItem;
-    private AHBottomNavigationViewPager mViewPager;
-    private AHBottomNavigation mBottomNavigation;
+    private Toolbar toolbar;
+    private MenuItem NTPMenuItem;
+    private MenuItem wearMenuItem;
+    private AHBottomNavigationViewPager ahBottomNavigationViewPager;
+    private AHBottomNavigation ahBottomNavigation;
 
-    private ViewPagerAdapter mViewPagerAdapter;
+    private MaterialDialog dialogSettings;
+
+    private ViewPagerAdapter viewPagerAdapter;
     public AbstractMainFragment captureFragment;
     public AbstractMainFragment smartphoneFragment;
     public AbstractMainFragment smartwatchFragment;
     public AbstractMainFragment timeToolFragment;
     public AbstractMainFragment archiveFragment;
 
-
-    private WearService mWearService;
-    private boolean mWearServiceBounded;
-    private ServiceConnection mWearServiceConnection;
+    private WearService wearService;
+    private boolean wearServiceBounded;
+    private ServiceConnection wearServiceConnection;
 
     // ---------------------------------------------------------------------------------------------
     // ACTIVITY STUFFS
@@ -88,10 +89,10 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         this.setContentView(R.layout.activity_main);
 
         this.sharedPreferences = this.getPreferences(MODE_PRIVATE);
-        this.mWearServiceConnection = this.createWearServiceConnection();
+        this.wearServiceConnection = this.createWearServiceConnection();
 
         Intent wearServiceIntent = new Intent(this, WearService.class);
-        bindService(wearServiceIntent, this.mWearServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService(wearServiceIntent, this.wearServiceConnection, Context.BIND_AUTO_CREATE);
 
         this.initUI();
     }
@@ -113,11 +114,10 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
 
     @Override
     protected void onDestroy() {
-        WearUtil.disconnect(this);
 
-        if (this.mWearServiceBounded){
-            unbindService(this.mWearServiceConnection);
-            this.mWearServiceBounded = false;
+        if (this.wearServiceBounded){
+            unbindService(this.wearServiceConnection);
+            this.wearServiceBounded = false;
         }
 
         super.onDestroy();
@@ -135,12 +135,11 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
 
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
-        boolean connected = getWearService() != null && this.mWearService.isConnected();
-        if (!connected)
+        if (!this.isWearClientConnected())
             return;
         String path = messageEvent.getPath();
         if (path.equals(getString(R.string.message_path_host_activity_disconnect))){
-            getWearService().disconnect(false);
+            this.getWearService().disconnect(false);
             this.updateWearMenuItem();
             this.smartwatchFragment.refresh();
             this.captureFragment.refresh();
@@ -149,8 +148,10 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
 
     private void initUI() {
         this.initToolbar();
+        this.initSettings();
         this.initBottomNavigation();
         this.initPagerView();
+        this.updateToolBarTitleAndIcon(0);
     }
 
     private void requestPermissions(){
@@ -165,9 +166,9 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             public void onPermissionsChecked(MultiplePermissionsReport report) {
                 if (!report.areAllPermissionsGranted()){
                     new MaterialDialog.Builder(MainActivity.this)
-                            .title(R.string.dialog_permissions_failed_title)
+                            .title(R.string.permissions_dialog_failed_title)
                             .titleColorRes(R.color.colorAlert)
-                            .content(R.string.dialog_permissions_failed_content)
+                            .content(R.string.permissions_dialog_failed_content)
                             .icon(Tools.changeDrawableColor(Objects.requireNonNull(MainActivity.this.getDrawable(R.drawable.ic_smartphone_lock)), ContextCompat.getColor(MainActivity.this, R.color.colorAlert)))
                             .cancelable(false)
                             .positiveText(R.string.button_try_again)
@@ -177,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
                                     requestPermissions();
                                 }
                             })
-                            .negativeText(R.string.button_exit)
+                            .negativeText(R.string.permissions_button_exit_app)
                             .onNegative(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -199,9 +200,9 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     // ACTION TOOLBAR STUFFS
     // ---------------------------------------------------------------------------------------------
     private void initToolbar() {
-        this.mToolbar = findViewById(R.id.appbar_toolbar);
-        this.setSupportActionBar(this.mToolbar);
-        Tools.setSystemBarColor(this, R.color.colorGreyMediumLight);
+        this.toolbar = findViewById(R.id.appbar_toolbar);
+        this.setSupportActionBar(this.toolbar);
+        Tools.setSystemBarColor(this, R.color.colorGreyLight);
         Tools.setSystemBarLight(this);
     }
 
@@ -214,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             m.setOptionalIconsVisible(true);
         }
         Tools.changeMenuIconColor(menu, ContextCompat.getColor(this, R.color.colorGrey));
-        this.mNTPMenuItem = menu.findItem(R.id.action_ntp);
-        this.mWearMenuItem = menu.findItem(R.id.action_wear);
+        this.NTPMenuItem = menu.findItem(R.id.action_ntp);
+        this.wearMenuItem = menu.findItem(R.id.action_wear);
         this.updateNTPMenuItem();
         this.updateWearMenuItem();
         return true;
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
                     doWearConnection();
                     break;
                 case R.id.action_settings:
-                    Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                    this.dialogSettings.show();
                     break;
                 case R.id.action_about:
                     Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
@@ -245,23 +246,93 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     }
 
     public void updateNTPMenuItem(){
-        boolean initialized = NTPTime.isInitialized();
+        boolean initialized = NTPTime.isSynchronized();
         if (initialized)
-            this.mNTPMenuItem.setIcon(R.drawable.ic_ntp_on);
+            this.NTPMenuItem.setIcon(R.drawable.ic_ntp_on);
         else
-            this.mNTPMenuItem.setIcon(R.drawable.ic_ntp_off);
+            this.NTPMenuItem.setIcon(R.drawable.ic_ntp_off);
         int color = ContextCompat.getColor(this, initialized ? R.color.colorAccent : R.color.colorAlert);
-        Tools.changeDrawableColor(this.mNTPMenuItem.getIcon(), color);
+        Tools.changeDrawableColor(this.NTPMenuItem.getIcon(), color);
     }
 
     public void updateWearMenuItem(){
-        boolean connected = this.getWearService() != null && this.getWearService().isConnected();
-        if (connected)
-            this.mWearMenuItem.setIcon(R.drawable.ic_smartwatch_on);
+        if (this.isWearClientConnected())
+            this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_on);
         else
-            this.mWearMenuItem.setIcon(R.drawable.ic_smartwatch_off);
-        int color = ContextCompat.getColor(this, connected ? R.color.colorAccent : R.color.colorAlert);
-        Tools.changeDrawableColor(this.mWearMenuItem.getIcon(), color);
+            this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_off);
+        int color = ContextCompat.getColor(this, this.isWearClientConnected() ? R.color.colorAccent : R.color.colorAlert);
+        Tools.changeDrawableColor(this.wearMenuItem.getIcon(), color);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Settings Stuffs
+    // ---------------------------------------------------------------------------------------------
+    public void initSettings(){
+        this.dialogSettings =  new MaterialDialog.Builder(Objects.requireNonNull(this))
+                .customView(R.layout.layout_dialog_settings, true)
+                .title(R.string.settings_title)
+                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_settings)), ContextCompat.getColor(this, R.color.colorPrimary)))
+                .cancelable(true)
+                .canceledOnTouchOutside(true)
+                .positiveText(R.string.button_save)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        View view = Objects.requireNonNull(dialog.getCustomView());
+
+                        AppCompatEditText inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input_text);
+                        editor.putString(getString(R.string.preference_main_default_key_ntp_pool), inputNTPPoolServer.getText().toString());
+
+                        Switch switchSoundEnable = view.findViewById(R.id.enable_sound_switch);
+                        editor.putBoolean(getString(R.string.preference_main_key_has_sound), switchSoundEnable.isChecked());
+
+                        Switch switchVibrationEnable = view.findViewById(R.id.enable_vibration_switch);
+                        editor.putBoolean(getString(R.string.preference_main_key_has_vibration), switchVibrationEnable.isChecked());
+
+                        RadioGroup radioGroupCountdownStart = view.findViewById(R.id.countdown_start_radio_group);
+                        int countdownStart = (radioGroupCountdownStart.getCheckedRadioButtonId() == R.id.countdown_start_3s_radio_option) ? 3 : 10;
+                        editor.putInt(getString(R.string.preference_main_key_countdown_capture), countdownStart);
+
+                        IndicatorSeekBar indicatorSeekBar = view.findViewById(R.id.timetool_qrcode_fps);
+                        editor.putInt(getString(R.string.preference_main_key_qrcode_fps), indicatorSeekBar.getProgress());
+
+                        editor.apply();
+                    }
+                }).neutralText(R.string.button_cancel)
+                .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.cancel();
+                    }
+                })
+                .build();
+
+        View view = Objects.requireNonNull(this.dialogSettings.getCustomView());
+
+        AppCompatEditText inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input_text);
+        inputNTPPoolServer.setText(this.sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool)));
+        inputNTPPoolServer.setSelection(inputNTPPoolServer.getText().length());
+
+        Switch switchSoundEnable = view.findViewById(R.id.enable_sound_switch);
+        switchSoundEnable.setChecked(this.sharedPreferences.getBoolean(getString(R.string.preference_main_key_has_sound), getResources().getBoolean(R.bool.preference_main_default_has_sound)));
+
+        Switch switchSoundVibration = view.findViewById(R.id.enable_vibration_switch);
+        switchSoundVibration.setChecked(this.sharedPreferences.getBoolean(getString(R.string.preference_main_key_has_vibration), getResources().getBoolean(R.bool.preference_main_default_has_vibration)));
+
+        IndicatorSeekBar indicatorSeekBar = view.findViewById(R.id.timetool_qrcode_fps);
+        indicatorSeekBar.setProgress(this.sharedPreferences.getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps)));
+
+        int countdownStart = this.sharedPreferences.getInt(getString(R.string.preference_main_key_countdown_capture), getResources().getInteger(R.integer.preference_main_default_countdown_capture));
+        RadioGroup radioGroupCountdownStart = view.findViewById(R.id.countdown_start_radio_group);
+        if(countdownStart == 3) {
+            radioGroupCountdownStart.check(R.id.countdown_start_3s_radio_option);
+        }else{
+            radioGroupCountdownStart.check(R.id.countdown_start_3s_radio_option);
+        }
+
+
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -269,16 +340,19 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     // ---------------------------------------------------------------------------------------------
     private void initBottomNavigation(){
 
-        this.mBottomNavigation = findViewById(R.id.bottom_navigation);
+        this.ahBottomNavigation = findViewById(R.id.bottom_navigation);
 
         AHBottomNavigationAdapter bottomNavigationAdapter = new AHBottomNavigationAdapter(this, R.menu.menu_bottom_navigation);
-        bottomNavigationAdapter.setupWithBottomNavigation(this.mBottomNavigation);
+        bottomNavigationAdapter.setupWithBottomNavigation(this.ahBottomNavigation);
 
-        this.mBottomNavigation.setTranslucentNavigationEnabled(true);
-        this.mBottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
-        this.mBottomNavigation.setForceTint(true);
-        this.mBottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        this.mBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
+        this.ahBottomNavigation.setTranslucentNavigationEnabled(true);
+        this.ahBottomNavigation.setBehaviorTranslationEnabled(false);
+        this.ahBottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
+        this.ahBottomNavigation.setForceTint(true);
+        this.ahBottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorGreyLight));
+        this.ahBottomNavigation.setInactiveColor(ContextCompat.getColor(this, R.color.colorPrimaryLight));
+        this.ahBottomNavigation.setDefaultBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        this.ahBottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
                 if (wasSelected) {
@@ -289,15 +363,17 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             }
         });
 
+        this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+
     }
 
     // ---------------------------------------------------------------------------------------------
     // PAGE VIEWER STUFFS
     // ---------------------------------------------------------------------------------------------
     public void initPagerView(){
-        this.mViewPager = findViewById(R.id.view_pager);
+        this.ahBottomNavigationViewPager = findViewById(R.id.view_pager);
 
-        this.mViewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        this.viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         this.captureFragment = new CaptureFragment();
         this.smartphoneFragment = new SmartphoneFragment();
@@ -305,30 +381,36 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         this.timeToolFragment = new TimeToolFragment();
         this.archiveFragment = new ArchiveFragment();
 
-        this.mViewPagerAdapter.add(this.captureFragment);
-        this.mViewPagerAdapter.add(this.smartphoneFragment);
-        this.mViewPagerAdapter.add(this.smartwatchFragment);
-        this.mViewPagerAdapter.add(this.timeToolFragment);
-        this.mViewPagerAdapter.add(this.archiveFragment);
+        this.viewPagerAdapter.add(this.captureFragment);
+        this.viewPagerAdapter.add(this.smartphoneFragment);
+        this.viewPagerAdapter.add(this.smartwatchFragment);
+        this.viewPagerAdapter.add(this.timeToolFragment);
+        this.viewPagerAdapter.add(this.archiveFragment);
 
-        this.mViewPager.setAdapter(mViewPagerAdapter);
-        this.mViewPager.setOffscreenPageLimit(5);
+        this.ahBottomNavigationViewPager.setAdapter(viewPagerAdapter);
+        this.ahBottomNavigationViewPager.setOffscreenPageLimit(5);
+
     }
 
     public void setCurrentFragment(int position){
 
-        AbstractMainFragment currentFragment = this.mViewPagerAdapter.getCurrentFragment();
+        AbstractMainFragment currentFragment = this.viewPagerAdapter.getCurrentFragment();
         currentFragment.hide();
 
-        String fragmentTitle = this.mBottomNavigation.getItem(position).getTitle(this);
-        Drawable fragmentIcon = this.mBottomNavigation.getItem(position).getDrawable(this);
-        this.mToolbar.setTitle(fragmentTitle);
-        this.mToolbar.setNavigationIcon(fragmentIcon);
-        Objects.requireNonNull(this.mToolbar.getNavigationIcon()).setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-        this.mViewPager.setCurrentItem(position, false);
+        this.updateToolBarTitleAndIcon(position);
+        this.ahBottomNavigationViewPager.setCurrentItem(position, false);
 
-        currentFragment = this.mViewPagerAdapter.getCurrentFragment();
+        currentFragment = this.viewPagerAdapter.getCurrentFragment();
         currentFragment.show();
+    }
+
+    public void updateToolBarTitleAndIcon(int position){
+        String fragmentTitle = this.ahBottomNavigation.getItem(position).getTitle(this);
+        this.toolbar.setTitle(fragmentTitle);
+        Drawable fragmentIcon;
+        fragmentIcon = Objects.requireNonNull(this.ahBottomNavigation.getItem(position).getDrawable(this).getConstantState()).newDrawable().mutate();
+        fragmentIcon = Tools.changeDrawableColor(fragmentIcon, ContextCompat.getColor(this, R.color.colorPrimary));
+        this.toolbar.setNavigationIcon(fragmentIcon);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -336,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     // ---------------------------------------------------------------------------------------------
     public void doNTPSynchronization(){
 
-        if (NTPTime.isInitialized()){
+        if (NTPTime.isSynchronized()){
 
             NTPTime.close(this);
             if (this.getWearService().isConnected()) {
@@ -346,64 +428,86 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             this.timeToolFragment.refresh();
 
         }else {
-
-            if (DeviceTools.isNetworkConnected(this)) {
-                new NTPSynchronizationTask(this).execute();
-                if (this.getWearService().isConnected()) {
-                    String ntpPool = sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool));
-                    this.getWearService().syncClientNTP(ntpPool);
-                }
-            } else {
-                new MaterialDialog.Builder(this)
-                        .title(R.string.dialog_network_error_title)
-                        .content(R.string.dialog_network_error_content)
-                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_wifi_off)), ContextCompat.getColor(this, R.color.colorPrimary)))
-                        .cancelable(true)
-                        .neutralText(R.string.button_cancel)
-                        .positiveText(R.string.button_try_again)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                doNTPSynchronization();
-                            }
-                        })
-                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.cancel();
-                            }
-                        })
-                        .cancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                updateNTPMenuItem();
-                                timeToolFragment.refresh();
-                            }
-                        })
-                        .show();
-            }
-
+            new NTPSynchronizationTask(this).execute();
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class NTPSynchronizationTask extends AsyncTask<Void, Void, String>{
+    private class NTPSynchronizationTask extends AsyncTask<Void, Void, NTPTime.NTPSynchronizationResponse>{
 
         private String ntpPool;
-        private MaterialDialog dialog;
+        private MaterialDialog whileSynchronizationDialog;
         private final WeakReference<MainActivity> mainActivity;
 
         NTPSynchronizationTask(MainActivity mainActivity){
             this.mainActivity = new WeakReference<>(mainActivity);
         }
 
+        MaterialDialog makeResponseErrorDialog(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse){
+
+            MaterialDialog responseErrorDialog = new MaterialDialog.Builder(this.mainActivity.get())
+                    .title("")
+                    .titleColorRes(R.color.colorAlert)
+                    .content("")
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_ntp_off)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)))
+                    .cancelable(true)
+                    .positiveText(R.string.button_try_again)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            doNTPSynchronization();
+                        }
+                    })
+                    .neutralText(R.string.button_cancel)
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .build();
+
+            switch (ntpSynchronizationResponse){
+
+                case ALREADY_SYNCHRONIZED:
+                    responseErrorDialog.setTitle(R.string.ntp_dialog_already_synchronized_error_title);
+                    responseErrorDialog.setContent(R.string.ntp_dialog_already_synchronized_error_content);
+                    break;
+
+                case NETWORK_DISABLED:
+                    responseErrorDialog.setIcon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_wifi_off)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)));
+                    responseErrorDialog.setTitle(R.string.ntp_dialog_network_error_title);
+                    responseErrorDialog.setContent(R.string.ntp_dialog_network_error_content);
+                    break;
+
+                case NTP_TIMEOUT:
+                    responseErrorDialog.setTitle(R.string.ntp_dialog_timeout_error_title);
+                    responseErrorDialog.setContent(R.string.ntp_dialog_timeout_error_content);
+                    break;
+
+                case NTP_ERROR:
+                    responseErrorDialog.setTitle(R.string.ntp_dialog_synchronization_error_title);
+                    String lastExceptionMessage = NTPTime.getLastExceptionMessage();
+                    String errorContent = String.format("%s %s", getString(R.string.ntp_dialog_synchronization_error_content_prefix), lastExceptionMessage != null ? lastExceptionMessage : "None");
+                    responseErrorDialog.setContent(errorContent);
+                    break;
+
+                case UNKNOWN_ERROR:
+                    responseErrorDialog.setTitle(R.string.ntp_dialog_unknown_error_title);
+                    responseErrorDialog.setContent(R.string.ntp_dialog_unknown_error_content);
+                    break;
+
+            }
+            return responseErrorDialog;
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             this.ntpPool = sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool));
-            this.dialog = new MaterialDialog.Builder(this.mainActivity.get())
-                .title(R.string.dialog_ntp_synchronization_title)
-                .content(getString(R.string.dialog_ntp_synchronization_content) + " " + ntpPool)
+            this.whileSynchronizationDialog = new MaterialDialog.Builder(this.mainActivity.get())
+                .title(R.string.ntp_dialog_synchronization_while_title)
+                .content(getString(R.string.ntp_dialog_synchronization_while_content) + " " + ntpPool)
                 .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_ntp_on)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorPrimary)))
                 .cancelable(false)
                 .progress(true, 0)
@@ -412,25 +516,29 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                NTPTime.initialize(mainActivity.get(), this.ntpPool);
-            } catch (IOException e) {
-                return e.getMessage();
-            }
-            return null;
+        protected NTPTime.NTPSynchronizationResponse doInBackground(Void... voids) {
+            return NTPTime.synchronize(mainActivity.get(), this.ntpPool);
         }
 
         @Override
-        protected void onPostExecute(String message) {
-            super.onPostExecute(message);
-            this.dialog.dismiss();
-            boolean refresh = (message == null);
-            message = message == null ? this.mainActivity.get().getString(R.string.toast_ntp_synchronization_success) : message;
-            Toast.makeText(this.mainActivity.get(), message, Toast.LENGTH_LONG).show();
+        protected void onPostExecute(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse) {
+            super.onPostExecute(ntpSynchronizationResponse);
+
+            this.whileSynchronizationDialog.dismiss();
             this.mainActivity.get().updateNTPMenuItem();
-            if (refresh)
+
+
+            if (ntpSynchronizationResponse == NTPTime.NTPSynchronizationResponse.SUCCESS) {
                 timeToolFragment.refresh();
+                if (isWearClientConnected()) {
+                    getWearService().syncClientNTP(this.ntpPool);
+                }
+                Toast.makeText(this.mainActivity.get(), getString(R.string.ntp_toast_synchronization_success), Toast.LENGTH_LONG).show();
+            } else {
+                MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(ntpSynchronizationResponse);
+                responseErrorDialog.show();
+            }
+
         }
     }
 
@@ -447,15 +555,31 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             this.captureFragment.refresh();
 
         }else {
+            new WearConnectionTask(this).execute();
+        }
+    }
 
-            if (!getWearService().hasWearOS()) {
-                new MaterialDialog.Builder(this)
-                        .title(R.string.dialog_wear_os_error_title)
-                        .content(R.string.dialog_wear_os_error_content)
-                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_wear_os_color)), ContextCompat.getColor(this, R.color.colorPrimary)))
+    @SuppressLint("StaticFieldLeak")
+    private class WearConnectionTask extends AsyncTask< Void, Void, WearService.WearConnectionResponse>{
+
+        private MaterialDialog whileConnectionDialog;
+        private final WeakReference<MainActivity> mainActivity;
+
+        WearConnectionTask(MainActivity mainActivity){
+            this.mainActivity = new WeakReference<>(mainActivity);
+        }
+
+        MaterialDialog makeResponseErrorDialog(WearService.WearConnectionResponse wearConnectionResponse){
+
+
+            if (wearConnectionResponse == WearService.WearConnectionResponse.NO_WEAR_APP){
+                return new MaterialDialog.Builder(this.mainActivity.get())
+                        .title(R.string.wear_dialog_wearos_error_title)
+                        .titleColorRes(R.color.colorAlert)
+                        .content(R.string.wear_dialog_wearos_error_content)
+                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_wear_os_color)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)))
                         .cancelable(true)
-                        .neutralText(R.string.button_cancel)
-                        .positiveText(R.string.dialog_wear_os_error_button)
+                        .positiveText(R.string.wear_dialog_wearos_error_button)
                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -463,90 +587,159 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
                                 startActivity(goToMarket);
                             }
                         })
-                        .show();
-            } else if (DeviceTools.isBluetoothDisabled()) {
-                new MaterialDialog.Builder(this)
-                        .title(R.string.dialog_bluetooth_error_title)
-                        .content(R.string.dialog_bluetooth_error_content)
-                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_bluetooth_off)), ContextCompat.getColor(this, R.color.colorPrimary)))
-                        .cancelable(true)
                         .neutralText(R.string.button_cancel)
-                        .positiveText(R.string.button_try_again)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                doWearConnection();
+                                dialog.cancel();
                             }
                         })
-                        .show();
-            } else {
-                new WearConnectionTask(this).execute();
+                        .build();
             }
 
-        }
-    }
 
-    @SuppressLint("StaticFieldLeak")
-    private class WearConnectionTask extends AsyncTask< Void, Void, WearService.ConnectionResponse>{
+            MaterialDialog responseErrorDialog = new MaterialDialog.Builder(this.mainActivity.get())
+                    .title("")
+                    .titleColorRes(R.color.colorAlert)
+                    .content("")
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_smartwatch_off)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)))
+                    .cancelable(true)
+                    .positiveText(R.string.button_try_again)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            doWearConnection();
+                        }
+                    })
+                    .neutralText(R.string.button_cancel)
+                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .build();
 
-        private MaterialDialog dialog;
-        private final WeakReference<MainActivity> mainActivity;
+            switch (wearConnectionResponse){
 
-        WearConnectionTask(MainActivity mainActivity){
-            this.mainActivity = new WeakReference<>(mainActivity);
+                case ALREADY_CONNECTED:
+                    responseErrorDialog.setTitle(R.string.wear_dialog_already_connected_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_already_connected_error_content);
+                    break;
+
+                case BLUETOOTH_DISABLED:
+                    responseErrorDialog.setIcon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_bluetooth_off)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)));
+                    responseErrorDialog.setTitle(R.string.wear_dialog_bluetooth_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_bluetooth_error_content);
+                    break;
+
+                case NO_PAIRED_DEVICES:
+                    responseErrorDialog.setTitle(R.string.wear_dialog_no_paired_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_no_paired_error_content);
+                    break;
+
+                case NO_CAPABLE_DEVICES:
+                    responseErrorDialog.setIcon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.logo)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorAlert)));
+                    responseErrorDialog.setTitle(R.string.wear_dialog_no_capable_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_no_capable_error_content);
+                    break;
+
+                case DEVICE_INFO_ERROR:
+                    responseErrorDialog.setTitle(R.string.wear_dialog_no_deviceinfo_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_no_deviceinfo_error_content);
+                    break;
+
+                case TIMEOUT:
+                    responseErrorDialog.setTitle(R.string.wear_dialog_timeout_error_title);
+                    responseErrorDialog.setContent(R.string.wear_dialog_timeout_error_content);
+                    break;
+
+                case UNKNOWN_ERROR:
+                    responseErrorDialog.setTitle(R.string.wear_dialog_unknown_error_title);
+
+                    WearService wearService = getWearService();
+                    String lastExceptionMessage = null;
+                    if (wearService != null) {
+                        lastExceptionMessage = wearService.getLastExceptionMessage();
+                    }
+                    String errorContent = String.format("%s %s", getString(R.string.wear_dialog_unknown_error_prefix_content), lastExceptionMessage != null ? lastExceptionMessage : "None");
+                    responseErrorDialog.setContent(errorContent);
+
+                    break;
+
+            }
+            return responseErrorDialog;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.dialog = new MaterialDialog.Builder(this.mainActivity.get())
-                    .title(R.string.dialog_wear_synchronization_title)
-                    .content(R.string.dialog_wear_synchronization_content)
-                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_smartphone)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorPrimary)))
+            this.whileConnectionDialog = new MaterialDialog.Builder(this.mainActivity.get())
+                    .title(R.string.wear_dialog_connection_while_title)
+                    .content(R.string.wear_dialog_connection_while_content)
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_smartwatch)), ContextCompat.getColor(this.mainActivity.get(), R.color.colorPrimary)))
                     .cancelable(false)
                     .progress(true, 0)
                     .show();
         }
 
         @Override
-        protected WearService.ConnectionResponse doInBackground(Void... voids) {
+        protected WearService.WearConnectionResponse doInBackground(Void... voids) {
             return getWearService().connect();
         }
 
         @Override
-        protected void onPostExecute(WearService.ConnectionResponse connectionResponse) {
-            super.onPostExecute(connectionResponse);
-            switch (connectionResponse){
-                case UNKNOWN_ERROR:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
-                    break;
-                case TIMEOUT:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
-                    break;
-                case NO_WEAR_APP:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
-                    break;
-                case BLUETOOTH_DISABLED:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_bluetooth_error), Toast.LENGTH_LONG).show();
-                    break;
-                case NO_PAIRED_DEVICES:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_paired_error), Toast.LENGTH_LONG).show();
-                    break;
-                case NO_CAPABLE_DEVICES:
-                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
-                    break;
-                case SUCCESS:
-                    break;
-            }
-            this.dialog.dismiss();
+        protected void onPostExecute(WearService.WearConnectionResponse wearConnectionResponse) {
+            super.onPostExecute(wearConnectionResponse);
+
+            this.whileConnectionDialog.dismiss();
             this.mainActivity.get().updateWearMenuItem();
-            smartwatchFragment.refresh();
-            captureFragment.refresh();
-            if (NTPTime.isInitialized()){
-                NTPTime.close(this.mainActivity.get());
-                updateNTPMenuItem();
-                timeToolFragment.refresh();
+
+            if (wearConnectionResponse == WearService.WearConnectionResponse.SUCCESS) {
+                smartwatchFragment.refresh();
+                captureFragment.refresh();
+                if (NTPTime.isSynchronized()){
+                    NTPTime.close(this.mainActivity.get());
+                    updateNTPMenuItem();
+                    timeToolFragment.refresh();
+                }
+                Toast.makeText(this.mainActivity.get(), getString(R.string.wear_toast_connection_success), Toast.LENGTH_LONG).show();
+            }else{
+                MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(wearConnectionResponse);
+                responseErrorDialog.show();
             }
+
+//            switch (wearConnectionResponse){
+//                case UNKNOWN_ERROR:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case TIMEOUT:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case NO_WEAR_APP:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_unknown_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case BLUETOOTH_DISABLED:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_bluetooth_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case NO_PAIRED_DEVICES:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_paired_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case NO_CAPABLE_DEVICES:
+//                    Toast.makeText(this.mainActivity.get(), getString(R.string.toast_wear_synchronization_no_capable_error), Toast.LENGTH_LONG).show();
+//                    break;
+//                case SUCCESS:
+//                    break;
+//            }
+
+//            this.mainActivity.get().updateWearMenuItem();
+//            smartwatchFragment.refresh();
+//            captureFragment.refresh();
+//            if (NTPTime.isSynchronized()){
+//                NTPTime.close(this.mainActivity.get());
+//                updateNTPMenuItem();
+//                timeToolFragment.refresh();
+//            }
         }
 
     }
@@ -556,18 +749,22 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 WearService.WearBinder wearBinder = (WearService.WearBinder) service;
-                mWearService = wearBinder.getService();
-                mWearServiceBounded = true;
+                wearService = wearBinder.getService();
+                wearServiceBounded = true;
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                mWearServiceBounded = false;
+                wearServiceBounded = false;
             }
         };
     }
 
     public WearService getWearService() {
-        return mWearService;
+        return wearService;
+    }
+
+    private boolean isWearClientConnected(){
+        return this.getWearService() != null && this.getWearService().isConnected();
     }
 }

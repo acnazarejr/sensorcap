@@ -31,4 +31,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.4'
 
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.3'
+    implementation 'com.jaredrummler:android-device-names:1.1.7'
 }

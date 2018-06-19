@@ -2,17 +2,19 @@ package com.ssig.smartcap.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.wearable.activity.WearableActivity;
+import android.support.wearable.input.WearableButtons;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
@@ -20,91 +22,67 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.capture.CaptureRunner;
 import com.ssig.sensorsmanager.config.CaptureConfig;
 import com.ssig.sensorsmanager.time.NTPTime;
-import com.ssig.sensorsmanager.time.SystemTime;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.CountDownAnimation;
 import com.ssig.smartcap.common.Serialization;
 import com.ssig.smartcap.service.HostListenerService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends WearableActivity  implements
-        CapabilityClient.OnCapabilityChangedListener,
         MessageClient.OnMessageReceivedListener,
         ActivityCompat.OnRequestPermissionsResultCallback{
 
     private final static int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
-    private enum CaptureState{
-        IDLE, CAPTURING
+    private enum DeviceState{
+        IDLE, WAITING_CONNECTION, CAPTURING, SENDING
     }
 
-    private ImageView mImageHostConnectedIcon;
-    private ImageView mImageNTPSynchronizedIcon;
-    private View mLayoutContent;
-    private View mLayoutLogo;
-    private ImageView mImageDeviceTimeIcon;
-    private TextView mTextDeviceTime;
-    private ImageView mImageNTPTimeIcon;
-    private TextView mTextNTPTime;
-    private ImageButton mButtonControlCapture;
-    private View mLayoutCountdown;
-    private TextView mTextCountdown;
-    private Chronometer mChronometer;
+    private ImageView imageHostConnectedStatusIcon;
+    private ImageView imageNTPSynchronizedStatusIcon;
+    private View layoutLogo;
+    private View layoutCountdown;
+    private Chronometer chronometer;
+    private TextView textCountdown;
+    private TextView textStatus;
+    private ImageView imageKeyPrimary;
+    private ImageView imageKeyOne;
 
-    private SimpleDateFormat mSimpleDateFormat;
-    private Timer mUpdateTimer;
-    private TimerTask mUpdateTimerTask;
-    private SystemTime mSystemTime;
-    private NTPTime mNtpTime;
 
     private CaptureRunner captureRunner;
-    private CaptureState captureState;
+    private DeviceState deviceState;
 
 
+    //----------------------------------------------------------------------------------------------
+    // Override Functions
+    //----------------------------------------------------------------------------------------------
     @SuppressLint("SimpleDateFormat")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setAmbientEnabled();
-        this.mSimpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format));
-        this.mUpdateTimer = null;
-        this.mUpdateTimerTask = null;
-        this.mSystemTime = new SystemTime();
-        this.mNtpTime = new NTPTime();
-        this.captureState = CaptureState.IDLE;
         this.captureRunner = null;
         final String uri = String.format("wear://*%s", getString(R.string.message_path_client_activity_prefix));
         Wearable.getMessageClient(this).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
         this.initUI();
-        this.registerListeners();
     }
-
 
     @Override
     protected void onStart() {
@@ -115,17 +93,15 @@ public class MainActivity extends WearableActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
-        Wearable.getCapabilityClient(this).addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE);
+        this.setState(HostListenerService.connectedOnHost ? DeviceState.IDLE : DeviceState.WAITING_CONNECTION);
         this.updateStatusIcons();
-        this.updateStateButtonControlCapture();
-        this.startTimer();
+        this.updateStatus();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        this.stopTimer();
-        Wearable.getCapabilityClient(this).removeListener(this);
+    protected void onStop() {
+        super.onStop();
+        finish();
     }
 
     @Override
@@ -136,16 +112,24 @@ public class MainActivity extends WearableActivity  implements
         super.onDestroy();
     }
 
-    @Override
-    public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
-        if (capabilityInfo.getName().equals(getString(R.string.capability_smartcap_capture))){
-            updateStateButtonControlCapture(!capabilityInfo.getNodes().isEmpty());
-        }
-    }
-
+    //----------------------------------------------------------------------------------------------
+    // Message Received
+    //----------------------------------------------------------------------------------------------
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
         String path = messageEvent.getPath();
+
+        if (path.equals(getString(R.string.message_path_client_activity_sync_ntp))){
+            byte[] data = messageEvent.getData();
+            String ntpPool = Serialization.deserializeObject(data);
+            new NTPSynchronizationTask(this).execute(ntpPool);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_activity_close_ntp))){
+            NTPTime.close(this);
+            this.updateStatusIcons();
+        }
+
         if (path.equals(getString(R.string.message_path_client_activity_start_capture))){
             byte[] data = messageEvent.getData();
             CaptureConfig captureConfig = Serialization.deserializeObject(data);
@@ -156,6 +140,9 @@ public class MainActivity extends WearableActivity  implements
         }
     }
 
+    //----------------------------------------------------------------------------------------------
+    // Permission STUFFS
+    //----------------------------------------------------------------------------------------------
     private void checkPermissions(){
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
@@ -172,90 +159,96 @@ public class MainActivity extends WearableActivity  implements
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    //----------------------------------------------------------------------------------------------
+    // UI STUFFS
+    //----------------------------------------------------------------------------------------------
     private void initUI(){
-        this.mImageHostConnectedIcon = findViewById(R.id.image_host_connected);
-        this.mImageNTPSynchronizedIcon = findViewById(R.id.image_ntp_synchronized);
-        this.mLayoutContent = findViewById(R.id.layout_content);
-        this.mImageDeviceTimeIcon = findViewById(R.id.image_device_time);
-        this.mTextDeviceTime = findViewById(R.id.text_device_time);
-        this.mImageNTPTimeIcon = findViewById(R.id.image_ntp_time);
-        this.mTextNTPTime = findViewById(R.id.text_ntp_time);
-        this.mButtonControlCapture = findViewById(R.id.button_control_capture);
-        this.mTextCountdown = findViewById(R.id.text_countdown);
+        this.imageHostConnectedStatusIcon = findViewById(R.id.host_connected_status_icon_image);
+        this.imageNTPSynchronizedStatusIcon = findViewById(R.id.ntp_synchronized_status_icon_image);
 
-        this.mLayoutLogo = findViewById(R.id.layout_logo);
-        this.mLayoutLogo.setVisibility(View.VISIBLE);
+        this.layoutLogo = findViewById(R.id.logo_layout);
+        this.layoutLogo.setVisibility(View.VISIBLE);
 
-        this.mLayoutCountdown = findViewById(R.id.layout_countdown);
-        this.mLayoutCountdown.setVisibility(View.GONE);
+        this.layoutCountdown = findViewById(R.id.countdown_layout);
+        this.textCountdown = findViewById(R.id.countdown_text);
+        this.layoutCountdown.setVisibility(View.GONE);
 
-        this.mChronometer = findViewById(R.id.chronometer);
-        this.mChronometer.setVisibility(View.GONE);
-    }
+        this.chronometer = findViewById(R.id.chronometer);
+        this.chronometer.setVisibility(View.GONE);
 
-    private TimerTask createUpdateTimerTask(){
+        this.textStatus = findViewById(R.id.status_text);
 
-        return new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Long unixTimestampDevice = mSystemTime.now();
-                        Long unixTimestampNTP = mNtpTime.now();
-                        Date dateTimestampDevice = new Date(unixTimestampDevice);
-                        mTextDeviceTime.setText(mSimpleDateFormat.format(dateTimestampDevice));
-                        mTextNTPTime.setText(unixTimestampNTP != null ? mSimpleDateFormat.format(new Date(unixTimestampNTP)) : getString(R.string.time_tool_dummy_hour));
-                    }
-                });
+        View imageKeyPrimaryLayout = findViewById(R.id.key_primary_image_layout);
+        imageKeyPrimaryLayout.setVisibility(View.GONE);
+        View imageKeyOneLayout = findViewById(R.id.key_one_image_layout);
+        imageKeyOneLayout.setVisibility(View.GONE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+            WearableButtons.ButtonInfo buttonPrimaryInfo = WearableButtons.getButtonInfo(this, KeyEvent.KEYCODE_STEM_PRIMARY);
+            WearableButtons.ButtonInfo buttonOneInfo = WearableButtons.getButtonInfo(this, KeyEvent.KEYCODE_STEM_1);
+
+            if(buttonPrimaryInfo != null){
+                imageKeyPrimaryLayout.setVisibility(View.VISIBLE);
+                ImageView imageKeyPrimary = findViewById(R.id.key_primary_image);
+                imageKeyPrimary.setImageDrawable(WearableButtons.getButtonIcon(this, KeyEvent.KEYCODE_STEM_PRIMARY));
             }
-        };
+
+            if(buttonOneInfo != null){
+                imageKeyOneLayout.setVisibility(View.VISIBLE);
+                ImageView imageKeyOne = findViewById(R.id.key_one_image);
+                imageKeyOne.setImageDrawable(WearableButtons.getButtonIcon(this, KeyEvent.KEYCODE_STEM_1));
+            }
+
+        }
+
+
     }
 
     private void updateStatusIcons(){
-        this.mImageHostConnectedIcon.setImageResource(HostListenerService.connectedOnHost ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
-        this.mImageHostConnectedIcon.setColorFilter(ContextCompat.getColor(this, HostListenerService.connectedOnHost ? R.color.colorAccent : R.color.colorAlert));
-        this.mImageNTPSynchronizedIcon.setImageResource(NTPTime.isInitialized() ? R.drawable.ic_ntp_on : R.drawable.ic_ntp_off);
-        this.mImageNTPSynchronizedIcon.setColorFilter(ContextCompat.getColor(this, NTPTime.isInitialized() ? R.color.colorAccent : R.color.colorAlert));
+        this.imageHostConnectedStatusIcon.setImageResource(HostListenerService.connectedOnHost ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
+        this.imageHostConnectedStatusIcon.setColorFilter(ContextCompat.getColor(this, HostListenerService.connectedOnHost ? R.color.colorAccent : R.color.colorAlert));
+        this.imageNTPSynchronizedStatusIcon.setImageResource(NTPTime.isSynchronized() ? R.drawable.ic_ntp_on : R.drawable.ic_ntp_off);
+        this.imageNTPSynchronizedStatusIcon.setColorFilter(ContextCompat.getColor(this, NTPTime.isSynchronized() ? R.color.colorAccent : R.color.colorAlert));
     }
 
-    private void updateStateButtonControlCapture(){
-        Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this).getCapability(getString(R.string.capability_smartcap_capture), CapabilityClient.FILTER_REACHABLE);
-        capabilityInfoTask.addOnCompleteListener(new OnCompleteListener<CapabilityInfo>() {
-            @Override
-            public void onComplete(@NonNull Task<CapabilityInfo> task) {
-                CapabilityInfo capabilityInfo = task.getResult();
-                updateStateButtonControlCapture(!capabilityInfo.getNodes().isEmpty());
-            }
-        });
-    }
-
-    private void updateStateButtonControlCapture(boolean hostHasCaptureCapability){
-        if (HostListenerService.connectedOnHost && hostHasCaptureCapability){
-            this.mButtonControlCapture.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorAccent)));
-            this.mButtonControlCapture.setEnabled(true);
-        }else{
-            this.mButtonControlCapture.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.colorDisabled)));
-            this.mButtonControlCapture.setEnabled(false);
-        }
-        this.mButtonControlCapture.setImageResource(this.captureState == CaptureState.IDLE ? R.drawable.ic_play : R.drawable.ic_stop);
-    }
-
-    private void stopTimer(){
-        if (this.mUpdateTimer != null){
-            this.mUpdateTimer.cancel();
-            this.mUpdateTimer.purge();
-            this.mUpdateTimerTask = null;
-            this.mUpdateTimer = null;
+    private void updateStatus(){
+        switch(this.deviceState){
+            case WAITING_CONNECTION:
+                this.textStatus.setText(R.string.waiting_connection);
+                break;
+            case IDLE:
+                this.textStatus.setText(R.string.ready_to_capture);
+                break;
+            case CAPTURING:
+                this.textStatus.setText(R.string.capturing);
+                break;
+            case SENDING:
+                this.textStatus.setText(R.string.sending_files);
+                break;
         }
     }
 
-    private void startTimer() {
-        mUpdateTimer = new Timer();
-        mUpdateTimerTask = createUpdateTimerTask();
-        mUpdateTimer.scheduleAtFixedRate(mUpdateTimerTask, 0, 20);
+    private void setState(DeviceState deviceState){
+        this.deviceState = deviceState;
+        this.updateStatus();
     }
 
+    //----------------------------------------------------------------------------------------------
+    // Hardware Button STUFFS
+    //----------------------------------------------------------------------------------------------
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (this.deviceState == DeviceState.CAPTURING)
+            HostListenerService.stopHostCapture();
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Capture STUFFS
+    //----------------------------------------------------------------------------------------------
     private void startCapture(CaptureConfig captureConfig){
 
         if (captureConfig.isSmartwatchEnabled()) {
@@ -268,29 +261,32 @@ public class MainActivity extends WearableActivity  implements
             }
         }
 
-
-        CountDownAnimation countDownAnimation = new CountDownAnimation(this, this.mTextCountdown, captureConfig.getCountdownStart(), captureConfig.hasSound(), captureConfig.hasVibration());
+        CountDownAnimation countDownAnimation = new CountDownAnimation(this, this.textCountdown, captureConfig.getCountdownStart(), captureConfig.hasSound(), captureConfig.hasVibration());
         countDownAnimation.setCountDownListener(new CountDownAnimation.CountDownListener() {
             @Override
             public void onCountDownEnd(CountDownAnimation animation) {
-                mLayoutCountdown.setVisibility(View.GONE);
-                mLayoutLogo.setVisibility(View.GONE);
-                mChronometer.setBase(SystemClock.elapsedRealtime());
-                mChronometer.start();
-                mChronometer.setVisibility(View.VISIBLE);
+                layoutCountdown.setVisibility(View.GONE);
+                layoutLogo.setVisibility(View.GONE);
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                chronometer.start();
+                chronometer.setVisibility(View.VISIBLE);
                 if (captureRunner != null)
                     captureRunner.start();
-                updateStateButtonControlCapture(true);
             }
         });
 
-
-        this.mLayoutCountdown.setVisibility(View.VISIBLE);
-        this.captureState = CaptureState.CAPTURING;
+        this.layoutCountdown.setVisibility(View.VISIBLE);
+        this.setState(DeviceState.CAPTURING);
         countDownAnimation.start();
     }
 
     private void stopCapture(){
+
+        this.chronometer.stop();
+        this.chronometer.setVisibility(View.GONE);
+        this.layoutLogo.setVisibility(View.VISIBLE);
+        this.setState(DeviceState.SENDING);
+
         if (this.captureRunner != null){
             try {
                 final File captureCompressedFile = captureRunner.finish();
@@ -305,8 +301,10 @@ public class MainActivity extends WearableActivity  implements
                 dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
                     @Override
                     public void onSuccess(DataItem dataItem) {
-                        Toast.makeText(MainActivity.this, "Sensor files sent", Toast.LENGTH_LONG).show();
                         captureCompressedFile.delete();
+                        setState(HostListenerService.connectedOnHost ? DeviceState.IDLE : DeviceState.WAITING_CONNECTION);
+                        Toast.makeText(MainActivity.this, "Sensor files sent", Toast.LENGTH_LONG).show();
+
                     }
                 });
             } catch (IOException e) {
@@ -314,31 +312,69 @@ public class MainActivity extends WearableActivity  implements
                 return;
             }
         }
-        this.mChronometer.stop();
-        this.mChronometer.setVisibility(View.GONE);
-        this.captureState = CaptureState.IDLE;
+
         this.captureRunner = null;
-        mLayoutLogo.setVisibility(View.VISIBLE);
-        updateStateButtonControlCapture(true);
     }
 
-    private void registerListeners(){
-        this.mButtonControlCapture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.toast_press_hold, Toast.LENGTH_SHORT).show();
+    //----------------------------------------------------------------------------------------------
+    // NTP STUFFS
+    //----------------------------------------------------------------------------------------------
+    @SuppressLint("StaticFieldLeak")
+    private class NTPSynchronizationTask extends AsyncTask<String, Void, NTPTime.NTPSynchronizationResponse> {
+
+        private final WeakReference<MainActivity> mainActivity;
+
+        NTPSynchronizationTask(MainActivity mainActivity){
+            this.mainActivity = new WeakReference<>(mainActivity);
+        }
+
+
+        @Override
+        protected NTPTime.NTPSynchronizationResponse doInBackground(String... strings) {
+            if (strings.length == 0)
+                return NTPTime.NTPSynchronizationResponse.UNKNOWN_ERROR;
+            return NTPTime.synchronize(mainActivity.get(), strings[0]);
+        }
+
+        @Override
+        protected void onPostExecute(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse) {
+            super.onPostExecute(ntpSynchronizationResponse);
+
+            this.mainActivity.get().updateStatusIcons();
+
+            String responseMessage = "";
+            switch (ntpSynchronizationResponse){
+
+                case ALREADY_SYNCHRONIZED:
+                    responseMessage = getString(R.string.ntp_toast_already_synchronized_error);
+                    break;
+
+                case NETWORK_DISABLED:
+                    responseMessage = getString(R.string.ntp_toast_network_error);
+                    break;
+
+                case NTP_TIMEOUT:
+                    responseMessage = getString(R.string.ntp_toast_timeout_error);
+                    break;
+
+                case NTP_ERROR:
+                    String lastExceptionMessage = NTPTime.getLastExceptionMessage();
+                    responseMessage = String.format("%s %s", getString(R.string.ntp_toast_synchronization_error_prefix), lastExceptionMessage != null ? lastExceptionMessage : "None");
+                    break;
+
+                case UNKNOWN_ERROR:
+                    responseMessage = getString(R.string.ntp_toast_unknown_error);
+                    break;
+
+                case SUCCESS:
+                    responseMessage = getString(R.string.ntp_toast_synchronization_success);
+                    break;
+
             }
-        });
-        this.mButtonControlCapture.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (captureState == CaptureState.IDLE)
-                    HostListenerService.startHostCapture();
-                else if (captureState == CaptureState.CAPTURING)
-                    HostListenerService.stopHostCapture();
-                return true;
-            }
-        });
+            Toast.makeText(this.mainActivity.get(), responseMessage, Toast.LENGTH_LONG).show();
+
+
+        }
     }
 
 }
