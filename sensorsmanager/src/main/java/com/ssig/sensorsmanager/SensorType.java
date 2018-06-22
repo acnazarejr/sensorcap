@@ -8,38 +8,62 @@ import java.util.Map;
 
 public enum SensorType {
 
-    TYPE_ACCELEROMETER(10),
-    TYPE_GYROSCOPE(20), TYPE_GYROSCOPE_UNCALIBRATED(21),
-    TYPE_MAGNETIC_FIELD(30), TYPE_MAGNETIC_FIELD_UNCALIBRATED(31),
-    TYPE_PRESSURE(40),
-    TYPE_HEART_RATE(50),
-    TYPE_GRAVITY(101),
-    TYPE_LINEAR_ACCELERATION(102),
-    TYPE_ROTATION_VECTOR(103),
-    TYPE_GAME_ROTATION_VECTOR(104),
-    TYPE_GEOMAGNETIC_ROTATION_VECTOR(105),
-    TYPE_STEP_DETECTOR(106),
-    TYPE_PROXIMITY(107),
-    TYPE_LIGHT(108);
+    TYPE_ACCELEROMETER("ACC"),
+    TYPE_GRAVITY("GVT"),
+    TYPE_GYROSCOPE("GYR"),
+    TYPE_GYROSCOPE_UNCALIBRATED("GYU"),
+    TYPE_LINEAR_ACCELERATION("LAC"),
+    TYPE_ROTATION_VECTOR("ROT"),
+    TYPE_STEP_DETECTOR("STP"),
+    TYPE_GAME_ROTATION_VECTOR("GRT"),
+    TYPE_GEOMAGNETIC_ROTATION_VECTOR("MRT"),
+    TYPE_MAGNETIC_FIELD("MAG"),
+    TYPE_MAGNETIC_FIELD_UNCALIBRATED("MAU"),
+    TYPE_PRESSURE("BAR"),
+    TYPE_HEART_RATE("HTR"),
+    TYPE_PROXIMITY("PRX"),
+    TYPE_LIGHT("LHT");
 
     public enum SensorGroup {
         MOTION, POSITION, ENVIRONMENT
     }
 
-    private final int code;
+    public enum DeviceType {
+        SMARTPHONE, SMARTWATCH
+    }
 
-    SensorType(int code) {
+    public enum DeviceLocation {
+        FRONT_POCKET, BACK_POCKET, SHIRT_POCKET, BAG, WRIST, OTHER
+    }
+
+    public enum DeviceSide{
+        LEFT, RIGHT
+    }
+
+    private final String code;
+
+    SensorType(String code) {
         this.code = code;
     }
 
-    public int code() {
+    public String code() {
         return code;
+    }
+
+    public static SensorType fromCode(String code) {
+        for(SensorType type : SensorType.values()) {
+            String typecode = type.code();
+            if(code.equals(type.code())) {
+                return type;
+            }
+        }
+        return null;
     }
 
 
     public Integer androidType() {
 
-        @SuppressLint("UseSparseArrays") Map<Integer, Integer> codeMap = new HashMap<>();
+        @SuppressLint("UseSparseArrays") Map<String, Integer> codeMap = new HashMap<>();
 
         codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               Sensor.TYPE_ACCELEROMETER);
         codeMap.put(SensorType.TYPE_GRAVITY.code(),                     Sensor.TYPE_GRAVITY);
@@ -63,7 +87,7 @@ public enum SensorType {
 
     public String toString() {
 
-        @SuppressLint("UseSparseArrays") Map<Integer, String> codeMap = new HashMap<>();
+        @SuppressLint("UseSparseArrays") Map<String, String> codeMap = new HashMap<>();
 
         codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               "Accelerometer");
         codeMap.put(SensorType.TYPE_GRAVITY.code(),                     "Gravity");
@@ -85,33 +109,10 @@ public enum SensorType {
 
     }
 
-    public String abbrev() {
-
-        @SuppressLint("UseSparseArrays") Map<Integer, String> codeMap = new HashMap<>();
-
-        codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               "ACC");
-        codeMap.put(SensorType.TYPE_GRAVITY.code(),                     "GVT");
-        codeMap.put(SensorType.TYPE_GYROSCOPE.code(),                   "GYR");
-        codeMap.put(SensorType.TYPE_GYROSCOPE_UNCALIBRATED.code(),      "GYU");
-        codeMap.put(SensorType.TYPE_LINEAR_ACCELERATION.code(),         "LAC");
-        codeMap.put(SensorType.TYPE_ROTATION_VECTOR.code(),             "ROT");
-        codeMap.put(SensorType.TYPE_STEP_DETECTOR.code(),               "STP");
-        codeMap.put(SensorType.TYPE_GAME_ROTATION_VECTOR.code(),        "GRT");
-        codeMap.put(SensorType.TYPE_GEOMAGNETIC_ROTATION_VECTOR.code(), "MRT");
-        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD.code(),              "MAG");
-        codeMap.put(SensorType.TYPE_MAGNETIC_FIELD_UNCALIBRATED.code(), "MAU");
-        codeMap.put(SensorType.TYPE_PRESSURE.code(),                    "BAR");
-        codeMap.put(SensorType.TYPE_HEART_RATE.code(),                  "HTR");
-        codeMap.put(SensorType.TYPE_PROXIMITY.code(),                   "PRX");
-        codeMap.put(SensorType.TYPE_LIGHT.code(),                       "LHT");
-
-        return codeMap.get(this.code);
-
-    }
 
     public String unit() {
 
-        @SuppressLint("UseSparseArrays") Map<Integer, String> codeMap = new HashMap<>();
+        @SuppressLint("UseSparseArrays") Map<String, String> codeMap = new HashMap<>();
 
         codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               "m/s²");
         codeMap.put(SensorType.TYPE_GRAVITY.code(),                     "m/s²");
@@ -135,7 +136,7 @@ public enum SensorType {
 
     public SensorGroup group() {
 
-        @SuppressLint("UseSparseArrays") Map<Integer, SensorGroup> codeMap = new HashMap<>();
+        @SuppressLint("UseSparseArrays") Map<String, SensorGroup> codeMap = new HashMap<>();
 
         codeMap.put(SensorType.TYPE_ACCELEROMETER.code(),               SensorGroup.MOTION);
         codeMap.put(SensorType.TYPE_GRAVITY.code(),                     SensorGroup.MOTION);

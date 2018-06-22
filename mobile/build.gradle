@@ -26,7 +26,7 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.android.support:support-v13:27.1.1'
     implementation 'com.android.support:support-vector-drawable:27.1.1'
     implementation 'com.google.android.gms:play-services-wearable:15.0.1'
+    implementation 'com.google.code.gson:gson:2.8.4'
 
     implementation 'com.balysv:material-ripple:1.0.2'
     implementation 'com.aurelhubert:ahbottomnavigation:2.1.0'
@@ -50,6 +51,7 @@ dependencies {
     implementation 'com.github.ceryle:RadioRealButton:v2.1.1'
     implementation 'com.ncorti:slidetoact:0.3.0'
     implementation 'com.karumi:dexter:4.2.0'
+    implementation 'org.zeroturnaround:zt-zip:1.13'
 
     wearApp project(':wear')
     implementation project(path: ':sensorsmanager')

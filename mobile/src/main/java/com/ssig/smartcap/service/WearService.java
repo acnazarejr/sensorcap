@@ -18,7 +18,8 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.config.CaptureConfig;
+import com.ssig.sensorsmanager.config.DeviceConfig;
+import com.ssig.sensorsmanager.data.DeviceData;
 import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.Serialization;
@@ -181,7 +182,7 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
             }
 
             this.clientNode = capableNode;
-            this.sendMessage(getString(R.string.message_path_client_service_connection_done));
+            this.sendMessage(getString(R.string.message_path_client_activity_connected));
             if(requestClientSensorInfo()){
                 return WearConnectionResponse.SUCCESS;
             }else{
@@ -216,7 +217,7 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         if (this.requestSensorInfoLatch != null)
             return false;
         this.requestSensorInfoLatch = new CountDownLatch(1);
-        this.sendMessage(getString(R.string.message_path_client_service_request_watch_sensorinfo));
+        this.sendMessage(getString(R.string.message_path_client_activity_request_watch_sensorinfo));
         try {
             this.requestSensorInfoLatch.await(60, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -225,7 +226,6 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         this.requestSensorInfoLatch = null;
         return this.clientDeviceInfo != null;
     }
-
 
     //----------------------------------------------------------------------------------------------
     // Disconnection STUFFS
@@ -237,7 +237,7 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     public boolean disconnect(boolean sendDisconnectMessageToClient){
         if (sendDisconnectMessageToClient) {
             try {
-                this.sendMessage(getString(R.string.message_path_client_service_disconnect));
+                this.sendMessage(getString(R.string.message_path_client_activity_disconnected));
             } catch (ApiException e) {
                 e.printStackTrace();
                 return false;
@@ -248,50 +248,9 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     }
 
 
-
-
-
-
-//    public WearConnectionResponse connect(){
-//
-//        if (this.clientNode != null)
-//            return WearConnectionResponse.SUCCESS;
-//
-//        if (!this.hasWearOS())
-//            return WearConnectionResponse.NO_WEAR_APP;
-//
-//        if (DeviceTools.isBluetoothDisabled())
-//            return WearConnectionResponse.BLUETOOTH_DISABLED;
-//
-//        try {
-//
-//            Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this).getCapability(getString(R.string.capability_smartcap_wear), CapabilityClient.FILTER_REACHABLE);
-//            CapabilityInfo capabilityInfo = Tasks.await(capabilityInfoTask, 10, TimeUnit.SECONDS);
-//            if (!capabilityInfo.getNodes().isEmpty()){
-//                List<Node> foundedClientNodes = new ArrayList<>(capabilityInfo.getNodes());
-//                this.clientNode = foundedClientNodes.get(0);
-//                if (this.requestClientSensorInfo()) {
-//                    this.sendMessage(getString(R.string.message_path_client_service_connection_done));
-//                    return WearConnectionResponse.SUCCESS;
-//                }else{
-//                    return WearConnectionResponse.TIMEOUT;
-//                }
-//            }
-//
-//            Task<List<Node>> connectedNodesTask = Wearable.getNodeClient(this).getConnectedNodes();
-//            List<Node> nodeList = Tasks.await(connectedNodesTask);
-//            return nodeList.isEmpty() ?  WearConnectionResponse.NO_PAIRED_DEVICES : WearConnectionResponse.NO_CAPABLE_DEVICES;
-//
-//        } catch (ExecutionException | InterruptedException | ApiException e) {
-//            return WearConnectionResponse.UNKNOWN_ERROR;
-//        } catch (TimeoutException e) {
-//            return WearConnectionResponse.TIMEOUT;
-//        }
-//
-//    }
-
-
-
+    //----------------------------------------------------------------------------------------------
+    // NTP STUFFS
+    //----------------------------------------------------------------------------------------------
     public void syncClientNTP(String ntpPool){
         try {
             byte[] data = Serialization.serializeObject(ntpPool);
@@ -309,17 +268,12 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         }
     }
 
-    public void setCaptureCapability(boolean capable){
-        if (capable){
-            Wearable.getCapabilityClient(this).addLocalCapability(getString(R.string.capability_smartcap_capture));
-        }else{
-            Wearable.getCapabilityClient(this).removeLocalCapability(getString(R.string.capability_smartcap_capture));
-        }
-    }
-
-    public void startCapture(CaptureConfig captureConfig){
+    //----------------------------------------------------------------------------------------------
+    // Capture STUFFS
+    //----------------------------------------------------------------------------------------------
+    public void startCapture(DeviceConfig deviceConfig){
         try {
-            byte[] data = Serialization.serializeObject(captureConfig);
+            byte[] data = Serialization.serializeObject(deviceConfig);
             this.sendMessage(getString(R.string.message_path_client_activity_start_capture), data);
         } catch (ApiException e) {
             e.printStackTrace();
@@ -334,17 +288,12 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         }
     }
 
-
-
-//    public String getClientID(){
-//        return (this.clientNode != null) ? this.clientNode.getId() : null;
-//    }
-
-
-
-
-
-
-
+    //----------------------------------------------------------------------------------------------
+    // Sensor Files STUFFS
+    //----------------------------------------------------------------------------------------------
+    public void requestSensorFiles(DeviceData deviceData) throws ApiException {
+        byte[] data = Serialization.serializeObject(deviceData);
+        this.sendMessage(getString(R.string.message_path_client_activity_request_sensor_files), data);
+    }
 
 }

@@ -43,6 +43,7 @@
     <string name="button_no">No</string>
     <string name="button_save">Save</string>
     <string name="button_done">Done</string>
+    <string name="button_ok">OK</string>
 
     <!-- ******************** PERMISSIONS *************************** -->
     <string name="permissions_dialog_failed_title">Permissions Denied</string>
@@ -78,7 +79,7 @@
     <string name="wear_dialog_no_paired_error_title">Nearby Paired Devices</string>
     <string name="wear_dialog_no_paired_error_content">No nearby smartwatch paired or connected devices with this device. Only bluetooth connections is allowed.</string>
     <string name="wear_dialog_no_capable_error_title">Nearby Capable Devices </string>
-    <string name="wear_dialog_no_capable_error_content">No nearby smartwatch capable devices with Smartcap app installed. Only bluetooth connections is allowed.</string>
+    <string name="wear_dialog_no_capable_error_content">No nearby smartwatch capable devices with Smartcap app installed or running. Only bluetooth connections is allowed.</string>
     <string name="wear_dialog_timeout_error_title">Connection Timeout</string>
     <string name="wear_dialog_timeout_error_content">A connection timeout is reached.</string>
     <string name="wear_dialog_no_deviceinfo_error_title">Device Info</string>
@@ -88,22 +89,9 @@
     <string name="wear_toast_connection_success">Wear successfully connected</string>
 
 
-    <!--<string name="dialog_wear_sensorinfo_title">Smartwatch Sensors</string>-->
-    <!--<string name="dialog_wear_sensorinfo_content">Requesting smartwatch sensor details.</string>-->
-    <!--<string name="toast_wear_sensorinfo_success">Sensor details successfully received</string>-->
-
-    <!--<string name="toast_wear_synchronization_bluetooth_error">No bluetooth connections found</string>-->
-    <!--<string name="toast_wear_synchronization_wear_error">The Android Wear App is not installed.</string>-->
-
-
-
-
-
-
-
     <!-- ******************** DEVICES *************************** -->
     <string name="devices_device_info_title">Device Details</string>
-    <string name="devices_device_uuid">Device UUID</string>
+    <string name="devices_device_uuid">Device sensorConfigUUID</string>
     <string name="devices_device_version">Android version</string>
     <string name="devices_device_api">API</string>
     <string name="devices_device_sensors_title">Available Sensors</string>
@@ -136,17 +124,7 @@
     <string name="timetool_dialog_device_alert_content">The Device mode is selected. The NTP mode is more reliable. Do you want to continue anyway?</string>
 
 
-
-
-
-
-
-
-
-
-
-
-
+    <!-- ******************** CAPTURE *************************** -->
     <string name="capture_devices_section_title">Capture Devices</string>
     <string name="capture_smartphone_position">Smartphone Position</string>
     <string name="capture_smartphone_side">Smartphone Side</string>
@@ -162,28 +140,38 @@
     <string name="capture_dialog_ntp_alert_content">The NTP is not synchronized. Do you want to continue anyway?</string>
     <string name="capture_dialog_wear_alert_title">Smartwatch Connection</string>
     <string name="capture_dialog_wear_alert_content">No devices paired or connected. Do you want to continue anyway?</string>
-    <string name="capture_dialog_wear_sensors_title">Smartwatch Data</string>
-    <string name="capture_dialog_wear_sensors_content">Receiving smartwatch sensor files.</string>
     <string name="capture_dialog_make_capture_data_title">Capture Data</string>
     <string name="capture_dialog_make_capture_data_content">Creating and compressing capture data.</string>
+    <string name="capture_slide_to_stop">Slide to Stop</string>
 
 
+    <!-- ******************** CAPTURE *************************** -->
+    <string name="archive_menu_share">Share</string>
+    <string name="archive_menu_delete">Delete</string>
+    <string name="archive_delete_dialog_title">Delete captures?</string>
+    <string name="archive_delete_dialog_content">All selected files will be deleted permanently!</string>
+    <string name="archive_share_dialog_error_title">Unclosed Captures</string>
+    <string name="archive_share_dialog_error_content">It is not possible to share unclosed captures.</string>
 
+    <string name="archive_close_dialog_confirm_title">Close Capture</string>
+    <string name="archive_close_dialog_confirm_content">The capture will be closed. If the capture employed a smartwatch, it must be connected with this smartphone to copy files. This operation can long a few minutes. Continue?</string>
+    <string name="archive_close_dialog_no_smartwatch_error_title">Smartwatch Connection</string>
+    <string name="archive_close_dialog_no_smartwatch_error_content">The correct employed smartwatch is not connected.</string>
 
+    <string name="archive_dialog_wear_sensors_title">Smartwatch Data</string>
+    <string name="archive_dialog_wear_sensors_content_waiting">Waiting for smartwatch sensor files. This operation can long a few minutes.</string>
+    <string name="archive_dialog_wear_sensors_content_prefix">Copying Sensor File: </string>
 
+    <string name="archive_dialog_wear_sensors_error_title">Transmission Error</string>
+    <string name="archive_dialog_wear_sensors_error_folder">Error during smartwatch capture folder creation.</string>
+    <string name="archive_dialog_wear_sensors_error_asset">Files not found in smartwatch.</string>
+    <string name="archive_dialog_wear_sensors_error_io">An IO Error occurs during sensor files transmission.</string>
+    <string name="archive_dialog_wear_sensors_error_execution">An Execution Error occurs during sensor files transmission.</string>
+    <string name="archive_dialog_wear_sensors_error_timeout">A transmission timeout is reached.</string>
 
-
-
-
-
-
-
-
-
-
-
-
-
+    <string name="archive_dialog_close_capture_title">Close Capture</string>
+    <string name="archive_dialog_close_capture_content">Compressing the capture files. This operation can long a few minutes.</string>
+    <string name="archive_toast_closed_success">Capture closed successfully</string>
 
 
 </resources>

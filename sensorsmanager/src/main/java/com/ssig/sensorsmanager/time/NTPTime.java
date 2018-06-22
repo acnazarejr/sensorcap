@@ -33,11 +33,6 @@ public class NTPTime implements Time {
         return NTPTime.isSynchronized() ? TrueTime.now().getTime() : null;
     }
 
-    @Override
-    public Long now(Long valueIfInvalid) {
-        return NTPTime.isSynchronized() ? TrueTime.now().getTime() : valueIfInvalid;
-    }
-
     public static boolean isSynchronized(){
         return isynchronized && TrueTime.isInitialized();
     }
@@ -56,7 +51,7 @@ public class NTPTime implements Time {
             TrueTime.build()
                     .withNtpHost(ntpPoolAddress)
                     .withLoggingEnabled(false)
-                    .withConnectionTimeout(30_000)
+                    .withConnectionTimeout(3_000)
                     .withSharedPreferences(context)
                     .initialize();
         } catch (SocketTimeoutException e) {

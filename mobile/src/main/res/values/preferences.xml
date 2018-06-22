@@ -15,9 +15,6 @@
     <string name="preference_main_key_has_vibration">has_vibration</string>
     <bool name="preference_main_default_has_vibration">false</bool>
 
-    <string name="preference_main_key_app_folder_name">app_folder</string>
-    <string name="preference_main_default_app_folder_name">smartcap</string>
-
     <string name="preference_smartphone_file_id">SMARTPHONE_PREFERENCES</string>
     <string name="preference_smartwatch_file_id">SMARTWATCH_PREFERENCES</string>
     <string name="preference_sensor_enabled_suffix">_ENABLED</string>

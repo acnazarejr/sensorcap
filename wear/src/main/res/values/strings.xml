@@ -20,6 +20,7 @@
     <string name="capturing">Capturing...</string>
     <string name="sending_files">Sending Files...</string>
     <string name="close">Close</string>
-    <string name="stop">Stop</string>
+    <string name="hardware_button_instruction">Stop (Click) - Close (Long)</string>
+    <string name="syncing_ntp">Syncing NTP...</string>
 
 </resources>

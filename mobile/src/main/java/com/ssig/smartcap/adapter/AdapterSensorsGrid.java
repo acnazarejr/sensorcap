@@ -98,7 +98,7 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
                         updateItemIcon(view.viewItemIcon, sensorsGridItem);
 
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(sensorsGridItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_enabled_suffix), sensorsGridItem.isEnabled());
+                        editor.putBoolean(sensorsGridItem.getSensorType().code() + context.getString(R.string.preference_sensor_enabled_suffix), sensorsGridItem.isEnabled());
                         editor.apply();
 
                         return true;
@@ -129,7 +129,7 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
         iconButton.setFocusable(sensorsGridItem.isValid());
 
         TextView iconText = viewItemIcon.findViewById(R.id.sensor_grid_item_icon_text);
-        iconText.setText(sensorsGridItem.getSensorType().abbrev());
+        iconText.setText(sensorsGridItem.getSensorType().code());
         if (!sensorsGridItem.isValid())
             iconText.setTextColor(ContextCompat.getColor(this.context, R.color.colorGreyLight));
 
@@ -163,7 +163,7 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
                     @Override
                     public void onDismiss(DialogInterface dialog) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putInt(sensorsGridItem.getSensorType().abbrev() + context.getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getFrequency());
+                        editor.putInt(sensorsGridItem.getSensorType().code() + context.getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getFrequency());
                         editor.apply();
                     }
                 })

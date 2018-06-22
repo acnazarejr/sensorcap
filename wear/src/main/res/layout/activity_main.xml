@@ -121,8 +121,9 @@
                     android:id="@+id/status_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:padding="2dp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:padding="4dp"
                     android:background="@color/colorPrimaryDark"
                     android:textColor="@color/colorGreyLight"/>
 
@@ -131,59 +132,37 @@
             <LinearLayout
                 android:id="@+id/bottom_layout"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="75dp"
                 android:background="@color/colorPrimaryLight"
                 android:layout_alignParentBottom="true"
                 android:gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:id="@+id/key_primary_image_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:layout_margin="5dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/key_primary_image"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_ntp_on"
-                        android:tint="@color/colorPrimaryDark"
-                        android:contentDescription="@string/image_description" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:text="@string/close"/>
-
-                </LinearLayout>
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/key_one_image_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="3dp"
                     android:gravity="center_horizontal"
-                    android:layout_margin="5dp"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textAlignment="center"
+                        android:text="@string/hardware_button_instruction"/>
 
                     <ImageView
                         android:id="@+id/key_one_image"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_ntp_on"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
                         android:tint="@color/colorPrimaryDark"
                         android:contentDescription="@string/image_description" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:text="@string/stop"/>
-
                 </LinearLayout>
+
+
 
             </LinearLayout>
 
@@ -208,6 +187,63 @@
 
         </RelativeLayout>
 
+        <LinearLayout
+            android:id="@+id/sending_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBackgroundView"
+            android:visibility="gone"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:padding="10dp"
+                android:tint="@color/colorPrimary"
+                android:src="@drawable/ic_progress_upload"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorGreyMediumDark"
+                android:textSize="20sp"
+                android:text="@string/sending_files"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ntp_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBackgroundView"
+            android:visibility="gone"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:padding="10dp"
+                android:tint="@color/colorPrimary"
+                android:src="@drawable/ic_ntp_on"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorGreyMediumDark"
+                android:textSize="20sp"
+                android:text="@string/syncing_ntp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

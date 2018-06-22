@@ -3,20 +3,19 @@
     <!-- CAPABILITIES -->
     <string name="capability_smartcap_phone">capability_smartcap_phone</string>
     <string name="capability_smartcap_wear">capability_smartcap_wear</string>
-    <string name="capability_smartcap_capture">capability_smartcap_capture</string>
+    <!--<string name="capability_smartcap_capture">capability_smartcap_capture</string>-->
 
-    <!-- MESSAGES TO WEAR SERVICE -->
-    <string name="message_path_client_service_prefix">/client-service</string>
-    <string name="message_path_client_service_connection_done">/client-service/connection-done</string>
-    <string name="message_path_client_service_request_watch_sensorinfo">/client-service/request-sensorinfo</string>
-    <string name="message_path_client_service_disconnect">/client-service/disconnect</string>
 
     <!-- MESSAGES TO WEAR ACTIVITY -->
     <string name="message_path_client_activity_prefix">/client-activity</string>
+    <string name="message_path_client_activity_request_watch_sensorinfo">/client-activity/request-sensorinfo</string>
+    <string name="message_path_client_activity_connected">/client-activity/connected</string>
+    <string name="message_path_client_activity_disconnected">/client-activity/disconnected</string>
     <string name="message_path_client_activity_sync_ntp">/client-activity/sync-ntp</string>
     <string name="message_path_client_activity_close_ntp">/client-activity/close-ntp</string>
     <string name="message_path_client_activity_start_capture">/client-activity/start-capture</string>
     <string name="message_path_client_activity_stop_capture">/client-activity/stop-capture</string>
+    <string name="message_path_client_activity_request_sensor_files">/client-activity/request-sensor-files</string>
 
     <!-- MESSAGES TO HOST SERVICE -->
     <string name="message_path_host_service_prefix">/host-service</string>
@@ -26,13 +25,26 @@
     <string name="message_path_host_activity_prefix">/host-activity</string>
     <string name="message_path_host_activity_disconnect">/host-activity/disconnect</string>
 
-    <!-- MESSAGES TO CAPTURE FRAGMENT -->
+    <!-- MESSAGES TO HOST CAPTURE FRAGMENT -->
     <string name="message_path_host_capture_fragment_prefix">/host-capture</string>
-    <string name="message_path_host_capture_fragment_start_capture">/host-capture/start-capture</string>
     <string name="message_path_host_capture_fragment_stop_capture">/host-capture/stop-capture</string>
-    <string name="message_path_host_capture_fragment_sensor_files">/host-capture/sensor-files</string>
 
+    <!-- MESSAGES TO HOST ARCHIVE FRAGMENT -->
+    <string name="message_path_host_archive_fragment_prefix">/host-archive</string>
+    <string name="message_path_host_archive_fragment_sensor_files_sent">/host-archive/sensor-files-sent</string>
+    <string name="message_path_host_archive_fragment_sensor_files_success">/host-archive/sensor-files-success</string>
+    <string name="message_path_host_archive_fragment_sensor_files_error">/host-archive/sensor-files-error</string>
+
+    <string name="sensor_files_error_capture_folder_no_exists">The capture folder does not exists.</string>
+    <string name="sensor_files_error_file_no_exists">Some sensor files does not exists.</string>
+    <string name="sensor_files_error_data_item">Failure while send files.</string>
+
+    <!-- ASSETS -->
     <string name="asset_sensors_smartwatch">asset_sensors_smartwatch</string>
 
+    <!-- FOLDERS -->
+    <string name="system_folder_name">smartcap</string>
+    <string name="capture_folder_name">captures</string>
+    <string name="archive_folder_name">archive</string>
 
 </resources>

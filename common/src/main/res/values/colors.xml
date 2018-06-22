@@ -20,6 +20,7 @@
 
     <color name="colorBackgroundView">@color/md_grey_100</color>
     <color name="colorBackgroundViewDark">@color/md_grey_200</color>
+    <color name="colorBackgroundSelected">#1A000000</color>
     <color name="colorDisabled">@color/colorGreyMediumLight</color>
 
     <color name="colorAlert">@color/md_red_300</color>

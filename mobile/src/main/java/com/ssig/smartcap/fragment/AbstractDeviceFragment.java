@@ -77,7 +77,7 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
         ((TextView)layoutDeviceInfo.findViewById(R.id.device_manufacturer_model_text)).setText(String.format("%s %s (%s)", deviceInfo.getManufacturer().toUpperCase(), deviceInfo.getMarketName(), deviceInfo.getModel()));
         ((TextView)layoutDeviceInfo.findViewById(R.id.android_version_text)).setText(deviceInfo.getAndroidVersion());
         ((TextView)layoutDeviceInfo.findViewById(R.id.android_api_text)).setText(String.valueOf(deviceInfo.getAndroidSDK()));
-        ((TextView)layoutDeviceInfo.findViewById(R.id.device_uuid_text)).setText(deviceInfo.getUUID());
+        ((TextView)layoutDeviceInfo.findViewById(R.id.device_uuid_text)).setText(deviceInfo.getDeviceKey());
     }
 
     protected void initDeviceSensors(View layoutAvailableSensors) {
@@ -153,8 +153,8 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
             SensorInfo sensorInfo = entry.getValue();
             if (sensorInfo != null) {
                 sensorsGridItem = new SensorsGridItem(sensorInfo);
-                sensorsGridItem.setEnabled(sharedPreferences.getBoolean(sensorsGridItem.getSensorType().abbrev() + getString(R.string.preference_sensor_enabled_suffix), true));
-                sensorsGridItem.setFrequency(sharedPreferences.getInt(sensorsGridItem.getSensorType().abbrev() + getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getDefaultFrequency()));
+                sensorsGridItem.setEnabled(sharedPreferences.getBoolean(sensorsGridItem.getSensorType().code() + getString(R.string.preference_sensor_enabled_suffix), true));
+                sensorsGridItem.setFrequency(sharedPreferences.getInt(sensorsGridItem.getSensorType().code() + getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getDefaultFrequency()));
             } else {
                 sensorsGridItem = new SensorsGridItem(entry.getKey());
             }
@@ -194,7 +194,7 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
                             case 100: frequency = sensorsGridItem.getMaxFrequency(); break;
                         }
                         sensorsGridItem.setFrequency(frequency);
-                        editor.putInt(sensorsGridItem.getSensorType().abbrev() + getContext().getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getFrequency());
+                        editor.putInt(sensorsGridItem.getSensorType().code() + getContext().getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getFrequency());
                     }
                 }
             }

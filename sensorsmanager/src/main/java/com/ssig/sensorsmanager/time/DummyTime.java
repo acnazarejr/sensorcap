@@ -1,11 +1,11 @@
 package com.ssig.sensorsmanager.time;
 
-
-public class SystemTime implements Time {
+public class DummyTime implements Time {
 
     @Override
     public Long now() {
-        return System.currentTimeMillis();
+        return -1L;
     }
+
 
 }

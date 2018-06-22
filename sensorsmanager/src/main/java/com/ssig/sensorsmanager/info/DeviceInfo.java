@@ -19,36 +19,45 @@ public class DeviceInfo implements Serializable {
 
     static final long serialVersionUID = 9111128914562345678L;
 
-    private String uuid;
-    private String deviceName;
-    private String androidVersion;
-    private int androidSDK;
-    private String manufacturer;
-    private String model;
-    private String marketName;
-    private Map<SensorType, SensorInfo> sensorsInfo;
-
-    public static DeviceInfo get(Context context){
-        return new DeviceInfo(context);
-    }
+    protected String deviceKey;
+    protected String deviceName;
+    protected String androidVersion;
+    protected int androidSDK;
+    protected String manufacturer;
+    protected String model;
+    protected String marketName;
+    protected Map<SensorType, SensorInfo> sensorsInfo;
 
     @SuppressLint("HardwareIds")
-    private DeviceInfo(Context context){
+    public static DeviceInfo get(Context context){
+        DeviceInfo deviceInfo = new DeviceInfo();
+
         DeviceName.DeviceInfo info = DeviceName.getDeviceInfo(context);
-        this.uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        deviceInfo.deviceKey = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.deviceName =  bluetoothAdapter != null ? bluetoothAdapter.getName() : context.getString(R.string.util_unknown_device);
-        this.androidVersion = Build.VERSION.RELEASE;
-        this.androidSDK = Build.VERSION.SDK_INT;
-        this.manufacturer = info.manufacturer;
-        this.model = info.model;
-        this.marketName = info.marketName;
-        this.sensorsInfo = SensorInfo.getAll(context);
+        deviceInfo.deviceName =  bluetoothAdapter != null ? bluetoothAdapter.getName() : context.getString(R.string.util_unknown_device);
+        deviceInfo.androidVersion = Build.VERSION.RELEASE;
+        deviceInfo.androidSDK = Build.VERSION.SDK_INT;
+        deviceInfo.manufacturer = info.manufacturer;
+        deviceInfo.model = info.model;
+        deviceInfo.marketName = info.marketName;
+        deviceInfo.sensorsInfo = SensorInfo.getAll(context);
+        return deviceInfo;
     }
 
+    protected DeviceInfo(){
+        this.deviceKey = null;
+        this.deviceName = null;
+        this.androidVersion = null;
+        this.androidSDK = -1;
+        this.manufacturer = null;
+        this.model = null;
+        this.marketName = null;
+        this.sensorsInfo = null;
+    }
 
-    public String getUUID() {
-        return uuid;
+    public String getDeviceKey() {
+        return deviceKey;
     }
 
     public String getDeviceName() {
@@ -75,10 +84,6 @@ public class DeviceInfo implements Serializable {
         return marketName;
     }
 
-    public Map<SensorType, SensorInfo> getSensorsInfo() {
-        return sensorsInfo;
-    }
-
     public Map<SensorType, SensorInfo> getSensorsInfo(SensorType.SensorGroup sensorGroup) {
         Map<SensorType, SensorInfo> sensorsInfoGroup = new HashMap<>();
         for (Map.Entry<SensorType, SensorInfo> entry : this.sensorsInfo.entrySet()){
@@ -87,4 +92,9 @@ public class DeviceInfo implements Serializable {
         }
         return sensorsInfoGroup;
     }
+
+    public Map<SensorType, SensorInfo> getSensorsInfo() {
+        return this.sensorsInfo;
+    }
+
 }

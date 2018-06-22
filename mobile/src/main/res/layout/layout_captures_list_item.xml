@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.balysv.materialripple.MaterialRippleLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/RippleStyleBlack"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/item_parent_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_multi_selection"
+        android:clickable="false"
+        android:longClickable="true"
+        android:orientation="horizontal"
+        android:padding="@dimen/spacing_large"
+        android:focusable="true">
+
+        <RelativeLayout
+                android:id="@+id/item_image_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/item_image_background"
+                    android:layout_width="@dimen/spacing_xmlarge"
+                    android:layout_height="@dimen/spacing_xmlarge"
+                    android:src="@drawable/shape_circle"
+                    android:tint="@color/colorPrimaryLight"
+                    android:contentDescription="@string/util_image_description" />
+
+                <ImageView
+                    android:id="@+id/item_image_icon"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:tint="@color/colorGreyLight"
+                    app:srcCompat="@drawable/ic_package_close"
+                    android:contentDescription="@string/util_image_description" />
+
+            </RelativeLayout>
+
+        <View
+            android:layout_width="@dimen/spacing_smlarge"
+            android:layout_height="0dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/item_title_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/item_duration_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="@color/colorPrimaryLight"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                android:id="@+id/item_timestamp_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="@color/colorGreyMediumDark"
+                android:textStyle="bold" />
+
+                    <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/item_smartphone_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="2dp"
+                    android:layout_marginStart="-8dp"
+                    android:layout_marginEnd="-8dp"
+                    android:src="@drawable/ic_smartphone"
+                    android:tint="@color/colorPrimaryLight"
+                    android:contentDescription="@string/util_image_description"/>
+
+                <ImageView
+                    android:id="@+id/item_smartwatch_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="2dp"
+                    android:layout_marginStart="-8dp"
+                    android:layout_marginEnd="-8dp"
+                    android:src="@drawable/ic_smartwatch"
+                    android:tint="@color/colorPrimaryLight"
+                    android:contentDescription="@string/util_image_description"/>
+
+                <TextView
+                    android:id="@+id/item_devices_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:layout_marginStart="3dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="@color/colorGrey" />
+
+            </LinearLayout>
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/close_capture_button"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="0dp"
+                    android:cropToPadding="false"
+                    android:src="@drawable/ic_package_down"
+                    android:tint="@color/colorGreyLight"
+                    android:backgroundTint="@color/colorAccent"
+                    android:contentDescription="@string/util_image_description"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</com.balysv.materialripple.MaterialRippleLayout>

@@ -3,11 +3,10 @@ package com.ssig.smartcap.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -17,11 +16,12 @@ import android.support.wearable.input.WearableButtons;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Chronometer;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.Asset;
@@ -31,17 +31,22 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
-import com.ssig.sensorsmanager.capture.CaptureRunner;
-import com.ssig.sensorsmanager.config.CaptureConfig;
+import com.ssig.sensorsmanager.SensorType;
+import com.ssig.sensorsmanager.capture.DeviceCaptureRunner;
+import com.ssig.sensorsmanager.config.DeviceConfig;
+import com.ssig.sensorsmanager.data.DeviceData;
+import com.ssig.sensorsmanager.data.SensorData;
+import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.CountDownAnimation;
 import com.ssig.smartcap.common.Serialization;
-import com.ssig.smartcap.service.HostListenerService;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends WearableActivity  implements
@@ -51,7 +56,7 @@ public class MainActivity extends WearableActivity  implements
     private final static int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private enum DeviceState{
-        IDLE, WAITING_CONNECTION, CAPTURING, SENDING
+        DISCONNECTED, CONNECTED, CAPTURING
     }
 
     private ImageView imageHostConnectedStatusIcon;
@@ -61,26 +66,37 @@ public class MainActivity extends WearableActivity  implements
     private Chronometer chronometer;
     private TextView textCountdown;
     private TextView textStatus;
-    private ImageView imageKeyPrimary;
-    private ImageView imageKeyOne;
 
+    private View sendingFilesLayout;
+    private View syncingNTPLayout;
 
-    private CaptureRunner captureRunner;
+    private File systemCapturesFolder;
     private DeviceState deviceState;
+    private String hostNodeId;
+    private DeviceCaptureRunner deviceCaptureRunner;
 
 
     //----------------------------------------------------------------------------------------------
     // Override Functions
     //----------------------------------------------------------------------------------------------
-    @SuppressLint("SimpleDateFormat")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setAmbientEnabled();
-        this.captureRunner = null;
+
+        String systemFolderName = getString(R.string.system_folder_name);
+        String captureFolderName = getString(R.string.capture_folder_name);
+        this.systemCapturesFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, captureFolderName));
+        this.deviceState = DeviceState.DISCONNECTED;
+
+        this.hostNodeId = null;
+        this.deviceCaptureRunner = null;
+
         final String uri = String.format("wear://*%s", getString(R.string.message_path_client_activity_prefix));
         Wearable.getMessageClient(this).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
+        Wearable.getCapabilityClient(this).addLocalCapability(getString(R.string.capability_smartcap_wear));
+
         this.initUI();
     }
 
@@ -93,7 +109,6 @@ public class MainActivity extends WearableActivity  implements
     @Override
     protected void onResume() {
         super.onResume();
-        this.setState(HostListenerService.connectedOnHost ? DeviceState.IDLE : DeviceState.WAITING_CONNECTION);
         this.updateStatusIcons();
         this.updateStatus();
     }
@@ -101,23 +116,37 @@ public class MainActivity extends WearableActivity  implements
     @Override
     protected void onStop() {
         super.onStop();
-        finish();
     }
 
     @Override
     protected void onDestroy() {
+        Wearable.getCapabilityClient(this).removeLocalCapability(getString(R.string.capability_smartcap_wear));
         Wearable.getMessageClient(this).removeListener(this);
         NTPTime.close(this);
-        HostListenerService.disconnect();
+        this.disconnectFromHost();
         super.onDestroy();
     }
 
     //----------------------------------------------------------------------------------------------
-    // Message Received
+    // Wear STUFFS
     //----------------------------------------------------------------------------------------------
     @Override
     public void onMessageReceived(@NonNull MessageEvent messageEvent) {
         String path = messageEvent.getPath();
+
+        if (path.equals(getString(R.string.message_path_client_activity_request_watch_sensorinfo))) {
+            byte[] data = Serialization.serializeObject(DeviceInfo.get(this));
+            this.sendMessageData(messageEvent.getSourceNodeId(), this.getString(R.string.message_path_host_service_response_watch_sensorinfo), data);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_activity_connected))) {
+            this.hostNodeId = messageEvent.getSourceNodeId();
+            this.setState(DeviceState.CONNECTED);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_activity_disconnected))) {
+            this.disconnect();
+        }
 
         if (path.equals(getString(R.string.message_path_client_activity_sync_ntp))){
             byte[] data = messageEvent.getData();
@@ -132,12 +161,56 @@ public class MainActivity extends WearableActivity  implements
 
         if (path.equals(getString(R.string.message_path_client_activity_start_capture))){
             byte[] data = messageEvent.getData();
-            CaptureConfig captureConfig = Serialization.deserializeObject(data);
-            this.startCapture(captureConfig);
+            DeviceConfig deviceConfig = Serialization.deserializeObject(data);
+            this.startCapture(deviceConfig);
         }
         if (path.equals(getString(R.string.message_path_client_activity_stop_capture))){
             this.stopCapture();
         }
+
+        if (path.equals(getString(R.string.message_path_client_activity_request_sensor_files))){
+            byte[] data = messageEvent.getData();
+            DeviceData deviceData = Serialization.deserializeObject(data);
+            this.sendSensorFiles(deviceData);
+        }
+    }
+
+    private boolean isConnected(){
+        return this.deviceState != DeviceState.DISCONNECTED;
+    }
+
+    private void disconnectFromHost(){
+        sendMessageToHost(getString(R.string.message_path_host_activity_disconnect));
+        this.disconnect();
+
+    }
+
+    private void disconnect(){
+        this.hostNodeId = null;
+        NTPTime.close(this);
+        this.setState(DeviceState.DISCONNECTED);
+    }
+
+    private void stopHostCapture(){
+        sendMessageToHost(getString(R.string.message_path_host_capture_fragment_stop_capture));
+    }
+
+    private void sendMessageToHost(String path){
+        this.sendMessageToHost(path, new byte[0]);
+    }
+
+    private void sendMessageToHost(String path, byte[] data){
+        if (this.isConnected()){
+            this.sendMessageData(this.hostNodeId, path, data);
+        }
+    }
+
+    private void sendMessageData(String nodeID, final String path, byte[] data){
+        Task<Integer> sendMessageTask = Wearable.getMessageClient(this).sendMessage(nodeID, path, data);
+        sendMessageTask.addOnSuccessListener(new OnSuccessListener<Integer>() {
+            @Override
+            public void onSuccess(Integer integer) {}
+        });
     }
 
     //----------------------------------------------------------------------------------------------
@@ -178,53 +251,40 @@ public class MainActivity extends WearableActivity  implements
 
         this.textStatus = findViewById(R.id.status_text);
 
-        View imageKeyPrimaryLayout = findViewById(R.id.key_primary_image_layout);
-        imageKeyPrimaryLayout.setVisibility(View.GONE);
+        this.syncingNTPLayout = findViewById(R.id.ntp_layout);
+        this.sendingFilesLayout = findViewById(R.id.sending_layout);
+
         View imageKeyOneLayout = findViewById(R.id.key_one_image_layout);
         imageKeyOneLayout.setVisibility(View.GONE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-            WearableButtons.ButtonInfo buttonPrimaryInfo = WearableButtons.getButtonInfo(this, KeyEvent.KEYCODE_STEM_PRIMARY);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             WearableButtons.ButtonInfo buttonOneInfo = WearableButtons.getButtonInfo(this, KeyEvent.KEYCODE_STEM_1);
-
-            if(buttonPrimaryInfo != null){
-                imageKeyPrimaryLayout.setVisibility(View.VISIBLE);
-                ImageView imageKeyPrimary = findViewById(R.id.key_primary_image);
-                imageKeyPrimary.setImageDrawable(WearableButtons.getButtonIcon(this, KeyEvent.KEYCODE_STEM_PRIMARY));
-            }
-
             if(buttonOneInfo != null){
                 imageKeyOneLayout.setVisibility(View.VISIBLE);
                 ImageView imageKeyOne = findViewById(R.id.key_one_image);
                 imageKeyOne.setImageDrawable(WearableButtons.getButtonIcon(this, KeyEvent.KEYCODE_STEM_1));
             }
-
         }
-
 
     }
 
     private void updateStatusIcons(){
-        this.imageHostConnectedStatusIcon.setImageResource(HostListenerService.connectedOnHost ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
-        this.imageHostConnectedStatusIcon.setColorFilter(ContextCompat.getColor(this, HostListenerService.connectedOnHost ? R.color.colorAccent : R.color.colorAlert));
+        this.imageHostConnectedStatusIcon.setImageResource(this.isConnected() ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
+        this.imageHostConnectedStatusIcon.setColorFilter(ContextCompat.getColor(this, this.isConnected() ? R.color.colorAccent : R.color.colorAlert));
         this.imageNTPSynchronizedStatusIcon.setImageResource(NTPTime.isSynchronized() ? R.drawable.ic_ntp_on : R.drawable.ic_ntp_off);
         this.imageNTPSynchronizedStatusIcon.setColorFilter(ContextCompat.getColor(this, NTPTime.isSynchronized() ? R.color.colorAccent : R.color.colorAlert));
     }
 
     private void updateStatus(){
         switch(this.deviceState){
-            case WAITING_CONNECTION:
+            case DISCONNECTED:
                 this.textStatus.setText(R.string.waiting_connection);
                 break;
-            case IDLE:
+            case CONNECTED:
                 this.textStatus.setText(R.string.ready_to_capture);
                 break;
             case CAPTURING:
                 this.textStatus.setText(R.string.capturing);
-                break;
-            case SENDING:
-                this.textStatus.setText(R.string.sending_files);
                 break;
         }
     }
@@ -232,6 +292,7 @@ public class MainActivity extends WearableActivity  implements
     private void setState(DeviceState deviceState){
         this.deviceState = deviceState;
         this.updateStatus();
+        this.updateStatusIcons();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -239,29 +300,34 @@ public class MainActivity extends WearableActivity  implements
     //----------------------------------------------------------------------------------------------
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
+        super.onKeyDown(keyCode, event);
         if (this.deviceState == DeviceState.CAPTURING)
-            HostListenerService.stopHostCapture();
+            this.stopHostCapture();
+        event.startTracking();
+        return true;
+    }
 
-        return super.onKeyDown(keyCode, event);
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        this.finish();
+        return false;
     }
 
     //----------------------------------------------------------------------------------------------
     // Capture STUFFS
     //----------------------------------------------------------------------------------------------
-    private void startCapture(CaptureConfig captureConfig){
+    private void startCapture(DeviceConfig deviceConfig){
 
-        if (captureConfig.isSmartwatchEnabled()) {
+        if (deviceConfig.isEnable()) {
             try {
-                String captureAlias = String.format("smartwatch_%s", captureConfig.getAlias());
-                this.captureRunner = new CaptureRunner(Objects.requireNonNull(this), captureConfig.getSmartwatchSensors(), captureConfig.getAppFolderName(), captureAlias);
+                this.deviceCaptureRunner = new DeviceCaptureRunner(Objects.requireNonNull(this), deviceConfig, this.systemCapturesFolder);
             } catch (IOException e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
-        CountDownAnimation countDownAnimation = new CountDownAnimation(this, this.textCountdown, captureConfig.getCountdownStart(), captureConfig.hasSound(), captureConfig.hasVibration());
+        CountDownAnimation countDownAnimation = new CountDownAnimation(this, this.textCountdown, deviceConfig.getCountdownStart(), deviceConfig.isSound(), deviceConfig.isVibration());
         countDownAnimation.setCountDownListener(new CountDownAnimation.CountDownListener() {
             @Override
             public void onCountDownEnd(CountDownAnimation animation) {
@@ -270,8 +336,8 @@ public class MainActivity extends WearableActivity  implements
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.start();
                 chronometer.setVisibility(View.VISIBLE);
-                if (captureRunner != null)
-                    captureRunner.start();
+                if (deviceCaptureRunner != null)
+                    deviceCaptureRunner.start();
             }
         });
 
@@ -285,35 +351,78 @@ public class MainActivity extends WearableActivity  implements
         this.chronometer.stop();
         this.chronometer.setVisibility(View.GONE);
         this.layoutLogo.setVisibility(View.VISIBLE);
-        this.setState(DeviceState.SENDING);
+        this.setState(DeviceState.CONNECTED);
 
-        if (this.captureRunner != null){
+        if (this.deviceCaptureRunner != null){
             try {
-                final File captureCompressedFile = captureRunner.finish();
-                Asset asset = Asset.createFromUri(Uri.fromFile(captureCompressedFile));
-
-                PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(getString(R.string.message_path_host_capture_fragment_sensor_files));
-                putDataMapRequest.getDataMap().putAsset(getString(R.string.asset_sensors_smartwatch), asset);
-                PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
-                putDataRequest.setUrgent();
-
-                Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
-                dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
-                    @Override
-                    public void onSuccess(DataItem dataItem) {
-                        captureCompressedFile.delete();
-                        setState(HostListenerService.connectedOnHost ? DeviceState.IDLE : DeviceState.WAITING_CONNECTION);
-                        Toast.makeText(MainActivity.this, "Sensor files sent", Toast.LENGTH_LONG).show();
-
-                    }
-                });
+                deviceCaptureRunner.finish();
             } catch (IOException e) {
                 Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 return;
             }
         }
 
-        this.captureRunner = null;
+        this.deviceCaptureRunner = null;
+    }
+
+    private void sendSensorFiles(DeviceData deviceData){
+
+        this.sendingFilesLayout.setVisibility(View.VISIBLE);
+
+        File deviceCaptureFolder = new File(String.format("%s%s%s%s%s", this.systemCapturesFolder, File.separator, deviceData.getCaptureDataUUID(), File.separator, deviceData.getDeviceDataUUID()));
+        if (!deviceCaptureFolder.exists()) {
+            this.sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_capture_folder_no_exists).getBytes());
+            this.sendingFilesLayout.setVisibility(View.GONE);
+            Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_capture_folder_no_exists), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Map<String, Asset> assets = new HashMap<>();
+        for (Map.Entry<SensorType, SensorData> entry : deviceData.getSensorsData().entrySet()){
+            if (entry.getValue().isEnable()) {
+                File sensorFile = new File(String.format("%s%s%s.txt", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
+                if (sensorFile.exists()) {
+                    Asset asset = Asset.createFromUri(Uri.fromFile(sensorFile));
+                    assets.put(entry.getKey().code(), asset);
+                } else {
+                    this.sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_file_no_exists).getBytes());
+                    this.sendingFilesLayout.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_file_no_exists), Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+        }
+
+        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(getString(R.string.message_path_host_archive_fragment_sensor_files_sent));
+
+        for(Map.Entry<String, Asset> entry : assets.entrySet())
+            putDataMapRequest.getDataMap().putAsset(entry.getKey(), entry.getValue());
+
+        final Long timestamp = System.currentTimeMillis();
+        putDataMapRequest.getDataMap().putLong("timestamp", timestamp);
+
+        PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
+        putDataRequest.setUrgent();
+
+        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
+        dataItemTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_data_item).getBytes());
+                sendingFilesLayout.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_data_item), Toast.LENGTH_LONG).show();
+            }
+        });
+        dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
+            @Override
+            public void onSuccess(DataItem dataItem) {
+//                byte[] data = Serialization.serializeObject(timestamp);
+//                sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_success), data);
+                sendingFilesLayout.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Files sent", Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     //----------------------------------------------------------------------------------------------
@@ -328,6 +437,11 @@ public class MainActivity extends WearableActivity  implements
             this.mainActivity = new WeakReference<>(mainActivity);
         }
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mainActivity.get().syncingNTPLayout.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected NTPTime.NTPSynchronizationResponse doInBackground(String... strings) {
@@ -371,6 +485,7 @@ public class MainActivity extends WearableActivity  implements
                     break;
 
             }
+            mainActivity.get().syncingNTPLayout.setVisibility(View.GONE);
             Toast.makeText(this.mainActivity.get(), responseMessage, Toast.LENGTH_LONG).show();
 
 

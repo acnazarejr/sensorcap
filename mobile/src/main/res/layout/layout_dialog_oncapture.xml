@@ -25,6 +25,15 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="Capturing..."/>
+
         <Chronometer
             android:id="@+id/chronometer"
             android:layout_width="match_parent"
@@ -39,10 +48,9 @@
             android:id="@+id/button_capture_stop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/spacing_large"
             app:text_size="@dimen/spacing_smlarge"
             app:text_style="bold"
-            app:text="Slide to Stop" />
+            app:text="@string/capture_slide_to_stop" />
 
     </LinearLayout>
 

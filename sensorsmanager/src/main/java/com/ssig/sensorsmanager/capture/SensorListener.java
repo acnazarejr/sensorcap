@@ -4,39 +4,37 @@ import android.annotation.SuppressLint;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.support.annotation.NonNull;
 
-import com.ssig.sensorsmanager.SensorType;
+import com.ssig.sensorsmanager.time.DummyTime;
+import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.sensorsmanager.time.SystemTime;
 import com.ssig.sensorsmanager.time.Time;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 import java.util.Locale;
 
 public class SensorListener implements SensorEventListener {
 
-    private File sensorDataFilePath;
+
+    private File sensorDataFile;
     private BufferedWriter bufferedWriter;
-    private Time primaryTime;
+    private SystemTime systemTime;
     private Time secondaryTime;
     private DecimalFormat decimalFormat;
 
-    public SensorListener(SensorType sensorType, File sensorDataFolderPath, @NonNull Time secondaryTime) throws IOException {
-        this.sensorDataFilePath = new File(String.format("%s/%s.txt", sensorDataFolderPath, sensorType.toString().replace(" ", "_").toLowerCase()));
-        this.bufferedWriter = new BufferedWriter(new FileWriter(this.sensorDataFilePath));
-        this.primaryTime = new SystemTime();
-        this.secondaryTime = secondaryTime;
+    SensorListener(File sensorDataFile) throws IOException {
+
+        this.sensorDataFile = sensorDataFile;
+
+        this.bufferedWriter = new BufferedWriter(new FileWriter(this.sensorDataFile));
+        this.systemTime = new SystemTime();
+        this.secondaryTime = NTPTime.isSynchronized() ? new NTPTime() : new DummyTime();
+
         DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
         otherSymbols.setDecimalSeparator('.');
         otherSymbols.setGroupingSeparator(',');
@@ -47,15 +45,15 @@ public class SensorListener implements SensorEventListener {
     public File close() throws IOException {
         this.bufferedWriter.flush();
         this.bufferedWriter.close();
-        return this.getSensorDataFilePath();
+        return this.getSensorDataFile();
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void onSensorChanged(SensorEvent event) {
         try {
-            Long primaryTimestamp = this.primaryTime.now(-1L);
-            Long secondaryTimestamp = this.secondaryTime.now(-1L);
+            Long primaryTimestamp = this.systemTime.now();
+            Long secondaryTimestamp = this.secondaryTime.now();
             String line = String.format("%d;%d;%d;%s", primaryTimestamp, secondaryTimestamp, event.accuracy, this.valuesToString(event.values));
             this.bufferedWriter.write(line);
             this.bufferedWriter.newLine();
@@ -70,16 +68,16 @@ public class SensorListener implements SensorEventListener {
     }
 
     private String valuesToString(float[] values){
-        String valuesString = "";
+        StringBuilder valuesString = new StringBuilder();
         int i;
         for(i = 0; i < values.length - 1; i++){
-            valuesString += String.format("%s;", this.decimalFormat.format(values[i]));
+            valuesString.append(String.format("%s;", this.decimalFormat.format(values[i])));
         }
-        valuesString += this.decimalFormat.format(values[i]);
-        return valuesString;
+        valuesString.append(this.decimalFormat.format(values[i]));
+        return valuesString.toString();
     }
 
-    public File getSensorDataFilePath() {
-        return sensorDataFilePath;
+    private File getSensorDataFile() {
+        return sensorDataFile;
     }
 }

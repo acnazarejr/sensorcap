@@ -25,18 +25,18 @@
             android:name="com.google.android.wearable.standalone"
             android:value="false" />
 
-        <service
-            android:name=".service.HostListenerService" >
+        <!--<service-->
+            <!--android:name=".service.HostListenerService" >-->
+            <!--&lt;!&ndash;<intent-filter>&ndash;&gt;-->
+                <!--&lt;!&ndash;&lt;!&ndash; listeners receive events that match the action and data filters &ndash;&gt;&ndash;&gt;-->
+                <!--&lt;!&ndash;<action android:name="com.google.android.gms.wearable.DATA_CHANGED" />&ndash;&gt;-->
+                <!--&lt;!&ndash;<data android:scheme="wear" android:host="*" android:pathPrefix="/teste"/>&ndash;&gt;-->
+            <!--&lt;!&ndash;</intent-filter>&ndash;&gt;-->
             <!--<intent-filter>-->
-                <!--&lt;!&ndash; listeners receive events that match the action and data filters &ndash;&gt;-->
-                <!--<action android:name="com.google.android.gms.wearable.DATA_CHANGED" />-->
-                <!--<data android:scheme="wear" android:host="*" android:pathPrefix="/teste"/>-->
+                <!--<action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />-->
+                <!--<data android:scheme="wear" android:host="*" android:pathPrefix="@string/message_path_client_service_prefix"/>-->
             <!--</intent-filter>-->
-            <intent-filter>
-                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="@string/message_path_client_service_prefix"/>
-            </intent-filter>
-        </service>
+        <!--</service>-->
 
         <activity
             android:name=".activity.MainActivity"

@@ -22,8 +22,8 @@
 //import com.ssig.smartcap.R;
 //import com.ssig.smartcap.fragment.AbstractMainFragment;
 //
-//////import com.ssig.smartcap.mobile.utils.AdapterListInbox;
-////import com.ssig.smartcap.mobile.utils.Inbox;
+//////import com.ssig.smartcap.mobile.utils.AdapterCaptureList;
+////import com.ssig.smartcap.mobile.utils.CaptureListItem;
 ////import com.ssig.smartcap.mobile.utils.ParserJSON.ReadJsonFile;
 ////import com.ssig.smartcap.mobile.widget.LineItemDecoration;
 //
@@ -48,12 +48,12 @@
 ////    private boolean delete;
 ////    private AppCompatDelegate delegate = null;
 ////    private RecyclerView recyclerView;
-////    private AdapterListInbox mAdapter;
+////    private AdapterCaptureList mAdapter;
 ////    private ActionModeCallback actionModeCallback;
 ////    private ActionMode actionMode;
 ////    private Toolbar toolbar;
 ////    private ArrayList<HashMap<String,String>> list_itens = new ArrayList<>();
-////    private List<Inbox> items = new ArrayList<>();
+////    private List<CaptureListItem> items = new ArrayList<>();
 ////
 ////    public ArchiveFragment(){
 ////        super("Capture Archive", R.layout.fragment_archive);
@@ -75,7 +75,7 @@
 ////    private void getJsonFiles() {
 ////        File[] files = dir.listFiles();
 ////        for(File f: files){
-////            Inbox obj;
+////            CaptureListItem obj;
 ////            HashMap<String, String> new_item;
 ////            ReadJsonFile jsonReader = new ReadJsonFile();
 ////            new_item = jsonReader.ReadFile(f.getDeviceName());
@@ -84,8 +84,8 @@
 ////        }
 ////    }
 ////
-////    private Inbox setInboxObj(HashMap<String, String> item, File f) {
-////        Inbox obj = new Inbox();
+////    private CaptureListItem setInboxObj(HashMap<String, String> item, File f) {
+////        CaptureListItem obj = new CaptureListItem();
 ////        obj.name = item.get("name");
 ////        obj.duration = item.get("duration");
 ////        obj.date = item.get("date");
@@ -93,10 +93,10 @@
 ////        return obj;
 ////    }
 ////
-////    private List<Inbox> getInboxData(){
-////        List<Inbox> items = new ArrayList<>();
+////    private List<CaptureListItem> getInboxData(){
+////        List<CaptureListItem> items = new ArrayList<>();
 ////        for(int i = 0; i < list_itens.size(); i++){
-////            Inbox obj = new Inbox();
+////            CaptureListItem obj = new CaptureListItem();
 ////            obj.name = list_itens.get(i).get("name");
 ////            obj.duration = list_itens.get(i).get("duration");
 ////            obj.date = list_itens.get(i).get("date");
@@ -110,22 +110,22 @@
 ////        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 ////        recyclerView.addItemDecoration(new LineItemDecoration(getContext(), LinearLayout.VERTICAL));
 ////        recyclerView.setHasFixedSize(true);
-////        mAdapter = new AdapterListInbox(getContext(), items);
+////        mAdapter = new AdapterCaptureList(getContext(), items);
 ////        recyclerView.setAdapter(mAdapter);
 ////
-////        mAdapter.setOnClickListener(new AdapterListInbox.OnClickListener() {
+////        mAdapter.setOnClickListener(new AdapterCaptureList.OnClickListener() {
 ////            @Override
-////            public void onItemClick(View view, Inbox obj, int pos) {
+////            public void onItemClick(View view, CaptureListItem obj, int pos) {
 ////                if (mAdapter.getSelectedItemCount() > 0) {
 ////                    enableActionMode(pos);
 ////                } else {
 ////                    // read the inbox which removes bold from the row
-////                    Inbox inbox = mAdapter.getItem(pos);
+////                    CaptureListItem inbox = mAdapter.getItem(pos);
 ////                }
 ////            }
 ////
 ////            @Override
-////            public void onItemLongClick(View view, Inbox obj, int pos) {
+////            public void onItemLongClick(View view, CaptureListItem obj, int pos) {
 ////                enableActionMode(pos);
 ////            }
 ////        });
@@ -212,7 +212,7 @@
 ////        share.setType("application/json");
 ////        share.putExtra(Intent.EXTRA_SUBJECT, "Email");
 ////        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-////            Inbox item;
+////            CaptureListItem item;
 ////            item = mAdapter.getItem(selectedItemPositions.get(i));
 ////            File[] files = dir.listFiles();
 ////            for(File f: files) {
@@ -229,7 +229,7 @@
 ////    private void deleteInboxes() {
 ////        List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
 ////        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-////            Inbox item;
+////            CaptureListItem item;
 ////            item = mAdapter.getItem(selectedItemPositions.get(i));
 ////            File[] files = dir.listFiles();
 ////            for(File f: files) {

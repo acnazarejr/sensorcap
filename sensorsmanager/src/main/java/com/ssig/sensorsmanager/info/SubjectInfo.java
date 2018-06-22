@@ -2,7 +2,7 @@ package com.ssig.sensorsmanager.info;
 
 import java.io.Serializable;
 
-public class PersonInfo implements Serializable {
+public class SubjectInfo implements Serializable {
 
     static final long serialVersionUID = 123789145623456789L;
 
@@ -16,7 +16,7 @@ public class PersonInfo implements Serializable {
         FEMALE, MALE
     }
 
-    public PersonInfo(String name){
+    public SubjectInfo(String name){
         this.name = name;
         this.height = null;
         this.weight = null;

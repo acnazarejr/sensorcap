@@ -4,8 +4,10 @@ package com.ssig.smartcap.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.smartcap.service.WearService;
 
+import java.io.File;
 import java.util.Objects;
 
 
@@ -26,8 +29,9 @@ public abstract class AbstractMainFragment extends Fragment {
 
     private View fragmentContainer;
 
-    private WearService wearService;
     private SharedPreferences sharedPreferences;
+    private File systemCapturesFolder;
+    private File systemArchiveFolder;
 
     public AbstractMainFragment(@LayoutRes int layout) {
         this.layout = layout;
@@ -41,6 +45,16 @@ public abstract class AbstractMainFragment extends Fragment {
         this.fragmentContainer = view.findViewById(R.id.fragment_container);
         this.sharedPreferences = Objects.requireNonNull(this.getActivity()).getPreferences(Context.MODE_PRIVATE);
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        String systemFolderName = getString(R.string.system_folder_name);
+        String captureFolderName = getString(R.string.capture_folder_name);
+        String archiveFolderName = getString(R.string.archive_folder_name);
+        this.systemCapturesFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, captureFolderName));
+        this.systemArchiveFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, archiveFolderName));
     }
 
     @Override
@@ -79,4 +93,15 @@ public abstract class AbstractMainFragment extends Fragment {
         return this.getWearService() != null && this.getWearService().isConnected();
     }
 
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
+    }
+
+    public File getSystemCapturesFolder() {
+        return systemCapturesFolder;
+    }
+
+    public File getSystemArchiveFolder() {
+        return systemArchiveFolder;
+    }
 }

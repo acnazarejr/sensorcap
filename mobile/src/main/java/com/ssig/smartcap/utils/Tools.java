@@ -31,6 +31,13 @@ public class Tools {
         }
     }
 
+    public static void setSystemBarDark(Activity act, @ColorRes int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Window window = act.getWindow();
+            window.setStatusBarColor(ContextCompat.getColor(act, color));
+        }
+    }
+
     public static void toggleArrow(boolean show, View view) {
         toggleArrow(show, view, true);
     }

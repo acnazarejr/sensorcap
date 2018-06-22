@@ -1,34 +1,40 @@
 package com.ssig.sensorsmanager.config;
 
-import com.ssig.sensorsmanager.SensorType;
-
 import java.io.Serializable;
-
 
 
 public class SensorConfig implements Serializable {
 
     static final long serialVersionUID = 567123789145623489L;
 
-    private SensorType sensorType;
+    private String sensorConfigUUID;
     private Boolean enabled;
     private Integer frequency;
 
-    public SensorConfig(SensorType type, Boolean enable, Integer frequency){
-        this.sensorType = type;
-        this.enabled = enable;
-        this.frequency = frequency;
+    public SensorConfig(String sensorConfigUUID){
+        this.sensorConfigUUID = sensorConfigUUID;
+        this.enabled = null;
+        this.frequency = null;
     }
 
-    public SensorType getSensorType() {
-        return sensorType;
+    public String getSensorConfigUUID() {
+        return sensorConfigUUID;
     }
 
     public Boolean isEnabled() {
         return enabled;
     }
 
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public Integer getFrequency() {
         return frequency;
     }
+
+    public void setFrequency(Integer frequency) {
+        this.frequency = frequency;
+    }
+
 }

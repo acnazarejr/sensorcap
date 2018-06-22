@@ -30,6 +30,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
+import com.google.android.gms.wearable.CapabilityClient;
+import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
@@ -56,7 +58,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements MessageClient.OnMessageReceivedListener {
+public class MainActivity extends AppCompatActivity implements
+        MessageClient.OnMessageReceivedListener,
+        CapabilityClient.OnCapabilityChangedListener {
 
     private SharedPreferences sharedPreferences;
     private long exitTime = 0;
@@ -133,19 +137,6 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         }
     }
 
-    @Override
-    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
-        if (!this.isWearClientConnected())
-            return;
-        String path = messageEvent.getPath();
-        if (path.equals(getString(R.string.message_path_host_activity_disconnect))){
-            this.getWearService().disconnect(false);
-            this.updateWearMenuItem();
-            this.smartwatchFragment.refresh();
-            this.captureFragment.refresh();
-        }
-    }
-
     private void initUI() {
         this.initToolbar();
         this.initSettings();
@@ -194,6 +185,25 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
                 token.continuePermissionRequest();
             }
         }).check();
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // WEAR LISTENERS STUFFS
+    // ---------------------------------------------------------------------------------------------
+    @Override
+    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
+        if (!this.isWearClientConnected())
+            return;
+        String path = messageEvent.getPath();
+        if (path.equals(getString(R.string.message_path_host_activity_disconnect))){
+            this.resetWearClientConnection(false);
+        }
+    }
+
+    @Override
+    public void onCapabilityChanged(@NonNull CapabilityInfo capabilityInfo) {
+        if (capabilityInfo.getName().equals(getString(R.string.capability_smartcap_wear)) && capabilityInfo.getNodes().isEmpty())
+            this.resetWearClientConnection(false);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -546,14 +556,8 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     // WEAR STUFFS
     // ---------------------------------------------------------------------------------------------
     public void doWearConnection(){
-
         if (getWearService().isConnected()){
-
-            getWearService().disconnect();
-            this.updateWearMenuItem();
-            this.smartwatchFragment.refresh();
-            this.captureFragment.refresh();
-
+            this.resetWearClientConnection(true);
         }else {
             new WearConnectionTask(this).execute();
         }
@@ -766,5 +770,12 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
 
     private boolean isWearClientConnected(){
         return this.getWearService() != null && this.getWearService().isConnected();
+    }
+
+    private void resetWearClientConnection(boolean sendDisconnectMessageToClient){
+        this.getWearService().disconnect(sendDisconnectMessageToClient);
+        this.updateWearMenuItem();
+        this.smartwatchFragment.refresh();
+        this.captureFragment.refresh();
     }
 }
