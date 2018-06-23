@@ -27,6 +27,14 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_clear"
+        android:icon="@drawable/ic_delete"
+        android:orderInCategory="250"
+        android:title="@string/menu_action_clear"
+        android:iconTint="@color/colorGreyDark"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_about"
         android:icon="@drawable/ic_info"
         android:orderInCategory="300"

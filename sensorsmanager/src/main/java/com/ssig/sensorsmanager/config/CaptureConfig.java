@@ -13,14 +13,14 @@ public class CaptureConfig implements Serializable {
     private DeviceConfig hostDeviceConfig;
     private DeviceConfig clientDeviceConfig;
     private SubjectInfo subjectInfo;
-    private String activityName;
+    private String captureName;
     private String additionalInfo;
 
     public CaptureConfig(String captureConfigUUID, DeviceConfig hostDeviceConfig){
         this.captureConfigUUID = captureConfigUUID;
         this.hostDeviceConfig = hostDeviceConfig;
         this.subjectInfo = null;
-        this.activityName = null;
+        this.captureName = null;
         this.additionalInfo = null;
         this.clientDeviceConfig = null;
     }
@@ -49,12 +49,12 @@ public class CaptureConfig implements Serializable {
         this.subjectInfo = subjectInfo;
     }
 
-    public String getActivityName() {
-        return activityName;
+    public String getCaptureName() {
+        return captureName;
     }
 
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
+    public void setCaptureName(String captureName) {
+        this.captureName = captureName;
     }
 
     public String getAdditionalInfo() {

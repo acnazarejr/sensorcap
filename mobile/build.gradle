@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.ncorti:slidetoact:0.3.0'
     implementation 'com.karumi:dexter:4.2.0'
     implementation 'org.zeroturnaround:zt-zip:1.13'
+    implementation 'com.jaredrummler:material-spinner:1.2.5'
 
     wearApp project(':wear')
     implementation project(path: ':sensorsmanager')

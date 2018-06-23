@@ -6,23 +6,23 @@
     android:fillViewport="true">
 
     <LinearLayout
-    android:id="@+id/layout_smartphone_content"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:descendantFocusability="blocksDescendants"
-    android:orientation="vertical">
-
-
-    <include layout="@layout/layout_device_info"
-        android:id="@+id/device_info_layout"/>
-
-    <include layout="@layout/layout_device_sensors"
-        android:id="@+id/available_sensors_layout"/>
-
-    <View
+        android:id="@+id/layout_smartphone_content"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/spacing_middle"/>
+        android:layout_height="wrap_content"
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="vertical">
 
-</LinearLayout>
+
+        <include layout="@layout/layout_device_info"
+            android:id="@+id/device_info_layout"/>
+
+        <include layout="@layout/layout_device_sensors"
+            android:id="@+id/available_sensors_layout"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/spacing_middle"/>
+
+    </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

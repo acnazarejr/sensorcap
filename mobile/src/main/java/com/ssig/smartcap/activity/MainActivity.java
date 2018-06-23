@@ -10,13 +10,14 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
-import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,20 +27,26 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
+import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.jaredrummler.materialspinner.MaterialSpinnerAdapter;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.ssig.sensorsmanager.data.CaptureData;
+import com.ssig.sensorsmanager.util.JSONUtil;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.ViewPagerAdapter;
 import com.ssig.smartcap.fragment.AbstractMainFragment;
@@ -48,11 +55,14 @@ import com.ssig.smartcap.fragment.CaptureFragment;
 import com.ssig.smartcap.fragment.SmartphoneFragment;
 import com.ssig.smartcap.fragment.SmartwatchFragment;
 import com.ssig.smartcap.fragment.TimeToolFragment;
+import com.ssig.smartcap.model.CaptureListItem;
 import com.ssig.smartcap.service.WearService;
 import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.utils.Tools;
 import com.warkiz.widget.IndicatorSeekBar;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Objects;
@@ -72,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements
     private AHBottomNavigation ahBottomNavigation;
 
     private MaterialDialog dialogSettings;
+    private MaterialDialog dialogAbout;
 
     private ViewPagerAdapter viewPagerAdapter;
     public AbstractMainFragment captureFragment;
@@ -79,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements
     public AbstractMainFragment smartwatchFragment;
     public AbstractMainFragment timeToolFragment;
     public AbstractMainFragment archiveFragment;
+
+    private File systemCapturesFolder;
+    private File systemArchiveFolder;
 
     private WearService wearService;
     private boolean wearServiceBounded;
@@ -94,6 +108,12 @@ public class MainActivity extends AppCompatActivity implements
 
         this.sharedPreferences = this.getPreferences(MODE_PRIVATE);
         this.wearServiceConnection = this.createWearServiceConnection();
+
+        String systemFolderName = getString(R.string.system_folder_name);
+        String captureFolderName = getString(R.string.capture_folder_name);
+        String archiveFolderName = getString(R.string.archive_folder_name);
+        this.systemCapturesFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, captureFolderName));
+        this.systemArchiveFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, archiveFolderName));
 
         Intent wearServiceIntent = new Intent(this, WearService.class);
         bindService(wearServiceIntent, this.wearServiceConnection, Context.BIND_AUTO_CREATE);
@@ -140,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements
     private void initUI() {
         this.initToolbar();
         this.initSettings();
+        this.initAbout();
         this.initBottomNavigation();
         this.initPagerView();
         this.updateToolBarTitleAndIcon(0);
@@ -246,8 +267,11 @@ public class MainActivity extends AppCompatActivity implements
                 case R.id.action_settings:
                     this.dialogSettings.show();
                     break;
+                case R.id.action_clear:
+                    this.clearData();
+                    break;
                 case R.id.action_about:
-                    Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+                    this.dialogAbout.show();
                     break;
             }
 
@@ -274,12 +298,62 @@ public class MainActivity extends AppCompatActivity implements
         Tools.changeDrawableColor(this.wearMenuItem.getIcon(), color);
     }
 
+    private void clearData(){
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.dialog_clear_data_title)
+                .titleColorRes(R.color.colorAlert)
+                .content(R.string.dialog_clear_data_content)
+                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_delete)), ContextCompat.getColor(this, R.color.colorAlert)))
+                .cancelable(true)
+                .positiveText(R.string.button_yes)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        if(isWearClientConnected())
+                            getWearService().clearWearCaptures();
+                        if(deleteRecursive(systemCapturesFolder) && deleteUnclosedArchivedCaptures())
+                            Toast.makeText(MainActivity.this, R.string.dialog_clear_data_toast, Toast.LENGTH_LONG).show();
+                        archiveFragment.refresh();
+                    }
+                })
+                .negativeText(R.string.button_no)
+                .show();
+
+    }
+
+    private boolean deleteRecursive(File fileOrDirectory) {
+        if (!fileOrDirectory.exists())
+            return false;
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+        return fileOrDirectory.delete();
+    }
+
+    private boolean deleteUnclosedArchivedCaptures(){
+        boolean deleted = true;
+        try {
+            for(File captureFile : ((ArchiveFragment)this.archiveFragment).listCaptureFiles()){
+                if(captureFile.exists()){
+                    CaptureData captureData = JSONUtil.load(captureFile, CaptureData.class);
+                    if (!captureData.isClosed())
+                        deleted &= captureFile.delete();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return deleted;
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Settings Stuffs
     // ---------------------------------------------------------------------------------------------
     public void initSettings(){
         this.dialogSettings =  new MaterialDialog.Builder(Objects.requireNonNull(this))
-                .customView(R.layout.layout_dialog_settings, true)
+                .customView(R.layout.dialog_settings, true)
                 .title(R.string.settings_title)
                 .icon(Tools.changeDrawableColor(Objects.requireNonNull(getDrawable(R.drawable.ic_settings)), ContextCompat.getColor(this, R.color.colorPrimary)))
                 .cancelable(true)
@@ -291,8 +365,9 @@ public class MainActivity extends AppCompatActivity implements
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         View view = Objects.requireNonNull(dialog.getCustomView());
 
-                        AppCompatEditText inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input_text);
-                        editor.putString(getString(R.string.preference_main_default_key_ntp_pool), inputNTPPoolServer.getText().toString());
+                        CharSequence[] ntpPoolOptions = getResources().getStringArray(R.array.ntp_pools);
+                        MaterialSpinner inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input);
+                        editor.putString(getString(R.string.preference_main_default_key_ntp_pool), ntpPoolOptions[inputNTPPoolServer.getSelectedIndex()].toString().trim());
 
                         Switch switchSoundEnable = view.findViewById(R.id.enable_sound_switch);
                         editor.putBoolean(getString(R.string.preference_main_key_has_sound), switchSoundEnable.isChecked());
@@ -320,9 +395,18 @@ public class MainActivity extends AppCompatActivity implements
 
         View view = Objects.requireNonNull(this.dialogSettings.getCustomView());
 
-        AppCompatEditText inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input_text);
-        inputNTPPoolServer.setText(this.sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool)));
-        inputNTPPoolServer.setSelection(inputNTPPoolServer.getText().length());
+        CharSequence[] ntpPoolOptions = getResources().getStringArray(R.array.ntp_pools);
+        MaterialSpinnerAdapter<CharSequence> spinnerAdapter = new MaterialSpinnerAdapter<>(this, ArrayUtils.toArrayList(ntpPoolOptions));
+
+        MaterialSpinner inputNTPPoolServer = view.findViewById(R.id.ntp_pool_server_input);
+        inputNTPPoolServer.setAdapter(spinnerAdapter);
+        String currentNTPPool = this.sharedPreferences.getString(getString(R.string.preference_main_default_key_ntp_pool), getString(R.string.preference_main_default_ntp_pool));
+        for(int i=0; i<ntpPoolOptions.length; i++){
+            if(currentNTPPool.contentEquals(ntpPoolOptions[i])){
+                inputNTPPoolServer.setSelectedIndex(i);
+            }
+        }
+
 
         Switch switchSoundEnable = view.findViewById(R.id.enable_sound_switch);
         switchSoundEnable.setChecked(this.sharedPreferences.getBoolean(getString(R.string.preference_main_key_has_sound), getResources().getBoolean(R.bool.preference_main_default_has_sound)));
@@ -344,6 +428,31 @@ public class MainActivity extends AppCompatActivity implements
 
 
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // About Stuffs
+    // ---------------------------------------------------------------------------------------------
+    public void initAbout(){
+        this.dialogAbout = new MaterialDialog.Builder(Objects.requireNonNull(this))
+                .customView(R.layout.dialog_about, true)
+                .btnStackedGravity(GravityEnum.CENTER)
+                .canceledOnTouchOutside(true)
+                .cancelable(true)
+                .positiveText(R.string.button_ok)
+                .build();
+
+        View view = Objects.requireNonNull(this.dialogAbout.getCustomView());
+        AppCompatButton buttonGetCode = view.findViewById(R.id.button_get_code);
+        buttonGetCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse("https://github.com/acnazarejr/smartcap"));
+                startActivity(i);
+            }
+        });
+    }
+
 
     // ---------------------------------------------------------------------------------------------
     // BOTTOM NAVIGATION STUFFS

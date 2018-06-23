@@ -27,7 +27,7 @@
             android:orientation="vertical">
 
             <android.support.v7.widget.CardView
-                android:id="@+id/capture_devices_section_layout"
+                android:id="@+id/capture_details_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_middle"
@@ -42,8 +42,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/spacing_middle"
-                    android:focusableInTouchMode="true"
-                    android:descendantFocusability="blocksDescendants"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -54,10 +52,49 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/capture_devices_section_title"
+                            android:text="@string/capture_title"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                             android:textColor="@color/colorPrimary"
                             android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/spacing_middle" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <android.support.design.widget.TextInputLayout
+                            android:id="@+id/capture_name_input_layout"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content">
+
+                            <android.support.v7.widget.AppCompatEditText
+                                android:id="@+id/capture_name_input_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:maxLines="1"
+                                android:imeOptions="actionDone"
+                                android:textColor="@color/colorGreyMediumDark"
+                                android:hint="@string/capture_name_hint" />
+
+                        </android.support.design.widget.TextInputLayout>
+
+                        <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/button_more_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:backgroundTint="@color/colorAccent"
+                            android:tint="@color/colorGreyLight"
+                            android:src="@drawable/ic_edit"
+                            android:contentDescription="@string/util_image_description"/>
 
                     </LinearLayout>
 
@@ -278,43 +315,6 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                android:id="@+id/capture_subject_section_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_middle"
-                android:layout_marginLeft="@dimen/spacing_middle"
-                android:layout_marginRight="@dimen/spacing_middle"
-                android:visibility="visible"
-                android:layout_below="@id/capture_devices_section_layout"
-                app:cardCornerRadius="2dp"
-                app:cardElevation="2dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/spacing_middle"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/capture_subject_section_title"
-                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                            android:textColor="@color/colorPrimary"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/spacing_middle" />
@@ -341,7 +341,7 @@
                                 android:textColor="@color/colorGreyMediumDark"
                                 android:hint="@string/capture_subject_name_hint" />
 
-                    </android.support.design.widget.TextInputLayout>
+                        </android.support.design.widget.TextInputLayout>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -530,7 +530,7 @@
                 android:layout_marginLeft="@dimen/spacing_middle"
                 android:layout_marginRight="@dimen/spacing_middle"
                 android:visibility="visible"
-                android:layout_below="@id/capture_subject_section_layout"
+                android:layout_below="@id/capture_details_layout"
                 app:cardCornerRadius="2dp"
                 app:cardElevation="2dp">
 
@@ -542,16 +542,12 @@
                     android:paddingTop="@dimen/spacing_medium"
                     android:paddingBottom="@dimen/spacing_medium"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <RadioGroup
+                    <RadioGroup
                             android:id="@+id/radio_group_devices"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
@@ -563,9 +559,9 @@
                                 android:drawableStart="@drawable/ic_smartphone" />
 
                             <View
-                                android:layout_width="@dimen/spacing_middle"
+                                android:layout_width="0dp"
+                                android:layout_weight="0.5"
                                 android:layout_height="match_parent" />
-
 
                             <RadioButton
                                 android:id="@+id/radio_option_smartwatch"
@@ -575,8 +571,9 @@
                                 android:drawableStart="@drawable/ic_smartwatch" />
 
                             <View
-                                android:layout_width="@dimen/spacing_middle"
-                                android:layout_height="match_parent" />
+                            android:layout_width="0dp"
+                            android:layout_weight="0.5"
+                            android:layout_height="match_parent" />
 
                             <RadioButton
                                 android:id="@+id/radio_option_both"
@@ -586,31 +583,27 @@
                                 android:drawableStart="@drawable/ic_smartphone"
                                 android:drawableEnd="@drawable/ic_smartwatch"/>
 
-
-                        </RadioGroup>
-
-
-                </LinearLayout>
-
-                    <View
-                        android:layout_width="@dimen/spacing_mlarge"
-                        android:layout_height="match_parent" />
+                    </RadioGroup>
 
                     <android.support.v7.widget.AppCompatButton
+                        style="@style/NoAllCaps"
                         android:id="@+id/button_capture_start"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_width="110dp"
                         android:layout_height="wrap_content"
-                        android:padding="@dimen/spacing_smlarge"
+                        android:layout_marginStart="@dimen/spacing_large"
                         android:text="@string/button_start"
+                        android:paddingTop="15dp"
+                        android:paddingBottom="15dp"
+                        android:textSize="20sp"
                         android:textColor="@color/colorGreyLight"
-                        android:textStyle="bold"
+                        android:drawableStart="@drawable/ic_play"
+                        android:drawableTint="@color/colorGreyLight"
+                        android:backgroundTint="@color/colorPrimary"
                         android:theme="@style/Button.Accent" />
 
                 </LinearLayout>
 
             </android.support.v7.widget.CardView>
-
 
         </RelativeLayout>
 

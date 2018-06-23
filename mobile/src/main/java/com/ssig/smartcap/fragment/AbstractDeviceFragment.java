@@ -13,6 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -20,12 +21,15 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.AdapterSensorsGrid;
 import com.ssig.smartcap.model.SensorsGridItem;
+import com.ssig.smartcap.utils.Tools;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +79,7 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
     protected void initDeviceInfo(View layoutDeviceInfo, DeviceInfo deviceInfo) {
         ((TextView)layoutDeviceInfo.findViewById(R.id.device_name_text)).setText(deviceInfo.getDeviceName());
         ((TextView)layoutDeviceInfo.findViewById(R.id.device_manufacturer_model_text)).setText(String.format("%s %s (%s)", deviceInfo.getManufacturer().toUpperCase(), deviceInfo.getMarketName(), deviceInfo.getModel()));
-        ((TextView)layoutDeviceInfo.findViewById(R.id.android_version_text)).setText(deviceInfo.getAndroidVersion());
-        ((TextView)layoutDeviceInfo.findViewById(R.id.android_api_text)).setText(String.valueOf(deviceInfo.getAndroidSDK()));
+        ((TextView)layoutDeviceInfo.findViewById(R.id.android_version_text)).setText(String.format("%s (API %s)", deviceInfo.getAndroidVersion(), deviceInfo.getAndroidSDK()));
         ((TextView)layoutDeviceInfo.findViewById(R.id.device_uuid_text)).setText(deviceInfo.getDeviceKey());
     }
 
@@ -105,15 +108,48 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        int percentage = 100;
-                        switch (item.getItemId()){
-                            case R.id.frequency_min: percentage = 0; break;
-                            case R.id.frequency_slow: percentage = 25; break;
-                            case R.id.frequency_medium: percentage = 50; break;
-                            case R.id.frequency_fast: percentage = 75; break;
-                            case R.id.frequency_max: percentage = 100; break;
+                        int itemID = item.getItemId();
+                        if (itemID == R.id.frequency_limited_to){
+                            new MaterialDialog.Builder(getContext())
+                                    .title(R.string.devices_dialog_frequency_title)
+                                    .titleColorRes(R.color.colorPrimary)
+                                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(ContextCompat.getDrawable(getContext(), R.drawable.ic_tune)), getContext().getColor(R.color.colorPrimary)))
+                                    .content(R.string.devices_dialog_frequency_content)
+                                    .inputType(InputType.TYPE_CLASS_NUMBER)
+                                    .neutralText(R.string.button_cancel)
+                                    .neutralColorRes(R.color.colorGrey)
+                                    .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                            dialog.cancel();
+                                        }
+                                    })
+                                    .positiveText(R.string.button_ok)
+                                    .input(getString(R.string.devices_dialog_frequency_hint), null, false, new MaterialDialog.InputCallback() {
+                                        @Override
+                                        public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                            try{
+                                                int frequency = Integer.valueOf(input.toString());
+                                                setAllMaximumSensorFrequencies(frequency);
+                                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+                                            }catch (NumberFormatException e){
+                                                dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+                                            }
+
+                                        }
+                                    })
+                                    .alwaysCallInputCallback()
+                                    .show();
+
+                        }else{
+                            int percentage = 100;
+                            switch (itemID){
+                                case R.id.frequency_min: percentage = 0; break;
+                                case R.id.frequency_medium: percentage = 50; break;
+                                case R.id.frequency_max: percentage = 100; break;
+                            }
+                            setAllSensorFrequenciesPercentage(percentage);
                         }
-                        setAllSensorFrequencies(percentage);
                         return true;
                     }
                 });
@@ -177,15 +213,31 @@ public abstract class AbstractDeviceFragment extends AbstractMainFragment {
         this.adapterSensorsGridMap.put(sensorGroup, adapterSensorsGrid);
     }
 
-
-    protected void setAllSensorFrequencies(int percentage){
+    protected void setAllMaximumSensorFrequencies(int maxFrequency){
         SharedPreferences sharedPreferences = Objects.requireNonNull(getContext()).getSharedPreferences(getString(preferencesFileName), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         for (AdapterSensorsGrid adapterSensorsGrid : this.adapterSensorsGridMap.values()){
             for (SensorsGridItem sensorsGridItem : adapterSensorsGrid.getSensorsGridItems()){
                 if(sensorsGridItem.isValid()) {
                     if ((sensorsGridItem.getReportingMode() == Sensor.REPORTING_MODE_CONTINUOUS || sensorsGridItem.getReportingMode() == Sensor.REPORTING_MODE_ON_CHANGE) && (sensorsGridItem.getMaxFrequency() > sensorsGridItem.getMinFrequency())) {
-                        int frequency = sensorsGridItem.getDefaultFrequency();
+                        sensorsGridItem.setFrequency(Math.min(maxFrequency, sensorsGridItem.getMaxFrequency()));
+                        editor.putInt(sensorsGridItem.getSensorType().code() + getContext().getString(R.string.preference_sensor_frequency_suffix), sensorsGridItem.getFrequency());
+                    }
+                }
+            }
+            adapterSensorsGrid.notifyDataSetChanged();
+        }
+        editor.apply();
+    }
+
+    protected void setAllSensorFrequenciesPercentage(int percentage){
+        SharedPreferences sharedPreferences = Objects.requireNonNull(getContext()).getSharedPreferences(getString(preferencesFileName), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for (AdapterSensorsGrid adapterSensorsGrid : this.adapterSensorsGridMap.values()){
+            for (SensorsGridItem sensorsGridItem : adapterSensorsGrid.getSensorsGridItems()){
+                if(sensorsGridItem.isValid()) {
+                    if ((sensorsGridItem.getReportingMode() == Sensor.REPORTING_MODE_CONTINUOUS || sensorsGridItem.getReportingMode() == Sensor.REPORTING_MODE_ON_CHANGE) && (sensorsGridItem.getMaxFrequency() > sensorsGridItem.getMinFrequency())) {
+                        int frequency = sensorsGridItem.getMaxFrequency();
                         switch (percentage){
                             case 0: frequency = sensorsGridItem.getMinFrequency(); break;
                             case 25: frequency = (int) (0.25 * sensorsGridItem.getMaxFrequency()); break;

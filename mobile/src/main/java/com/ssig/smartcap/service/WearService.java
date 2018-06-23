@@ -291,6 +291,15 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     //----------------------------------------------------------------------------------------------
     // Sensor Files STUFFS
     //----------------------------------------------------------------------------------------------
+    public void clearWearCaptures(){
+        try {
+            this.sendMessage(getString(R.string.message_path_client_activity_clear_captures));
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void requestSensorFiles(DeviceData deviceData) throws ApiException {
         byte[] data = Serialization.serializeObject(deviceData);
         this.sendMessage(getString(R.string.message_path_client_activity_request_sensor_files), data);

@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -172,6 +171,10 @@ public class MainActivity extends WearableActivity  implements
             byte[] data = messageEvent.getData();
             DeviceData deviceData = Serialization.deserializeObject(data);
             this.sendSensorFiles(deviceData);
+        }
+
+        if (path.equals(getString(R.string.message_path_client_activity_clear_captures))){
+            this.clearCaptureFiles();
         }
     }
 
@@ -490,6 +493,20 @@ public class MainActivity extends WearableActivity  implements
 
 
         }
+    }
+
+    private void clearCaptureFiles(){
+        if (this.deleteRecursive(this.systemCapturesFolder))
+            Toast.makeText(this, R.string.capture_files_deleted, Toast.LENGTH_LONG).show();
+    }
+
+    private boolean deleteRecursive(File fileOrDirectory) {
+        if (!fileOrDirectory.exists())
+            return false;
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+        return fileOrDirectory.delete();
     }
 
 }

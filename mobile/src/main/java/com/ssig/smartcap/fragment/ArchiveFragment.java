@@ -13,6 +13,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatCallback;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -44,6 +45,7 @@ import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.AdapterCaptureList;
 import com.ssig.smartcap.model.CaptureListItem;
 import com.ssig.smartcap.utils.Tools;
+import com.ssig.smartcap.widget.EmptyRecyclerView;
 import com.ssig.smartcap.widget.LineItemDecoration;
 
 import org.zeroturnaround.zip.ZipUtil;
@@ -54,7 +56,6 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -111,6 +112,7 @@ public class ArchiveFragment extends AbstractMainFragment implements
     @Override
     public void onStart() {
         super.onStart();
+        this.refresh();
         final String uri = String.format("wear://*%s", getString(R.string.message_path_host_archive_fragment_prefix));
         Wearable.getDataClient(Objects.requireNonNull(this.getContext())).addListener(this, Uri.parse(uri), DataClient.FILTER_PREFIX);
         Wearable.getMessageClient(Objects.requireNonNull(this.getContext())).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
@@ -141,10 +143,12 @@ public class ArchiveFragment extends AbstractMainFragment implements
             }
         });
 
-        RecyclerView recyclerViewCaptures = Objects.requireNonNull(this.getView()).findViewById(R.id.captures_recycler_view);
+        EmptyRecyclerView recyclerViewCaptures = Objects.requireNonNull(this.getView()).findViewById(R.id.captures_recycler_view);
         recyclerViewCaptures.setLayoutManager(new LinearLayoutManager(this.getContext()));
         recyclerViewCaptures.addItemDecoration(new LineItemDecoration(Objects.requireNonNull(this.getContext()), LinearLayout.VERTICAL));
         recyclerViewCaptures.setHasFixedSize(true);
+        recyclerViewCaptures.setItemAnimator(new DefaultItemAnimator());
+        recyclerViewCaptures.setEmptyView(this.getView().findViewById(R.id.layout_no_capture));
 
         this.adapterCaptureList = new AdapterCaptureList(getContext(), this.listCaptureItems(this.listCaptureFiles()));
         recyclerViewCaptures.setAdapter(this.adapterCaptureList);
@@ -234,7 +238,7 @@ public class ArchiveFragment extends AbstractMainFragment implements
     //----------------------------------------------------------------------------------------------
     // Capture Items STUFFS
     //----------------------------------------------------------------------------------------------
-    private List<File> listCaptureFiles() {
+    public List<File> listCaptureFiles() {
         List<File> listedFiles = new LinkedList<>();
         if (this.getSystemArchiveFolder().exists()) {
             File[] files = this.getSystemArchiveFolder().listFiles(new FilenameFilter() {
@@ -490,11 +494,9 @@ public class ArchiveFragment extends AbstractMainFragment implements
             getWearService().requestSensorFiles(this.captureData.getClientDeviceData());
         }
 
-        boolean configureDeviceCaptureFolder(){
+        boolean configureDeviceCaptureFolder() {
             this.deviceCaptureFolder = new File(String.format("%s%s%s%s%s", getSystemCapturesFolder(), File.separator, captureData.getCaptureDataUUID(), File.separator, captureData.getClientDeviceData().getDeviceDataUUID()));
-            if (!deviceCaptureFolder.exists())
-                return deviceCaptureFolder.mkdirs();
-            return true;
+            return deviceCaptureFolder.exists() || deviceCaptureFolder.mkdirs();
         }
 
 

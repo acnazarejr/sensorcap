@@ -235,6 +235,10 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
+    <style name="NoAllCaps" parent="Widget.AppCompat.Button">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
     <style name="TabTitle" parent="Base.TextAppearance.AppCompat.Medium">
         <item name="android:textAllCaps">false</item>
         <item name="android:capitalize">words</item>

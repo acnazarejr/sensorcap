@@ -22,5 +22,6 @@
     <string name="close">Close</string>
     <string name="hardware_button_instruction">Stop (Click) - Close (Long)</string>
     <string name="syncing_ntp">Syncing NTP...</string>
+    <string name="capture_files_deleted">Capture Files Deleted</string>
 
 </resources>

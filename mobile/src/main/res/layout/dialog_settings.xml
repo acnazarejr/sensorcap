@@ -6,22 +6,37 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/ntp_pool_server_input_layout"
+    <!--<android.support.design.widget.TextInputLayout-->
+        <!--android:id="@+id/ntp_pool_server_input_layout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="3">-->
+
+        <!--<android.support.v7.widget.AppCompatEditText-->
+            <!--android:id="@+id/ntp_pool_server_input_text"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:inputType="text"-->
+            <!--android:maxLines="1"-->
+            <!--android:textColor="@color/colorGreyMediumDark"-->
+            <!--android:hint="@string/settings_ntp_pool_server_hint" />-->
+
+    <!--</android.support.design.widget.TextInputLayout>-->
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="3">
+        android:gravity="center_vertical"
+        android:text="@string/settings_ntp_pool_server_hint"/>
 
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/ntp_pool_server_input_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:maxLines="1"
-            android:textColor="@color/colorGreyMediumDark"
-            android:hint="@string/settings_ntp_pool_server_hint" />
-
-    </android.support.design.widget.TextInputLayout>
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/ntp_pool_server_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/settings_ntp_pool_server_hint"
+        android:textColorHint="@color/colorGreyMediumDark"
+        app:ms_background_color="@color/colorGreyLight"
+         />
 
     <View
         android:layout_width="match_parent"

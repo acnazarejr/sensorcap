@@ -16,6 +16,7 @@
     <string name="message_path_client_activity_start_capture">/client-activity/start-capture</string>
     <string name="message_path_client_activity_stop_capture">/client-activity/stop-capture</string>
     <string name="message_path_client_activity_request_sensor_files">/client-activity/request-sensor-files</string>
+    <string name="message_path_client_activity_clear_captures">/client-activity/clear-captures</string>
 
     <!-- MESSAGES TO HOST SERVICE -->
     <string name="message_path_host_service_prefix">/host-service</string>

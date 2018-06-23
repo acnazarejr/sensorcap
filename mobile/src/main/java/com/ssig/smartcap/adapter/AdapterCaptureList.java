@@ -257,7 +257,7 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
                 if (comp != 0)
                     return -comp;
 
-                return item1.itemTimestampLong.compareTo(item2.itemTimestampLong);
+                return -item1.itemTimestampLong.compareTo(item2.itemTimestampLong);
             }
         });
     }

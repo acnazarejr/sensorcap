@@ -5,13 +5,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatImageButton;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
@@ -61,6 +62,8 @@ import co.ceryle.radiorealbutton.RadioRealButtonGroup;
 
 public class CaptureFragment extends AbstractMainFragment implements MessageClient.OnMessageReceivedListener {
 
+    private AppCompatEditText inputCaptureName;
+    private AppCompatImageButton buttonMoreDetails;
     private RadioRealButtonGroup switchSmartphoneLocation;
     private RadioRealButtonGroup switchSmartphoneSide;
     private RadioRealButtonGroup switchSmartwatchSide;
@@ -81,6 +84,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     private SlideToActView buttonCaptureStop;
 
 
+    private String moreDetailsText;
     private CaptureConfig currentCaptureConfig;
     private DeviceCaptureRunner deviceCaptureRunner;
     private long currentCaptureStart;
@@ -98,6 +102,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        this.moreDetailsText = null;
         this.deviceCaptureRunner = null;
         this.currentCaptureConfig = null;
         this.currentCaptureStart = -1;
@@ -140,7 +145,11 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     // UI Stuffs
     //----------------------------------------------------------------------------------------------
     private void initUI(){
-        this.switchSmartphoneLocation = Objects.requireNonNull(this.getView()).findViewById(R.id.switch_smartphone_location);
+
+        this.inputCaptureName = Objects.requireNonNull(this.getView()).findViewById(R.id.capture_name_input_text);
+        this.buttonMoreDetails = this.getView().findViewById(R.id.button_more_info);
+
+        this.switchSmartphoneLocation = this.getView().findViewById(R.id.switch_smartphone_location);
         this.switchSmartphoneSide = this.getView().findViewById(R.id.switch_smartphone_side);
         this.switchSmartwatchSide = this.getView().findViewById(R.id.switch_smartwatch_side);
         this.inputSubjectName = this.getView().findViewById(R.id.subject_name_input_text);
@@ -153,7 +162,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         this.radioGroupDevices = this.getView().findViewById(R.id.radio_group_devices);
 
         this.dialogOnCapture =  new MaterialDialog.Builder(Objects.requireNonNull(this.getContext()))
-                .customView(R.layout.layout_dialog_oncapture, true)
+                .customView(R.layout.dialog_oncapture, true)
                 .cancelable(false)
                 .canceledOnTouchOutside(false)
                 .build();
@@ -168,6 +177,9 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
                 stopCapture();
             }
         });
+
+
+
         this.resetDialogOnCapture();
     }
 
@@ -184,6 +196,35 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     }
 
     private void registerListeners(){
+
+        this.buttonMoreDetails.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
+                        .title(R.string.capture_dialog_details_title)
+                        .titleColorRes(R.color.colorPrimary)
+                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(ContextCompat.getDrawable(getContext(), R.drawable.ic_edit)), getContext().getColor(R.color.colorPrimary)))
+                        .content(R.string.capture_dialog_details_content)
+                        .neutralText(R.string.button_cancel)
+                        .neutralColorRes(R.color.colorGrey)
+                        .onNeutral(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE)
+                        .positiveText(R.string.button_save)
+                        .input(getString(R.string.capture_dialog_details_hint), null, new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                                moreDetailsText = input.toString();
+                            }
+                        })
+                        .show();
+            }
+        });
+
 
         this.switchSubjectGender.setCheckedChangeListener(new IconSwitch.CheckedChangeListener() {
             @Override
@@ -413,7 +454,12 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
 
         CaptureConfig captureConfig = new CaptureConfig(globalCaptureConfigUUID, hostDeviceConfig);
         captureConfig.setSubjectInfo(subjectInfo);
-        captureConfig.setActivityName(null);
+
+        String captureName = this.inputSubjectName.getText().toString();
+        captureName = !captureName.equals("") ? captureName : "capture";
+        captureConfig.setCaptureName(captureName);
+        captureConfig.setAdditionalInfo(moreDetailsText);
+
 
 
         //---------------------------------
@@ -487,7 +533,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         }
 
         captureData.setSubjectInfo(this.currentCaptureConfig.getSubjectInfo());
-        captureData.setActivityName(this.currentCaptureConfig.getActivityName());
+        captureData.setActivityName(this.currentCaptureConfig.getCaptureName());
         captureData.setAdditionalInfo(this.currentCaptureConfig.getAdditionalInfo());
         captureData.setStartTimestamp(this.currentCaptureStart);
         captureData.setEndTimestamp(this.currentCaptureEnd);
