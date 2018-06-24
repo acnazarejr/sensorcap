@@ -119,7 +119,9 @@ public class MainActivity extends AppCompatActivity implements
         bindService(wearServiceIntent, this.wearServiceConnection, Context.BIND_AUTO_CREATE);
 
         this.initUI();
+
     }
+
 
     @Override
     protected void onStart() {

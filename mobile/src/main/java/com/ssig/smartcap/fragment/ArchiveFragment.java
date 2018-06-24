@@ -562,7 +562,7 @@ public class ArchiveFragment extends AbstractMainFragment implements
                         if (asset == null)
                             return ReceiveSmartwatchFilesTaskResponseType.ASSET_FAILURE;
 
-                        File sensorFile = new File(String.format("%s%s%s.txt", this.deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
+                        File sensorFile = new File(String.format("%s%s%s.dat", this.deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
                         Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -624,7 +624,7 @@ public class ArchiveFragment extends AbstractMainFragment implements
             this.dialogWaitingSmartwatchFiles.dismiss();
 
             if (response == ReceiveSmartwatchFilesTaskResponseType.SUCCESS) {
-                Toast.makeText(getContext(), "Arquivos recebidos", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.archive_toast_smartwatch_files_received, Toast.LENGTH_LONG).show();
                 new CloseCaptureTask().execute(this.captureData);
             } else {
                 MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(response);
@@ -664,12 +664,12 @@ public class ArchiveFragment extends AbstractMainFragment implements
             File compressedCaptureFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
             File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
 
-            ZipUtil.pack(captureFolder, compressedCaptureFile);
-            ZipUtil.addEntry(compressedCaptureFile, "capture.json", captureDataFile);
 
             captureData.setClosed(true);
             try {
                 JSONUtil.save(captureData, captureDataFile);
+                ZipUtil.pack(captureFolder, compressedCaptureFile);
+                ZipUtil.addEntry(compressedCaptureFile, "capture.json", captureDataFile);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;

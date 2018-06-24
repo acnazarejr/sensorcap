@@ -408,7 +408,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         int radioGroupDevicesCheckedId = this.radioGroupDevices.getCheckedRadioButtonId();
 
 
-        String subjectName = this.inputSubjectName.getText().toString();
+        String subjectName = this.inputSubjectName.getText().toString().trim();
         subjectName = !subjectName.equals("") ? subjectName : "Unknown";
         SubjectInfo subjectInfo = new SubjectInfo(subjectName);
         subjectInfo.setGender(this.switchSubjectGender.getChecked() == IconSwitch.Checked.LEFT ? SubjectInfo.Gender.MALE : SubjectInfo.Gender.FEMALE);
@@ -421,9 +421,15 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         boolean hasVibration = this.getSharedPreferences().getBoolean(getString(R.string.preference_main_key_has_vibration), getResources().getBoolean(R.bool.preference_main_default_has_vibration));
 
 
-        String subjectNameNormalized = Normalizer.normalize(subjectInfo.getName().toLowerCase().replace(" ", ""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        String captureName = this.inputCaptureName.getText().toString().trim();
+        captureName = !captureName.equals("") ? captureName : "capture";
+        String captureNameNormalized = Normalizer.normalize(captureName.toLowerCase().replace(" ", ""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+        String subjectFirstNameNormalized = Normalizer.normalize(subjectInfo.getName().split(" ")[0].toLowerCase().replace(" ", ""), Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat(getString(R.string.util_time_format_file));
-        String globalCaptureConfigUUID = String.format("%s_%s", subjectNameNormalized, simpleDateFormat.format(new Date()));
+
+
+
+        String globalCaptureConfigUUID = String.format("%s_%s_%s", captureNameNormalized, subjectFirstNameNormalized, simpleDateFormat.format(new Date()));
 
         //---------------------------------
         // SMARTPHONE CAPTURE CONFIG STUFFS
@@ -455,8 +461,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         CaptureConfig captureConfig = new CaptureConfig(globalCaptureConfigUUID, hostDeviceConfig);
         captureConfig.setSubjectInfo(subjectInfo);
 
-        String captureName = this.inputSubjectName.getText().toString();
-        captureName = !captureName.equals("") ? captureName : "capture";
+
         captureConfig.setCaptureName(captureName);
         captureConfig.setAdditionalInfo(moreDetailsText);
 
@@ -533,7 +538,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         }
 
         captureData.setSubjectInfo(this.currentCaptureConfig.getSubjectInfo());
-        captureData.setActivityName(this.currentCaptureConfig.getCaptureName());
+        captureData.setCaptureName(this.currentCaptureConfig.getCaptureName());
         captureData.setAdditionalInfo(this.currentCaptureConfig.getAdditionalInfo());
         captureData.setStartTimestamp(this.currentCaptureStart);
         captureData.setEndTimestamp(this.currentCaptureEnd);

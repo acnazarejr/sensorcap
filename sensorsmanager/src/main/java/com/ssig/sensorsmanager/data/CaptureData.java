@@ -14,7 +14,7 @@ public final class CaptureData implements Serializable {
     private DeviceData hostDeviceData;
     private DeviceData clientDeviceData;
     private SubjectInfo subjectInfo;
-    private String activityName;
+    private String captureName;
     private String additionalInfo;
     private long startTimestamp;
     private long endTimestamp;
@@ -25,7 +25,7 @@ public final class CaptureData implements Serializable {
         this.hostDeviceData= null;
         this.clientDeviceData = null;
         this.subjectInfo = null;
-        this.activityName = null;
+        this.captureName = null;
         this.additionalInfo =  null;
     }
 
@@ -45,8 +45,8 @@ public final class CaptureData implements Serializable {
         this.subjectInfo = subjectInfo;
     }
 
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
+    public void setCaptureName(String captureName) {
+        this.captureName = captureName;
     }
 
     public void setAdditionalInfo(String additionalInfo) {

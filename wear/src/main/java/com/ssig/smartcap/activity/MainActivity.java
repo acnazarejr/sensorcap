@@ -383,7 +383,7 @@ public class MainActivity extends WearableActivity  implements
         Map<String, Asset> assets = new HashMap<>();
         for (Map.Entry<SensorType, SensorData> entry : deviceData.getSensorsData().entrySet()){
             if (entry.getValue().isEnable()) {
-                File sensorFile = new File(String.format("%s%s%s.txt", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
+                File sensorFile = new File(String.format("%s%s%s.dat", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
                 if (sensorFile.exists()) {
                     Asset asset = Asset.createFromUri(Uri.fromFile(sensorFile));
                     assets.put(entry.getKey().code(), asset);

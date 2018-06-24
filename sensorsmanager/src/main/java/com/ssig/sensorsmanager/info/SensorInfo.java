@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 
 import com.ssig.sensorsmanager.SensorType;
+import com.ssig.sensorsmanager.util.SensorsValuesLength;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class SensorInfo implements Serializable{
     protected int minDelay;
     protected float resolution;
     protected int reportingMode;
+    protected int valuesLength;
 
     public SensorInfo(SensorType sensorType){
         this.sensorType = sensorType;
@@ -132,6 +134,13 @@ public class SensorInfo implements Serializable{
         this.reportingMode = reportingMode;
     }
 
+    public void setValuesLength(int valuesLength) {
+        this.valuesLength = valuesLength;
+    }
+
+    public int getValuesLength() {
+        return valuesLength;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // STATIC FACTORY METHODS
@@ -152,6 +161,7 @@ public class SensorInfo implements Serializable{
             sensorInfo.setMinDelay(defaultSensor.getMinDelay());
             sensorInfo.setResolution(defaultSensor.getResolution());
             sensorInfo.setReportingMode(defaultSensor.getReportingMode());
+            sensorInfo.setValuesLength(SensorsValuesLength.get(context, sensorType));
             return sensorInfo;
         }
         return null;

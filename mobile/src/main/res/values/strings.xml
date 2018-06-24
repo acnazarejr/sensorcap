@@ -2,6 +2,7 @@
 
     <!-- ******************** APP *************************** -->
     <string name="app_name">SmartCap</string>
+    <string name="app_sub_title">Wearable Sensors Capture</string>
 
     <!-- ******************** UTIL STRINGS *************************** -->
     <string name="util_time_format">HH:mm:ss.SSS</string>
@@ -129,8 +130,8 @@
 
 
     <!-- ******************** SMARTWATCH *************************** -->
-    <string name="smartwatch_error_title">No Wear Device Connected</string>
-    <string name="smartwatch_error_content">No devices paired or connected. Please open the Wear OS App and connect to a wear device with SmartCap installed.</string>
+    <string name="smartwatch_disconnected_title">No Wear Device Connected</string>
+    <string name="smartwatch_disconnected_content">No devices paired or connected. Please open the Wear OS App and connect to a wear device with SmartCap installed.</string>
 
 
     <!-- ******************** TIMETOOL *************************** -->
@@ -192,6 +193,7 @@
     <string name="archive_dialog_wear_sensors_error_timeout">A transmission timeout is reached.</string>
     <string name="archive_dialog_close_capture_title">Close Capture</string>
     <string name="archive_dialog_close_capture_content">Compressing the capture files. This operation can long a few minutes.</string>
+    <string name="archive_toast_smartwatch_files_received">Smartwatch sensors files received</string>
     <string name="archive_toast_closed_success">Capture closed successfully</string>
     <string name="archive_empty_title">No Captures</string>
     <string name="archive_empty_content">Closed and unclosed captures appear here.</string>

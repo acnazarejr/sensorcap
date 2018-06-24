@@ -104,7 +104,7 @@ public class DeviceCaptureRunner {
         for(SensorType sensorType : sensorsConfig.keySet()){
             SensorConfig sensorConfig = sensorsConfig.get(sensorType);
             if (sensorConfig.isEnabled()){
-                File sensorDataFile = new File(String.format("%s%s%s.txt", this.deviceCaptureFolder, File.separator, sensorConfig.getSensorConfigUUID()));
+                File sensorDataFile = new File(String.format("%s%s%s.dat", this.deviceCaptureFolder, File.separator, sensorConfig.getSensorConfigUUID()));
                 this.sensorListeners.put(sensorType, new SensorListener(sensorDataFile));
             }
         }

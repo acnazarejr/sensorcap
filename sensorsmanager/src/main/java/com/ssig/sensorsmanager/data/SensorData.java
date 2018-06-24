@@ -21,6 +21,7 @@ public final class SensorData implements Serializable {
     private int minDelay;
     private float resolution;
     private int reportingMode;
+    private int valuesLength;
     private Integer frequency;
     private boolean enable;
 
@@ -43,6 +44,7 @@ public final class SensorData implements Serializable {
         this.minDelay = sensorInfo.getMinDelay();
         this.resolution = sensorInfo.getResolution();
         this.reportingMode = sensorInfo.getReportingMode();
+        this.valuesLength = sensorInfo.getValuesLength();
 
         this.frequency = sensorConfig.getFrequency();
         this.enable = sensorConfig.isEnabled();
