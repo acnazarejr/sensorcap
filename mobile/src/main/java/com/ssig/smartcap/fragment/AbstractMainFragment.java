@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.smartcap.service.WearService;
@@ -23,9 +22,10 @@ import java.io.File;
 import java.util.Objects;
 
 
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractMainFragment extends Fragment {
 
-    private int layout;
+    private final int layout;
 
     private View fragmentContainer;
 
@@ -33,7 +33,7 @@ public abstract class AbstractMainFragment extends Fragment {
     private File systemCapturesFolder;
     private File systemArchiveFolder;
 
-    public AbstractMainFragment(@LayoutRes int layout) {
+    protected AbstractMainFragment(@LayoutRes int layout) {
         this.layout = layout;
         this.fragmentContainer = null;
         this.sharedPreferences = null;
@@ -83,7 +83,8 @@ public abstract class AbstractMainFragment extends Fragment {
         }
     }
 
-    public void refresh(){}
+    @SuppressWarnings("unused")
+    public abstract void refresh();
 
     protected WearService getWearService() {
         return ((MainActivity) Objects.requireNonNull(this.getActivity())).getWearService();
@@ -93,15 +94,15 @@ public abstract class AbstractMainFragment extends Fragment {
         return this.getWearService() != null && this.getWearService().isConnected();
     }
 
-    public SharedPreferences getSharedPreferences() {
+    protected SharedPreferences getSharedPreferences() {
         return sharedPreferences;
     }
 
-    public File getSystemCapturesFolder() {
+    protected File getSystemCapturesFolder() {
         return systemCapturesFolder;
     }
 
-    public File getSystemArchiveFolder() {
+    protected File getSystemArchiveFolder() {
         return systemArchiveFolder;
     }
 }

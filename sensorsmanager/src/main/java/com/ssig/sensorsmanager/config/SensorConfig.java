@@ -7,7 +7,7 @@ public class SensorConfig implements Serializable {
 
     static final long serialVersionUID = 567123789145623489L;
 
-    private String sensorConfigUUID;
+    private final String sensorConfigUUID;
     private Boolean enabled;
     private Integer frequency;
 

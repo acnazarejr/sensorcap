@@ -9,8 +9,8 @@ public class CaptureConfig implements Serializable {
 
     static final long serialVersionUID = 914562348956712378L;
 
-    private String captureConfigUUID;
-    private DeviceConfig hostDeviceConfig;
+    private final String captureConfigUUID;
+    private final DeviceConfig hostDeviceConfig;
     private DeviceConfig clientDeviceConfig;
     private SubjectInfo subjectInfo;
     private String captureName;

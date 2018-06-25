@@ -14,8 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.ssig.smartcap.R;
@@ -32,9 +30,9 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private class SensorsListItemViewHolder extends RecyclerView.ViewHolder {
 
-        private View viewItemIcon;
-        private TextView textItemTitle;
-        private FloatingActionButton buttonItemIcon;
+        private final View viewItemIcon;
+        private final TextView textItemTitle;
+        private final FloatingActionButton buttonItemIcon;
 
         SensorsListItemViewHolder(View view) {
             super(view);
@@ -45,19 +43,19 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    private List<SensorsGridItem> mSensorsGridItems;
-    private Context context;
-    private SharedPreferences sharedPreferences;
+    private final List<SensorsGridItem> sensorsGridItems;
+    private final Context context;
+    private final SharedPreferences sharedPreferences;
 
 
-    public AdapterSensorsGrid(Context context, List<SensorsGridItem> mSensorsGridItems, String preferencesName) {
-        this.mSensorsGridItems = mSensorsGridItems;
+    public AdapterSensorsGrid(Context context, List<SensorsGridItem> sensorsGridItems, String preferencesName) {
+        this.sensorsGridItems = sensorsGridItems;
         this.context = context;
         this.sharedPreferences = Objects.requireNonNull(context).getSharedPreferences(preferencesName, Context.MODE_PRIVATE);
     }
 
     public List<SensorsGridItem> getSensorsGridItems() {
-        return mSensorsGridItems;
+        return sensorsGridItems;
     }
 
     @NonNull
@@ -77,7 +75,7 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder instanceof SensorsListItemViewHolder) {
 
             final SensorsListItemViewHolder view = (SensorsListItemViewHolder) holder;
-            final SensorsGridItem sensorsGridItem = mSensorsGridItems.get(position);
+            final SensorsGridItem sensorsGridItem = sensorsGridItems.get(position);
 
             updateItemIcon(view.viewItemIcon, sensorsGridItem);
             view.textItemTitle.setText(sensorsGridItem.getSensorType().toString());
@@ -111,12 +109,12 @@ public class AdapterSensorsGrid extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public int getItemCount() {
-        return mSensorsGridItems.size();
+        return sensorsGridItems.size();
     }
 
 //    public void clear() {
-//        final int size = mSensorsGridItems.size();
-//        mSensorsGridItems.clear();
+//        final int size = sensorsGridItems.size();
+//        sensorsGridItems.clear();
 //        notifyItemRangeRemoved(0, size);
 //    }
 

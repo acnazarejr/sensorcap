@@ -6,12 +6,13 @@ import com.ssig.sensorsmanager.info.SensorInfo;
 
 import java.io.Serializable;
 
+@SuppressWarnings("ALL")
 public final class SensorData implements Serializable {
 
     static final long serialVersionUID = 961237891451623489L;
 
-    private String sensorDataUUID;
-    private SensorType sensorType;
+    private final String sensorDataUUID;
+    private final SensorType sensorType;
     private String model;
     private String vendor;
     private int version;

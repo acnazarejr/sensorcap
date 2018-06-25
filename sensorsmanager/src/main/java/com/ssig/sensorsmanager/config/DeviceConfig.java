@@ -6,19 +6,20 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("ALL")
 public class DeviceConfig implements Serializable {
 
     static final long serialVersionUID = 56712229445623489L;
 
 
-    private String deviceConfigUUID;
-    private String captureConfigUUID;
-    private String deviceKey;
-    private SensorType.DeviceType deviceType;
+    private final String deviceConfigUUID;
+    private final String captureConfigUUID;
+    private final String deviceKey;
+    private final SensorType.DeviceType deviceType;
     private Boolean enable;
     private SensorType.DeviceLocation deviceLocation;
     private SensorType.DeviceSide deviceSide;
-    private Map<SensorType, SensorConfig> sensorsConfig;
+    private final Map<SensorType, SensorConfig> sensorsConfig;
 
     private Integer countdownStart;
     private Boolean sound;

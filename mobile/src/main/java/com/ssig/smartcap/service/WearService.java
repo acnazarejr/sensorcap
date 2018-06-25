@@ -6,18 +6,12 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.MessageClient;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.*;
 import com.ssig.sensorsmanager.config.DeviceConfig;
 import com.ssig.sensorsmanager.data.DeviceData;
 import com.ssig.sensorsmanager.info.DeviceInfo;
@@ -88,10 +82,6 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         return super.onUnbind(intent);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 
 
     //----------------------------------------------------------------------------------------------
@@ -219,9 +209,10 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
         this.requestSensorInfoLatch = new CountDownLatch(1);
         this.sendMessage(getString(R.string.message_path_client_activity_request_watch_sensorinfo));
         try {
-            this.requestSensorInfoLatch.await(60, TimeUnit.SECONDS);
+            this.requestSensorInfoLatch.await(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             this.requestSensorInfoLatch = null;
+            throw new TimeoutException(e.getMessage());
         }
         this.requestSensorInfoLatch = null;
         return this.clientDeviceInfo != null;
@@ -230,21 +221,19 @@ public class WearService extends Service implements MessageClient.OnMessageRecei
     //----------------------------------------------------------------------------------------------
     // Disconnection STUFFS
     //----------------------------------------------------------------------------------------------
-    public boolean disconnect(){
-        return this.disconnect(true);
+    private void disconnect(){
+        this.disconnect(true);
     }
 
-    public boolean disconnect(boolean sendDisconnectMessageToClient){
+    public void disconnect(boolean sendDisconnectMessageToClient){
         if (sendDisconnectMessageToClient) {
             try {
                 this.sendMessage(getString(R.string.message_path_client_activity_disconnected));
             } catch (ApiException e) {
                 e.printStackTrace();
-                return false;
             }
         }
         this.reset();
-        return true;
     }
 
 

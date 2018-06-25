@@ -31,25 +31,6 @@ public class Tools {
         }
     }
 
-    public static void setSystemBarDark(Activity act, @ColorRes int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Window window = act.getWindow();
-            window.setStatusBarColor(ContextCompat.getColor(act, color));
-        }
-    }
-
-    public static void toggleArrow(boolean show, View view) {
-        toggleArrow(show, view, true);
-    }
-
-    public static void toggleArrow(boolean show, View view, boolean delay) {
-        if (show) {
-            view.animate().setDuration(delay ? 200 : 0).rotation(180);
-        } else {
-            view.animate().setDuration(delay ? 200 : 0).rotation(0);
-        }
-    }
-
     public static void changeMenuIconColor(Menu menu, @ColorInt int color) {
         for (int i = 0; i < menu.size(); i++) {
             Drawable drawable = menu.getItem(i).getIcon();

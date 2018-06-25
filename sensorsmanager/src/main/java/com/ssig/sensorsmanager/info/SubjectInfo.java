@@ -2,6 +2,7 @@ package com.ssig.sensorsmanager.info;
 
 import java.io.Serializable;
 
+@SuppressWarnings("ALL")
 public class SubjectInfo implements Serializable {
 
     static final long serialVersionUID = 123789145623456789L;

@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
-
 import com.jaredrummler.android.device.DeviceName;
 import com.ssig.sensorsmanager.R;
 import com.ssig.sensorsmanager.SensorType;
@@ -19,14 +18,14 @@ public class DeviceInfo implements Serializable {
 
     static final long serialVersionUID = 9111128914562345678L;
 
-    protected String deviceKey;
-    protected String deviceName;
-    protected String androidVersion;
-    protected int androidSDK;
-    protected String manufacturer;
-    protected String model;
-    protected String marketName;
-    protected Map<SensorType, SensorInfo> sensorsInfo;
+    private String deviceKey;
+    private String deviceName;
+    private String androidVersion;
+    private int androidSDK;
+    private String manufacturer;
+    private String model;
+    private String marketName;
+    private Map<SensorType, SensorInfo> sensorsInfo;
 
     @SuppressLint("HardwareIds")
     public static DeviceInfo get(Context context){
@@ -45,7 +44,7 @@ public class DeviceInfo implements Serializable {
         return deviceInfo;
     }
 
-    protected DeviceInfo(){
+    private DeviceInfo(){
         this.deviceKey = null;
         this.deviceName = null;
         this.androidVersion = null;

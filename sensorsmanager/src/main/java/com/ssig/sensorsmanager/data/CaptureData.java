@@ -3,14 +3,14 @@ package com.ssig.sensorsmanager.data;
 
 import com.ssig.sensorsmanager.info.SubjectInfo;
 
-
 import java.io.Serializable;
 
+@SuppressWarnings("ALL")
 public final class CaptureData implements Serializable {
 
     static final long serialVersionUID = 719145489623562378L;
 
-    private String captureDataUUID;
+    private final String captureDataUUID;
     private DeviceData hostDeviceData;
     private DeviceData clientDeviceData;
     private SubjectInfo subjectInfo;

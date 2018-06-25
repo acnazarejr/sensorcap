@@ -2,20 +2,16 @@ package com.ssig.smartcap.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
@@ -25,7 +21,6 @@ import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.GravityEnum;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -33,11 +28,7 @@ import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationAdapter;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationViewPager;
 import com.google.android.gms.common.util.ArrayUtils;
-import com.google.android.gms.wearable.CapabilityClient;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.MessageClient;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.*;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinnerAdapter;
 import com.karumi.dexter.Dexter;
@@ -46,18 +37,12 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.ssig.sensorsmanager.data.CaptureData;
+import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.sensorsmanager.util.JSONUtil;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.ViewPagerAdapter;
-import com.ssig.smartcap.fragment.AbstractMainFragment;
-import com.ssig.smartcap.fragment.ArchiveFragment;
-import com.ssig.smartcap.fragment.CaptureFragment;
-import com.ssig.smartcap.fragment.SmartphoneFragment;
-import com.ssig.smartcap.fragment.SmartwatchFragment;
-import com.ssig.smartcap.fragment.TimeToolFragment;
-import com.ssig.smartcap.model.CaptureListItem;
+import com.ssig.smartcap.fragment.*;
 import com.ssig.smartcap.service.WearService;
-import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.utils.Tools;
 import com.warkiz.widget.IndicatorSeekBar;
 
@@ -85,14 +70,13 @@ public class MainActivity extends AppCompatActivity implements
     private MaterialDialog dialogAbout;
 
     private ViewPagerAdapter viewPagerAdapter;
-    public AbstractMainFragment captureFragment;
-    public AbstractMainFragment smartphoneFragment;
-    public AbstractMainFragment smartwatchFragment;
-    public AbstractMainFragment timeToolFragment;
-    public AbstractMainFragment archiveFragment;
+    private CaptureFragment captureFragment;
+    private SmartphoneFragment smartphoneFragment;
+    private SmartwatchFragment smartwatchFragment;
+    private TimeToolFragment timeToolFragment;
+    private ArchiveFragment archiveFragment;
 
     private File systemCapturesFolder;
-    private File systemArchiveFolder;
 
     private WearService wearService;
     private boolean wearServiceBounded;
@@ -111,9 +95,7 @@ public class MainActivity extends AppCompatActivity implements
 
         String systemFolderName = getString(R.string.system_folder_name);
         String captureFolderName = getString(R.string.capture_folder_name);
-        String archiveFolderName = getString(R.string.archive_folder_name);
         this.systemCapturesFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, captureFolderName));
-        this.systemArchiveFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, archiveFolderName));
 
         Intent wearServiceIntent = new Intent(this, WearService.class);
         bindService(wearServiceIntent, this.wearServiceConnection, Context.BIND_AUTO_CREATE);
@@ -281,22 +263,22 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    public void updateNTPMenuItem(){
+    private void updateNTPMenuItem(){
         boolean initialized = NTPTime.isSynchronized();
         if (initialized)
             this.NTPMenuItem.setIcon(R.drawable.ic_ntp_on);
         else
             this.NTPMenuItem.setIcon(R.drawable.ic_ntp_off);
-        int color = ContextCompat.getColor(this, initialized ? R.color.colorAccent : R.color.colorAlert);
+        int color = ContextCompat.getColor(this, initialized ? R.color.colorAccentLight : R.color.colorAlert);
         Tools.changeDrawableColor(this.NTPMenuItem.getIcon(), color);
     }
 
-    public void updateWearMenuItem(){
+    private void updateWearMenuItem(){
         if (this.isWearClientConnected())
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_on);
         else
             this.wearMenuItem.setIcon(R.drawable.ic_smartwatch_off);
-        int color = ContextCompat.getColor(this, this.isWearClientConnected() ? R.color.colorAccent : R.color.colorAlert);
+        int color = ContextCompat.getColor(this, this.isWearClientConnected() ? R.color.colorAccentLight : R.color.colorAlert);
         Tools.changeDrawableColor(this.wearMenuItem.getIcon(), color);
     }
 
@@ -336,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements
     private boolean deleteUnclosedArchivedCaptures(){
         boolean deleted = true;
         try {
-            for(File captureFile : ((ArchiveFragment)this.archiveFragment).listCaptureFiles()){
+            for(File captureFile : this.archiveFragment.listCaptureFiles()){
                 if(captureFile.exists()){
                     CaptureData captureData = JSONUtil.load(captureFile, CaptureData.class);
                     if (!captureData.isClosed())
@@ -353,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements
     // ---------------------------------------------------------------------------------------------
     // Settings Stuffs
     // ---------------------------------------------------------------------------------------------
-    public void initSettings(){
+    private void initSettings(){
         this.dialogSettings =  new MaterialDialog.Builder(Objects.requireNonNull(this))
                 .customView(R.layout.dialog_settings, true)
                 .title(R.string.settings_title)
@@ -434,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements
     // ---------------------------------------------------------------------------------------------
     // About Stuffs
     // ---------------------------------------------------------------------------------------------
-    public void initAbout(){
+    private void initAbout(){
         this.dialogAbout = new MaterialDialog.Builder(Objects.requireNonNull(this))
                 .customView(R.layout.dialog_about, true)
                 .btnStackedGravity(GravityEnum.CENTER)
@@ -454,7 +436,6 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
     }
-
 
     // ---------------------------------------------------------------------------------------------
     // BOTTOM NAVIGATION STUFFS
@@ -491,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements
     // ---------------------------------------------------------------------------------------------
     // PAGE VIEWER STUFFS
     // ---------------------------------------------------------------------------------------------
-    public void initPagerView(){
+    private void initPagerView(){
         this.ahBottomNavigationViewPager = findViewById(R.id.view_pager);
 
         this.viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -513,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
-    public void setCurrentFragment(int position){
+    private void setCurrentFragment(int position){
 
         AbstractMainFragment currentFragment = this.viewPagerAdapter.getCurrentFragment();
         currentFragment.hide();
@@ -525,13 +506,25 @@ public class MainActivity extends AppCompatActivity implements
         currentFragment.show();
     }
 
-    public void updateToolBarTitleAndIcon(int position){
+    private void updateToolBarTitleAndIcon(int position){
         String fragmentTitle = this.ahBottomNavigation.getItem(position).getTitle(this);
         this.toolbar.setTitle(fragmentTitle);
         Drawable fragmentIcon;
         fragmentIcon = Objects.requireNonNull(this.ahBottomNavigation.getItem(position).getDrawable(this).getConstantState()).newDrawable().mutate();
         fragmentIcon = Tools.changeDrawableColor(fragmentIcon, ContextCompat.getColor(this, R.color.colorPrimary));
         this.toolbar.setNavigationIcon(fragmentIcon);
+    }
+
+    public SmartphoneFragment getSmartphoneFragment() {
+        return smartphoneFragment;
+    }
+
+    public SmartwatchFragment getSmartwatchFragment() {
+        return smartwatchFragment;
+    }
+
+    public ArchiveFragment getArchiveFragment() {
+        return archiveFragment;
     }
 
     // ---------------------------------------------------------------------------------------------

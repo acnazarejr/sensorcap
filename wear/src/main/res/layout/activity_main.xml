@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.wear.widget.BoxInsetLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorBackgroundView"
-    android:padding="@dimen/box_inset_layout_padding"
-    tools:context=".activity.MainActivity"
-    tools:deviceIds="wear">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorBackgroundView"
+        android:padding="@dimen/box_inset_layout_padding"
+        tools:context=".activity.MainActivity"
+        tools:deviceIds="wear" tools:ignore="Overdraw">
 
 
     <RelativeLayout
@@ -20,16 +20,14 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/top_layout"
-                android:layout_width="match_parent"
+                    android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_horizontal"
                 android:layout_above="@id/bottom_layout"
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/status_icon_layout"
-                    android:layout_width="wrap_content"
+                        android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
@@ -55,8 +53,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/main_layout"
-                    android:layout_width="match_parent"
+                        android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -84,8 +81,7 @@
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/text_title"
-                                android:layout_width="wrap_content"
+                                    android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorPrimary"
                                 android:text="@string/app_name"
@@ -93,8 +89,7 @@
                                 android:textStyle="bold"/>
 
                             <TextView
-                                android:id="@+id/text_message"
-                                android:layout_width="wrap_content"
+                                    android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorGreyDark"
                                 android:textSize="15sp"
@@ -140,12 +135,13 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/key_one_image_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="3dp"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                        android:id="@+id/key_one_image_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="3dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical"
+                        tools:ignore="UseCompoundDrawables">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -203,7 +199,8 @@
                 android:layout_marginTop="20dp"
                 android:padding="10dp"
                 android:tint="@color/colorPrimary"
-                android:src="@drawable/ic_progress_upload"/>
+                android:src="@drawable/ic_progress_upload"
+                android:contentDescription="@string/image_description"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -232,7 +229,8 @@
                 android:layout_marginTop="20dp"
                 android:padding="10dp"
                 android:tint="@color/colorPrimary"
-                android:src="@drawable/ic_ntp_on"/>
+                android:src="@drawable/ic_ntp_on"
+                android:contentDescription="@string/image_description"/>
 
             <TextView
                 android:layout_width="match_parent"

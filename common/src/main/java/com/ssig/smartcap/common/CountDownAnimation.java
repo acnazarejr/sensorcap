@@ -14,18 +14,18 @@ import android.widget.TextView;
 
 public class CountDownAnimation {
 
-    private TextView mTextView;
-    private Animation mAnimation;
-    private int mStartCount;
+    private final TextView mTextView;
+    private final Animation mAnimation;
+    private final int mStartCount;
     private int mCurrentCount;
     private CountDownListener mListener;
 
-    private ToneGenerator toneGenerator;
-    private Vibrator vibrator;
-    private boolean hasSound;
-    private boolean hasVibration;
+    private final ToneGenerator toneGenerator;
+    private final Vibrator vibrator;
+    private final boolean hasSound;
+    private final boolean hasVibration;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler();
 
     private final Runnable mCountDown = new Runnable() {
         public void run() {
@@ -80,19 +80,12 @@ public class CountDownAnimation {
         }
     }
 
-//    public void cancel() {
-//        mHandler.removeCallbacks(mCountDown);
-//
-//        mTextView.setText("");
-//        mTextView.setVisibility(View.GONE);
-//    }
-
-
     public void setCountDownListener(CountDownListener listener) {
         mListener = listener;
     }
 
 
+    @SuppressWarnings("unused")
     public interface CountDownListener {
         void onCountDownEnd(CountDownAnimation animation);
     }

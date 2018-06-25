@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/bottom_navigation_height"
-    android:background="@color/colorBackgroundView"
-    tools:context=".fragment.TimeToolFragment">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/bottom_navigation_height"
+        android:background="@color/colorBackgroundView"
+        tools:context=".fragment.TimeToolFragment" tools:ignore="Overdraw">
 
     <RelativeLayout
-        android:id="@+id/layout_timetool_content"
-        android:layout_width="match_parent"
+            android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:descendantFocusability="blocksDescendants">
 
@@ -33,8 +32,7 @@
                 android:orientation="vertical">
 
                 <RelativeLayout
-                    android:id="@+id/qr_code_container"
-                    android:layout_width="match_parent"
+                        android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_above="@id/separator"
                     android:gravity="center"

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="@dimen/spacing_large">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@android:color/white"
+              android:gravity="center"
+              android:orientation="vertical"
+              android:padding="@dimen/spacing_large" tools:ignore="Overdraw">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,8 +19,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
         <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="80dp"
+                android:layout_width="80dp"
             android:layout_height="80dp"
             android:tint="@color/colorPrimary"
             app:srcCompat="@drawable/logo"
@@ -36,8 +35,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tv_version"
-            android:layout_width="wrap_content"
+                android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
             android:text="Version 0.1"

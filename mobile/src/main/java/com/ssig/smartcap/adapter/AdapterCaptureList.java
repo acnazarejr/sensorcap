@@ -13,26 +13,21 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.model.CaptureListItem;
+
+import java.util.*;
 
 public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final int VIEW_ITEM = 1;
 
-    private Context context;
-    private List<CaptureListItem> captureListItems;
+    private final Context context;
+    private final List<CaptureListItem> captureListItems;
     private OnClickListener onClickListener;
     private OnCloseButtonClickListener onCloseButtonClickListener;
 
-    private SparseBooleanArray selectedItems;
+    private final SparseBooleanArray selectedItems;
     private int currentSelectedIdx;
 
     public AdapterCaptureList(Context context, List<CaptureListItem> captureListItems) {
@@ -57,19 +52,19 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
     //----------------------------------------------------------------------------------------------
     class CaptureHolder extends RecyclerView.ViewHolder {
 
-        private View layoutParent;
+        private final View layoutParent;
 
-        private TextView textItemTitle;
-        private TextView textItemDuration;
-        private TextView textItemTimestamp;
-        private ImageView imageSmartphoneEnable;
-        private ImageView imageSmartwatchEnable;
-        private TextView textItemDevices;
+        private final TextView textItemTitle;
+        private final TextView textItemDuration;
+        private final TextView textItemTimestamp;
+        private final ImageView imageSmartphoneEnable;
+        private final ImageView imageSmartwatchEnable;
+        private final TextView textItemDevices;
 
-        private ImageView imageItemImageBackground;
-        private ImageView imageItemImageIcon;
+        private final ImageView imageItemImageBackground;
+        private final ImageView imageItemImageIcon;
 
-        private ImageButton buttonCloseCapture;
+        private final ImageButton buttonCloseCapture;
 
         CaptureHolder(View view) {
             super(view);
@@ -91,11 +86,11 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    public static class SectionViewHolder extends RecyclerView.ViewHolder {
-        TextView textTitleSection;
+    private static class SectionViewHolder extends RecyclerView.ViewHolder {
+        final TextView textTitleSection;
         SectionViewHolder(View v) {
             super(v);
-            textTitleSection = (TextView) v.findViewById(R.id.title_section_text);
+            textTitleSection = v.findViewById(R.id.title_section_text);
         }
     }
 
@@ -312,11 +307,13 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
         this.onCloseButtonClickListener = onCloseButtonClickListener;
     }
 
+    @SuppressWarnings("unused")
     public interface OnClickListener {
         void onItemClick(View view, CaptureListItem obj, int pos);
         void onItemLongClick(View view, CaptureListItem obj, int pos);
     }
 
+    @SuppressWarnings("unused")
     public interface OnCloseButtonClickListener {
         void onItemClick(View view, CaptureListItem obj, int pos);
     }

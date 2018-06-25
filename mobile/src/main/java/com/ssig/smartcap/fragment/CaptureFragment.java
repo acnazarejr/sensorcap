@@ -14,13 +14,8 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatImageButton;
 import android.text.InputType;
 import android.view.View;
-import android.widget.Chronometer;
-import android.widget.CompoundButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
+import co.ceryle.radiorealbutton.RadioRealButtonGroup;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.wearable.MessageClient;
@@ -40,12 +35,12 @@ import com.ssig.sensorsmanager.data.SensorData;
 import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.sensorsmanager.info.SensorInfo;
 import com.ssig.sensorsmanager.info.SubjectInfo;
+import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.sensorsmanager.util.JSONUtil;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.smartcap.common.CountDownAnimation;
 import com.ssig.smartcap.model.SensorsGridItem;
-import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.smartcap.utils.Tools;
 
 import java.io.File;
@@ -57,8 +52,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import co.ceryle.radiorealbutton.RadioRealButtonGroup;
 
 public class CaptureFragment extends AbstractMainFragment implements MessageClient.OnMessageReceivedListener {
 
@@ -344,7 +337,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     //----------------------------------------------------------------------------------------------
     // Capture STUFFS
     //----------------------------------------------------------------------------------------------
-    public void startCapture(){
+    private void startCapture(){
 
         this.currentCaptureStart = System.currentTimeMillis();
 
@@ -379,7 +372,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
 
     }
 
-    public void stopCapture(){
+    private void stopCapture(){
         this.chronometerCapture.stop();
         try {
             if (this.deviceCaptureRunner != null)
@@ -442,7 +435,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         if (hostDeviceConfig.isEnable()) {
             hostDeviceConfig.setDeviceLocation(smartphoneLocations[this.switchSmartphoneLocation.getPosition()]);
             hostDeviceConfig.setDeviceSide(this.switchSmartphoneSide.getPosition() == 0 ? SensorType.DeviceSide.LEFT : SensorType.DeviceSide.RIGHT);
-            List<SensorsGridItem> sensorsGridItemList = ((SmartphoneFragment)((MainActivity) Objects.requireNonNull(getActivity())).smartphoneFragment).getValidSensorGridItemList();
+            List<SensorsGridItem> sensorsGridItemList = ((MainActivity) Objects.requireNonNull(getActivity())).getSmartphoneFragment().getValidSensorGridItemList();
             for (SensorsGridItem item : sensorsGridItemList){
                 String sensorConfigUUID = String.format("%s_%s", smartphoneCaptureUUID, item.getSensorType().code().toLowerCase());
                 SensorConfig sensorConfig = new SensorConfig(sensorConfigUUID);
@@ -479,7 +472,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
             if (clientDeviceConfig.isEnable()) {
                 clientDeviceConfig.setDeviceLocation(SensorType.DeviceLocation.WRIST);
                 clientDeviceConfig.setDeviceSide(this.switchSmartwatchSide.getPosition() == 0 ? SensorType.DeviceSide.LEFT : SensorType.DeviceSide.RIGHT);
-                List<SensorsGridItem> sensorsGridItemList = ((SmartwatchFragment)((MainActivity) Objects.requireNonNull(getActivity())).smartwatchFragment).getValidSensorGridItemList();
+                List<SensorsGridItem> sensorsGridItemList = ((MainActivity) Objects.requireNonNull(getActivity())).getSmartwatchFragment().getValidSensorGridItemList();
                 for (SensorsGridItem item : sensorsGridItemList){
                     String sensorConfigUUID = String.format("%s_%s", smartwatchCaptureUUID, item.getSensorType().code().toLowerCase());
                     SensorConfig sensorConfig = new SensorConfig(sensorConfigUUID);
@@ -551,7 +544,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
 
         File captureDataFile = new File(String.format("%s%s%s.json", this.getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
         JSONUtil.save(captureData, captureDataFile);
-        ((ArchiveFragment)((MainActivity) Objects.requireNonNull(this.getActivity())).archiveFragment).addCaptureData(captureData);
+        ((MainActivity) Objects.requireNonNull(this.getActivity())).getArchiveFragment().addCaptureData(captureData);
         this.currentCaptureConfig = null;
         this.currentCaptureStart = -1;
         this.currentCaptureEnd = -1;

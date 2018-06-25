@@ -19,17 +19,10 @@ import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.MessageClient;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.*;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.capture.DeviceCaptureRunner;
 import com.ssig.sensorsmanager.config.DeviceConfig;
@@ -82,7 +75,6 @@ public class MainActivity extends WearableActivity  implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setAmbientEnabled();
 
         String systemFolderName = getString(R.string.system_folder_name);
         String captureFolderName = getString(R.string.capture_folder_name);
@@ -110,11 +102,6 @@ public class MainActivity extends WearableActivity  implements
         super.onResume();
         this.updateStatusIcons();
         this.updateStatus();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -380,13 +367,13 @@ public class MainActivity extends WearableActivity  implements
             return;
         }
 
-        Map<String, Asset> assets = new HashMap<>();
+        Map<SensorType, Asset> assets = new HashMap<>();
         for (Map.Entry<SensorType, SensorData> entry : deviceData.getSensorsData().entrySet()){
             if (entry.getValue().isEnable()) {
                 File sensorFile = new File(String.format("%s%s%s.dat", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
                 if (sensorFile.exists()) {
                     Asset asset = Asset.createFromUri(Uri.fromFile(sensorFile));
-                    assets.put(entry.getKey().code(), asset);
+                    assets.put(entry.getKey(), asset);
                 } else {
                     this.sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_file_no_exists).getBytes());
                     this.sendingFilesLayout.setVisibility(View.GONE);
@@ -396,35 +383,36 @@ public class MainActivity extends WearableActivity  implements
             }
         }
 
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(getString(R.string.message_path_host_archive_fragment_sensor_files_sent));
 
-        for(Map.Entry<String, Asset> entry : assets.entrySet())
-            putDataMapRequest.getDataMap().putAsset(entry.getKey(), entry.getValue());
+        for(Map.Entry<SensorType, Asset> entry : assets.entrySet()) {
 
-        final Long timestamp = System.currentTimeMillis();
-        putDataMapRequest.getDataMap().putLong("timestamp", timestamp);
+            final Long timestamp = System.currentTimeMillis();
+            PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(String.format("%s/%s", getString(R.string.message_path_host_archive_fragment_sensor_files_sent), entry.getKey().code()));
+            putDataMapRequest.getDataMap().putAsset(getString(R.string.data_item_sensors_smartwatch_asset), entry.getValue());
+            putDataMapRequest.getDataMap().putString(getString(R.string.data_item_sensors_smartwatch_key), entry.getKey().code());
+            putDataMapRequest.getDataMap().putLong("timestamp", timestamp);
 
-        PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
-        putDataRequest.setUrgent();
+            PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
+            putDataRequest.setUrgent();
 
-        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
-        dataItemTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_data_item).getBytes());
-                sendingFilesLayout.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_data_item), Toast.LENGTH_LONG).show();
-            }
-        });
-        dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
-            @Override
-            public void onSuccess(DataItem dataItem) {
-//                byte[] data = Serialization.serializeObject(timestamp);
-//                sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_success), data);
-                sendingFilesLayout.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Files sent", Toast.LENGTH_LONG).show();
-            }
-        });
+            Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
+            dataItemTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_data_item).getBytes());
+                    sendingFilesLayout.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_data_item), Toast.LENGTH_LONG).show();
+                }
+            });
+            dataItemTask.addOnSuccessListener(new OnSuccessListener<DataItem>() {
+                @Override
+                public void onSuccess(DataItem dataItem) { }
+            });
+
+        }
+
+        sendingFilesLayout.setVisibility(View.GONE);
+        Toast.makeText(MainActivity.this, R.string.files_sent, Toast.LENGTH_LONG).show();
 
     }
 

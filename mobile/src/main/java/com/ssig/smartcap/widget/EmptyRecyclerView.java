@@ -30,7 +30,7 @@ public class EmptyRecyclerView extends RecyclerView {
         }
     }
 
-    final AdapterDataObserver observer = new AdapterDataObserver() {
+    private final AdapterDataObserver observer = new AdapterDataObserver() {
         @Override
         public void onChanged() {
             super.onChanged();

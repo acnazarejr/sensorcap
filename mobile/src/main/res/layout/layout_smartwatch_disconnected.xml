@@ -3,7 +3,6 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/lyt_no_connection"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_centerHorizontal="true"
@@ -11,8 +10,7 @@
     android:orientation="vertical">
 
     <ImageView
-        android:id="@+id/layout_smartphone_error_icon"
-        android:layout_width="170dp"
+            android:layout_width="170dp"
         android:layout_height="170dp"
         android:layout_margin="@dimen/spacing_mxlarge"
         android:tint="@color/colorGreyMediumLight"
@@ -20,8 +18,7 @@
         android:contentDescription="@string/util_image_description"/>
 
     <TextView
-        android:id="@+id/layout_smartwatch_error_title"
-        android:layout_width="wrap_content"
+            android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/smartwatch_disconnected_title"
         android:textSize="25sp"
@@ -29,8 +26,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/layout_smartwatch_error_content"
-        android:layout_width="300dp"
+            android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_large"
         android:textAlignment="center"

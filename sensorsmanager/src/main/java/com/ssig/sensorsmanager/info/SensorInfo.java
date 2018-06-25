@@ -3,13 +3,13 @@ package com.ssig.sensorsmanager.info;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.util.SensorsValuesLength;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
+
 
 public class SensorInfo implements Serializable{
 
@@ -25,9 +25,9 @@ public class SensorInfo implements Serializable{
     protected int minDelay;
     protected float resolution;
     protected int reportingMode;
-    protected int valuesLength;
+    private int valuesLength;
 
-    public SensorInfo(SensorType sensorType){
+    protected SensorInfo(SensorType sensorType){
         this.sensorType = sensorType;
         this.model = null;
         this.vendor = null;
@@ -80,7 +80,7 @@ public class SensorInfo implements Serializable{
         return version;
     }
 
-    public void setVersion(int version) {
+    private void setVersion(int version) {
         this.version = version;
     }
 
@@ -134,7 +134,7 @@ public class SensorInfo implements Serializable{
         this.reportingMode = reportingMode;
     }
 
-    public void setValuesLength(int valuesLength) {
+    private void setValuesLength(int valuesLength) {
         this.valuesLength = valuesLength;
     }
 
@@ -146,7 +146,7 @@ public class SensorInfo implements Serializable{
     // STATIC FACTORY METHODS
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static SensorInfo get(Context context, SensorType sensorType){
+    private static SensorInfo get(Context context, SensorType sensorType){
 
         SensorManager sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         Sensor defaultSensor = sensorManager != null ? sensorManager.getDefaultSensor(sensorType.androidType()) : null;

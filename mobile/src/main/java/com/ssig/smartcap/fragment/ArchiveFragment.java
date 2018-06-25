@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -15,27 +16,17 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
-import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataClient;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.MessageClient;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.*;
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.data.CaptureData;
 import com.ssig.sensorsmanager.data.DeviceData;
@@ -47,42 +38,21 @@ import com.ssig.smartcap.model.CaptureListItem;
 import com.ssig.smartcap.utils.Tools;
 import com.ssig.smartcap.widget.EmptyRecyclerView;
 import com.ssig.smartcap.widget.LineItemDecoration;
-
+import org.zeroturnaround.zip.FileSource;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.zip.ZipOutputStream;
 
-public class ArchiveFragment extends AbstractMainFragment implements
-        DataClient.OnDataChangedListener,
-        MessageClient.OnMessageReceivedListener {
-
-    public enum ReceiveSmartwatchFilesTaskResponseType{
-        FOLDER_FAILURE, ASSET_FAILURE,
-        IO_FAILURE, EXECUTION_FAILURE,
-        TIME_OUT_FAILURE, SUCCESS
-    }
+public class ArchiveFragment extends AbstractMainFragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private AppCompatDelegate appCompatDelegate;
     private AdapterCaptureList adapterCaptureList;
     private ActionMode actionMode;
     private ActionModeCallback actionModeCallback;
-
-    ReceiveSmartwatchFilesTask receiveSmartwatchFilesTask;
 
     public ArchiveFragment(){
         super(R.layout.fragment_archive);
@@ -100,12 +70,8 @@ public class ArchiveFragment extends AbstractMainFragment implements
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
         this.appCompatDelegate = AppCompatDelegate.create(Objects.requireNonNull(getActivity()), (AppCompatCallback) getActivity());
-
         this.actionMode = null;
-        this.receiveSmartwatchFilesTask = null;
         this.initUI();
     }
 
@@ -113,21 +79,6 @@ public class ArchiveFragment extends AbstractMainFragment implements
     public void onStart() {
         super.onStart();
         this.refresh();
-        final String uri = String.format("wear://*%s", getString(R.string.message_path_host_archive_fragment_prefix));
-        Wearable.getDataClient(Objects.requireNonNull(this.getContext())).addListener(this, Uri.parse(uri), DataClient.FILTER_PREFIX);
-        Wearable.getMessageClient(Objects.requireNonNull(this.getContext())).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
-    }
-
-    @Override
-    public void onStop() {
-        Wearable.getDataClient(Objects.requireNonNull(this.getContext())).removeListener(this);
-        Wearable.getMessageClient(Objects.requireNonNull(this.getContext())).removeListener(this);
-        super.onStop();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -182,7 +133,7 @@ public class ArchiveFragment extends AbstractMainFragment implements
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 dialog.dismiss();
-                                checkCloseCaptureData(obj);
+                                new CloseCaptureTask().execute(obj.captureData);
                             }
                         })
                         .show();
@@ -258,6 +209,11 @@ public class ArchiveFragment extends AbstractMainFragment implements
         for(File file: captureFiles){
             try {
                 CaptureData captureData = JSONUtil.load(file, CaptureData.class);
+                if(captureData.isClosed()){
+                    File compressedFile = new File(file.toString().replace(".json", ".zip"));
+                    if(!compressedFile.exists())
+                        continue;
+                }
                 CaptureListItem captureListItem = new CaptureListItem(captureData);
                 captureListItems.add(captureListItem);
             } catch (FileNotFoundException e) {
@@ -273,6 +229,83 @@ public class ArchiveFragment extends AbstractMainFragment implements
             this.adapterCaptureList.addItem(new CaptureListItem(captureData));
             this.adapterCaptureList.notifyDataSetChanged();
         }
+    }
+
+    private void shareFiles(final ActionMode mode) {
+        List<Integer> selectedItemPositions = this.adapterCaptureList.getSelectedItems();
+
+        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
+            CaptureListItem item;
+            item = this.adapterCaptureList.getItem(selectedItemPositions.get(i));
+            if (!item.closed){
+                new MaterialDialog.Builder(Objects.requireNonNull(this.getContext()))
+                        .title(R.string.archive_share_dialog_error_title)
+                        .titleColorRes(R.color.colorAlert)
+                        .content(R.string.archive_share_dialog_error_content)
+                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(this.getContext().getDrawable(R.drawable.ic_package_open)), ContextCompat.getColor(this.getContext(), R.color.colorAlert)))
+                        .cancelable(true)
+                        .positiveText(R.string.button_ok)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+                return;
+            }
+        }
+
+        ArrayList<Uri> uri_files = new ArrayList<>();
+        Intent share = new Intent();
+        share.setAction(Intent.ACTION_SEND_MULTIPLE);
+        share.setType("application/json");
+        share.putExtra(Intent.EXTRA_SUBJECT, "SmartCap Capture Data");
+        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
+            CaptureListItem item;
+            item = this.adapterCaptureList.getItem(selectedItemPositions.get(i));
+
+            File captureDataFile = new File(String.format("%s%s%s.zip", this.getSystemArchiveFolder(), File.separator, item.captureDataUUID));
+            Uri uri = FileProvider.getUriForFile(Objects.requireNonNull(this.getContext()), this.getContext().getApplicationContext().getPackageName() + ".provider", captureDataFile);
+            uri_files.add(uri);
+
+        }
+        share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uri_files);
+        getContext().startActivity(Intent.createChooser(share, "Send files..."));
+        mode.finish();
+    }
+
+    private void deleteFiles(final ActionMode mode) {
+        new MaterialDialog.Builder(Objects.requireNonNull(getActivity()))
+                .title(R.string.archive_delete_dialog_title)
+                .titleColorRes(R.color.colorAlert)
+                .content(R.string.archive_delete_dialog_content)
+                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getActivity().getDrawable(R.drawable.ic_delete)), ContextCompat.getColor(getActivity(), R.color.colorAlert)))
+                .cancelable(true)
+                .positiveText(R.string.button_yes)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        List<Integer> selectedItemPositions = adapterCaptureList.getSelectedItems();
+                        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
+                            CaptureListItem item = adapterCaptureList.getItem(selectedItemPositions.get(i));
+
+                            File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, item.captureDataUUID));
+                            if(item.closed){
+                                File captureDataCompressedFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, item.captureDataUUID));
+                                if(captureDataCompressedFile.delete() && captureDataFile.delete())
+                                    adapterCaptureList.removeData(selectedItemPositions.get(i));
+                            }else{
+                                if(captureDataFile.delete())
+                                    adapterCaptureList.removeData(selectedItemPositions.get(i));
+                            }
+                        }
+                        adapterCaptureList.notifyDataSetChanged();
+                        mode.finish();
+                    }
+                })
+                .negativeText(R.string.button_no)
+                .show();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -317,379 +350,359 @@ public class ArchiveFragment extends AbstractMainFragment implements
         }
     }
 
-    private void shareFiles(final ActionMode mode) {
-        List<Integer> selectedItemPositions = this.adapterCaptureList.getSelectedItems();
 
-        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-            CaptureListItem item;
-            item = this.adapterCaptureList.getItem(selectedItemPositions.get(i));
-            if (!item.closed){
-                new MaterialDialog.Builder(Objects.requireNonNull(this.getContext()))
-                        .title(R.string.archive_share_dialog_error_title)
-                        .titleColorRes(R.color.colorAlert)
-                        .content(R.string.archive_share_dialog_error_content)
-                        .icon(Tools.changeDrawableColor(Objects.requireNonNull(this.getContext().getDrawable(R.drawable.ic_package_open)), ContextCompat.getColor(this.getContext(), R.color.colorAlert)))
-                        .cancelable(true)
-                        .positiveText(R.string.button_ok)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-                return;
-            }
-        }
-
-        ArrayList<Uri> uri_files = new ArrayList<>();
-        Intent share = new Intent();
-        share.setAction(Intent.ACTION_SEND_MULTIPLE);
-        share.setType("application/json");
-        share.putExtra(Intent.EXTRA_SUBJECT, "SmartCap Capture Data");
-        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-            CaptureListItem item;
-            item = this.adapterCaptureList.getItem(selectedItemPositions.get(i));
-
-            File captureDataFile = new File(String.format("%s%s%s.zip", this.getSystemArchiveFolder(), File.separator, item.captureUUID));
-            Uri uri = FileProvider.getUriForFile(Objects.requireNonNull(this.getContext()), this.getContext().getApplicationContext().getPackageName() + ".provider", captureDataFile);
-            uri_files.add(uri);
-
-        }
-        share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uri_files);
-        getContext().startActivity(Intent.createChooser(share, "Send files..."));
-        mode.finish();
-    }
-
-    private void deleteFiles(final ActionMode mode) {
-        new MaterialDialog.Builder(Objects.requireNonNull(getActivity()))
-                .title(R.string.archive_delete_dialog_title)
-                .titleColorRes(R.color.colorAlert)
-                .content(R.string.archive_delete_dialog_content)
-                .icon(Tools.changeDrawableColor(Objects.requireNonNull(getActivity().getDrawable(R.drawable.ic_delete)), ContextCompat.getColor(getActivity(), R.color.colorAlert)))
-                .cancelable(true)
-                .positiveText(R.string.button_yes)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        List<Integer> selectedItemPositions = adapterCaptureList.getSelectedItems();
-                        for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-                            CaptureListItem item = adapterCaptureList.getItem(selectedItemPositions.get(i));
-
-                            File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, item.captureUUID));
-                            if(item.closed){
-                                File captureDataCompressedFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, item.captureUUID));
-                                if(captureDataCompressedFile.delete() && captureDataFile.delete())
-                                    adapterCaptureList.removeData(selectedItemPositions.get(i));
-                            }else{
-                                if(captureDataFile.delete())
-                                    adapterCaptureList.removeData(selectedItemPositions.get(i));
-                            }
-                        }
-                        adapterCaptureList.notifyDataSetChanged();
-                        mode.finish();
-                    }
-                })
-                .negativeText(R.string.button_no)
-                .show();
-    }
 
     //----------------------------------------------------------------------------------------------
-    // Close Capture Stuffs
+    // CloseCaptureTask
     //----------------------------------------------------------------------------------------------
-    @Override
-    public void onMessageReceived(@NonNull MessageEvent messageEvent) {
-        String path = messageEvent.getPath();
-
-        if (path.equals(getString(R.string.message_path_host_archive_fragment_sensor_files_error))) {
-            byte[] data = messageEvent.getData();
-            String errorMessge = new String(data);
-
-        }
-    }
-
-
-    @Override
-    public void onDataChanged(@NonNull DataEventBuffer dataEventBuffer) {
-        for (DataEvent event : dataEventBuffer) {
-            if (event.getType() == DataEvent.TYPE_CHANGED) {
-                String path = event.getDataItem().getUri().getPath();
-                if (path.equals(getString(R.string.message_path_host_archive_fragment_sensor_files_sent))) {
-                    DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                    DataMap dataMap = dataMapItem.getDataMap();
-                    if (this.receiveSmartwatchFilesTask != null)
-                        this.receiveSmartwatchFilesTask.execute(dataMap);
-                }
-            }
-        }
-    }
-
-    private void checkCloseCaptureData(CaptureListItem captureListItem){
-
-        this.receiveSmartwatchFilesTask = null;
-
-        File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, captureListItem.captureUUID));
-        CaptureData captureData = null;
-        try {
-            captureData = JSONUtil.load(captureDataFile, CaptureData.class);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-        DeviceData clientDeviceData = Objects.requireNonNull(captureData).getClientDeviceData();
-        try{
-            if (clientDeviceData != null){
-                if (this.isWearClientConnected() && this.getWearService().getClientDeviceInfo().getDeviceKey().equals(clientDeviceData.getDeviceKey())){
-                    this.receiveSmartwatchFilesTask = new ReceiveSmartwatchFilesTask(captureData);
-                    this.receiveSmartwatchFilesTask.init();
-                }else{
-                    new MaterialDialog.Builder(Objects.requireNonNull(this.getContext()))
-                            .title(R.string.archive_close_dialog_no_smartwatch_error_title)
-                            .titleColorRes(R.color.colorAlert)
-                            .content(R.string.archive_close_dialog_no_smartwatch_error_content)
-                            .icon(Tools.changeDrawableColor(Objects.requireNonNull(this.getContext().getDrawable(R.drawable.ic_smartwatch_off)), ContextCompat.getColor(this.getContext(), R.color.colorAlert)))
-                            .cancelable(true)
-                            .positiveText(R.string.button_ok)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .show();
-                }
-            } else {
-                new CloseCaptureTask().execute(captureData);
-            }
-        } catch (ApiException e) {
-            e.printStackTrace();
-            Toast.makeText(this.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-
-    }
-
     @SuppressLint("StaticFieldLeak")
-    private class ReceiveSmartwatchFilesTask extends AsyncTask<DataMap, Void, ReceiveSmartwatchFilesTaskResponseType> {
+    private class CloseCaptureTask extends AsyncTask<CaptureData, Object, Integer> implements
+            DataClient.OnDataChangedListener,
+            MessageClient.OnMessageReceivedListener{
 
-        MaterialDialog dialogWaitingSmartwatchFiles;
-        CaptureData captureData;
-        File deviceCaptureFolder;
+        private final Integer RESPONSE_NO_SMARTWATCH = 0;
+        private final Integer RESPONSE_FOLDER_FAILURE = 1;
+        private final Integer RESPONSE_ASSET_FAILURE = 2;
+        private final Integer RESPONSE_IO_FAILURE = 3;
+        private final Integer RESPONSE_EXECUTION_FAILURE = 4;
+        private final Integer RESPONSE_TIME_OUT_FAILURE = 5;
+        private final Integer RESPONSE_CANCEL = 50;
+        private final Integer RESPONSE_SUCCESS = 100;
 
-        ReceiveSmartwatchFilesTask(CaptureData captureData){
-            this.dialogWaitingSmartwatchFiles = null;
-            this.captureData = captureData;
-            this.deviceCaptureFolder = null;
-        }
+        private String messageOnCancel = null;
+        @DrawableRes private Integer iconOnCancel = null;
 
-        void init() throws ApiException {
-            this.dialogWaitingSmartwatchFiles = new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
-                    .title(R.string.archive_dialog_wear_sensors_title)
-                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(R.drawable.ic_smartwatch_on)), ContextCompat.getColor(getContext(), R.color.colorPrimary)))
-                    .content(R.string.archive_dialog_wear_sensors_content_waiting)
-                    .progress(true, 0)
-                    .cancelable(false)
-                    .show();
-            getWearService().requestSensorFiles(this.captureData.getClientDeviceData());
-        }
-
-        boolean configureDeviceCaptureFolder() {
-            this.deviceCaptureFolder = new File(String.format("%s%s%s%s%s", getSystemCapturesFolder(), File.separator, captureData.getCaptureDataUUID(), File.separator, captureData.getClientDeviceData().getDeviceDataUUID()));
-            return deviceCaptureFolder.exists() || deviceCaptureFolder.mkdirs();
-        }
+        private final BlockingQueue<DataMap> dataItemsBlockingQueue = new LinkedBlockingQueue<>(50);
+        private MaterialDialog dialogReceiveFiles;
+        private MaterialDialog dialogCompressFiles;
 
 
-        MaterialDialog makeResponseErrorDialog(ReceiveSmartwatchFilesTaskResponseType response){
-
-            MaterialDialog responseErrorDialog = new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
-                    .title(R.string.archive_dialog_wear_sensors_error_title)
-                    .titleColorRes(R.color.colorAlert)
-                    .content("")
-                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(R.drawable.ic_package_open)), ContextCompat.getColor(getContext(), R.color.colorAlert)))
-                    .cancelable(true)
-                    .positiveText(R.string.button_ok)
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .build();
-
-            switch (response){
-
-                case FOLDER_FAILURE:
-                    responseErrorDialog.setContent(R.string.archive_dialog_wear_sensors_error_folder);
-                    break;
-
-                case ASSET_FAILURE:
-                    responseErrorDialog.setContent(R.string.archive_dialog_wear_sensors_error_asset);
-                    break;
-
-                case IO_FAILURE:
-                    responseErrorDialog.setContent(R.string.archive_dialog_wear_sensors_error_io);
-                    break;
-
-                case EXECUTION_FAILURE:
-                    responseErrorDialog.setContent(R.string.archive_dialog_wear_sensors_error_execution);
-                    break;
-
-                case TIME_OUT_FAILURE:
-                    responseErrorDialog.setContent(R.string.archive_dialog_wear_sensors_error_timeout);
-                    break;
-
-            }
-            return responseErrorDialog;
-        }
-
-        @Override
-        protected ReceiveSmartwatchFilesTaskResponseType doInBackground(DataMap... dataMaps) {
-
-            if(!configureDeviceCaptureFolder())
-                return ReceiveSmartwatchFilesTaskResponseType.FOLDER_FAILURE;
-
-            try {
-                DataMap dataMap = dataMaps[0];
-
-                int nFiles = this.captureData.getClientDeviceData().getSensorsData().size();
-                int elapsedProgress = 0;
-                for (final Map.Entry<SensorType, SensorData> entry : this.captureData.getClientDeviceData().getSensorsData().entrySet()){
-
-                    if (entry.getValue().isEnable()) {
-
-                        Asset asset = dataMap.getAsset(entry.getKey().code());
-                        if (asset == null)
-                            return ReceiveSmartwatchFilesTaskResponseType.ASSET_FAILURE;
-
-                        File sensorFile = new File(String.format("%s%s%s.dat", this.deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
-                        Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                dialogWaitingSmartwatchFiles.setContent(String.format("%s: %s", getString(R.string.archive_dialog_wear_sensors_content_prefix), entry.getKey().toString()));
-                            }
-                        });
-                        if(!sensorFile.exists()) {
-
-                            Task<DataClient.GetFdForAssetResponse> getFdForAssetResponseTask = Wearable.getDataClient(Objects.requireNonNull(getContext())).getFdForAsset(asset);
-                            DataClient.GetFdForAssetResponse getFdForAssetResponse = Tasks.await(getFdForAssetResponseTask, 20, TimeUnit.SECONDS);
-                            InputStream assetInputStream = getFdForAssetResponse.getInputStream();
-//                            int totalEstimatedBytes = assetInputStream.available();
-
-                            FileOutputStream fileOutputStream = new FileOutputStream(sensorFile);
-
-                            byte[] bytes = new byte[1024];
-                            int lengthReadBytes;
-//                            int currentReadBytes = 0;
-                            while ((lengthReadBytes = assetInputStream.read(bytes)) >= 0) {
-                                fileOutputStream.write(bytes, 0, lengthReadBytes);
-//                                currentReadBytes += lengthReadBytes;
-//                                float fileProgress = (int) ((float) currentReadBytes / (float) totalEstimatedBytes * (100.0f / (float) nFiles));
-//                                publishProgress((int) (elapsedProgress + fileProgress));
-                            }
-                            fileOutputStream.close();
-                            assetInputStream.close();
-
-                        }
-//                        elapsedProgress += (int) (100.0f / (float) nFiles);
-//                        publishProgress((int) elapsedProgress);
-
-                    }
-                }
-//                publishProgress(100);
-                return ReceiveSmartwatchFilesTaskResponseType.SUCCESS;
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                return ReceiveSmartwatchFilesTaskResponseType.IO_FAILURE;
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-                return ReceiveSmartwatchFilesTaskResponseType.EXECUTION_FAILURE;
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-                return ReceiveSmartwatchFilesTaskResponseType.TIME_OUT_FAILURE;
-            }
-
-        }
-
-//        @Override
-//        protected void onProgressUpdate(Integer... values) {
-//            super.onProgressUpdate(values);
-//            dialogWaitingSmartwatchFiles.setProgress(values[0]);
-//        }
-
-        @Override
-        protected void onPostExecute(ReceiveSmartwatchFilesTaskResponseType response) {
-            super.onPostExecute(response);
-            this.dialogWaitingSmartwatchFiles.dismiss();
-
-            if (response == ReceiveSmartwatchFilesTaskResponseType.SUCCESS) {
-                Toast.makeText(getContext(), R.string.archive_toast_smartwatch_files_received, Toast.LENGTH_LONG).show();
-                new CloseCaptureTask().execute(this.captureData);
-            } else {
-                MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(response);
-                responseErrorDialog.show();
-            }
-
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class CloseCaptureTask extends AsyncTask<CaptureData, Void, Boolean> {
-
-        MaterialDialog dialogWaitingCaptureClose;
-
-        CloseCaptureTask(){
-            this.dialogWaitingCaptureClose = null;
-        }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.dialogWaitingCaptureClose = new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
-                    .title(R.string.archive_dialog_close_capture_title)
-                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(R.drawable.ic_package_close)), ContextCompat.getColor(getContext(), R.color.colorPrimary)))
-                    .content(R.string.archive_dialog_close_capture_content)
-                    .progress(true, 0)
-                    .cancelable(false)
-                    .show();
+            final String uri = String.format("wear://*%s", getString(R.string.message_path_host_archive_fragment_prefix));
+            Wearable.getMessageClient(Objects.requireNonNull(getContext())).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
+            Wearable.getDataClient(Objects.requireNonNull(getContext())).addListener(this, Uri.parse(uri), DataClient.FILTER_PREFIX);
+            this.cleanDataItems();
         }
 
         @Override
-        protected Boolean doInBackground(CaptureData... values) {
+        protected Integer doInBackground(CaptureData... values) {
 
+            //--------------------------------------------------------------------------------------
+            // PRE-INITIALIZATION
+            //--------------------------------------------------------------------------------------
             CaptureData captureData = values[0];
-
-            File captureFolder = new File(String.format("%s%s%s", getSystemCapturesFolder(), File.separator, captureData.getCaptureDataUUID()));
-            File compressedCaptureFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
             File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
+            File captureFolder = new File(String.format("%s%s%s", getSystemCapturesFolder(), File.separator, captureData.getCaptureDataUUID()));
 
+            DeviceData clientDeviceData = captureData.getClientDeviceData();
+            List<FileSource> clientCapturesFiles = new LinkedList<>();
+
+            //--------------------------------------------------------------------------------------
+            // SMARTWATCH FILES
+            //--------------------------------------------------------------------------------------
+            if (clientDeviceData != null){
+                if (isWearClientConnected() && getWearService().getClientDeviceInfo().getDeviceKey().equals(clientDeviceData.getDeviceKey())){
+
+                    File clientCaptureFolder = new File(String.format("%s%s%s", captureFolder, File.separator, clientDeviceData.getDeviceDataUUID()));
+                    if(!(clientCaptureFolder.exists() || clientCaptureFolder.mkdirs()))
+                        return this.RESPONSE_FOLDER_FAILURE;
+
+                    try {
+                        getWearService().requestSensorFiles(clientDeviceData);
+                    } catch (ApiException e) {
+                        e.printStackTrace();
+                        return this.RESPONSE_NO_SMARTWATCH;
+                    }
+
+                    Map<SensorType, Boolean> sensorsFilesReceived = new HashMap<>();
+                    for (final Map.Entry<SensorType, SensorData> entry : clientDeviceData.getSensorsData().entrySet()){
+                        if(entry.getValue().isEnable())
+                            sensorsFilesReceived.put(entry.getKey(), false);
+                    }
+                    publishProgress(0, sensorsFilesReceived.size());
+
+                    while(sensorsFilesReceived.containsValue(false)){
+
+                        if(isCancelled()){
+                            return this.RESPONSE_CANCEL;
+                        }
+
+                        try {
+                            DataMap dataMap = this.dataItemsBlockingQueue.poll(120, TimeUnit.SECONDS);
+                            String sensorCode = dataMap.getString(getString(R.string.data_item_sensors_smartwatch_key));
+                            Asset asset = dataMap.getAsset(getString(R.string.data_item_sensors_smartwatch_asset));
+                            if (asset == null || sensorCode == null)
+                                return this.RESPONSE_ASSET_FAILURE;
+
+                            SensorType sensorType = SensorType.fromCode(sensorCode);
+                            SensorData sensorData = clientDeviceData.getSensorsData().get(sensorType);
+                            publishProgress(1, sensorType);
+
+                            File sensorFile = new File(String.format("%s%s%s.dat", clientCaptureFolder, File.separator, sensorData.getSensorDataUUID()));
+                            if(!sensorFile.exists()) {
+
+                                Task<DataClient.GetFdForAssetResponse> getFdForAssetResponseTask = Wearable.getDataClient(Objects.requireNonNull(getContext())).getFdForAsset(asset);
+                                DataClient.GetFdForAssetResponse getFdForAssetResponse = Tasks.await(getFdForAssetResponseTask, 20, TimeUnit.SECONDS);
+                                InputStream assetInputStream = getFdForAssetResponse.getInputStream();
+                                BufferedOutputStream bufferedOutputStream =new BufferedOutputStream(new FileOutputStream(sensorFile), 512 * 1024);
+
+                                byte[] bytes = new byte[1024];
+                                int lengthReadBytes;
+                                while ((lengthReadBytes = assetInputStream.read(bytes)) >= 0) {
+                                    bufferedOutputStream.write(bytes, 0, lengthReadBytes);
+                                }
+                                bufferedOutputStream.flush();
+                                bufferedOutputStream.close();
+                                assetInputStream.close();
+
+                            }
+
+                            sensorsFilesReceived.put(sensorType, true);
+                            clientCapturesFiles.add(new FileSource(String.format("smartwatch/%s", sensorFile.getName()), sensorFile));
+
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                            return this.RESPONSE_EXECUTION_FAILURE;
+                        } catch (TimeoutException e) {
+                            e.printStackTrace ( );
+                            return this.RESPONSE_TIME_OUT_FAILURE;
+                        } catch (IOException e) {
+                            e.printStackTrace ( );
+                            return this.RESPONSE_IO_FAILURE;
+                        }
+
+                    }
+
+                    publishProgress(-1);
+
+                }else{
+                    return this.RESPONSE_NO_SMARTWATCH;
+                }
+            }
+
+            //--------------------------------------------------------------------------------------
+            // SMARTPHONE FILES
+            //--------------------------------------------------------------------------------------
+            DeviceData hostDeviceData = captureData.getHostDeviceData();
+            List<FileSource> hostCapturesFiles = new LinkedList<>();
+            if (hostDeviceData != null) {
+                File hostCaptureFolder = new File(String.format("%s%s%s", captureFolder, File.separator, hostDeviceData.getDeviceDataUUID()));
+                for (final SensorData sensorData : hostDeviceData.getSensorsData().values()){
+                    File sensorFile = new File(String.format("%s%s%s.dat", hostCaptureFolder, File.separator, sensorData.getSensorDataUUID()));
+                    if(sensorData.isEnable() && sensorFile.exists()) {
+                        hostCapturesFiles.add(new FileSource(String.format("smartphone/%s", sensorFile.getName()), sensorFile));
+                    }
+                }
+            }
+
+            List<FileSource> filesToZip = new LinkedList<>();
+            filesToZip.addAll(hostCapturesFiles);
+            filesToZip.addAll(clientCapturesFiles);
+            publishProgress(2, filesToZip.size() + 1);
+
+            File compressedCaptureFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
+            if(compressedCaptureFile.exists() && !compressedCaptureFile.delete())
+                return this.RESPONSE_IO_FAILURE;
+
+            try {
+                new ZipOutputStream(new FileOutputStream(compressedCaptureFile));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return this.RESPONSE_IO_FAILURE;
+            }
+
+            ZipUtil.packEntry(captureDataFile, compressedCaptureFile, "capture.json");
+            publishProgress(3);
+            for(FileSource fileSource : filesToZip){
+                ZipUtil.addEntry(compressedCaptureFile, fileSource);
+                publishProgress(3);
+            }
 
             captureData.setClosed(true);
             try {
                 JSONUtil.save(captureData, captureDataFile);
-                ZipUtil.pack(captureFolder, compressedCaptureFile);
-                ZipUtil.addEntry(compressedCaptureFile, "capture.json", captureDataFile);
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;
+                return this.RESPONSE_IO_FAILURE;
             }
 
-            return true;
+            return RESPONSE_SUCCESS;
         }
 
         @Override
-        protected void onPostExecute(Boolean response) {
-            super.onPostExecute(response);
-            this.dialogWaitingCaptureClose.dismiss();
-            if (response) {
-                refresh();
-                Toast.makeText(getContext(), R.string.archive_toast_closed_success, Toast.LENGTH_LONG).show();
+        protected void onProgressUpdate(Object... values) {
+            super.onProgressUpdate(values);
+            int command = (int)values[0];
+            switch (command){
+                case -1:
+                    this.dismissDialogs();
+                    break;
+                case 0:
+                    this.dialogReceiveFiles = this.makeReceiveFilesDialog((int)values[1]);
+                    this.dialogReceiveFiles.show();
+                    break;
+                case 1:
+                    if(this.dialogReceiveFiles != null){
+                        this.dialogReceiveFiles.incrementProgress(1);
+                        this.dialogReceiveFiles.setContent(String.format("%s: %s", getString(R.string.archive_dialog_wear_sensors_content_prefix), values[1].toString()));
+                    }
+                    break;
+                case 2:
+                    this.dialogCompressFiles = this.makeCompressFilesDialog((int)values[1]);
+                    this.dialogCompressFiles.show();
+                    break;
+                case 3:
+                    if(this.dialogCompressFiles != null){
+                        this.dialogCompressFiles.incrementProgress(1);
+                    }
+                    break;
             }
         }
 
-    }
+        @Override
+        protected void onPostExecute(Integer response) {
+            super.onPostExecute(response);
+            this.unregisterListeners();
+            this.dismissDialogs();
 
+            if(response.equals(this.RESPONSE_SUCCESS)){
+                refresh();
+                Toast.makeText(getContext(), R.string.archive_toast_closed_success, Toast.LENGTH_LONG).show();
+            }else if (response >= 0 & response <= 10){
+                this.makeResponseErrorDialog(response).show();
+            }else if (response.equals(this.RESPONSE_CANCEL)){
+                if(this.messageOnCancel != null)
+                    this.makeResponseErrorDialog(messageOnCancel, this.iconOnCancel != null ? this.iconOnCancel : R.drawable.ic_package_open);
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            this.unregisterListeners();
+            this.dismissDialogs();
+
+            if(this.messageOnCancel != null)
+                this.makeResponseErrorDialog(messageOnCancel, this.iconOnCancel != null ? this.iconOnCancel : R.drawable.ic_package_open);
+        }
+
+        @Override
+        protected void onCancelled(Integer response) {
+            super.onCancelled(response);
+            this.unregisterListeners();
+            this.dismissDialogs();
+
+            if (response.equals(this.RESPONSE_CANCEL)){
+                if(this.messageOnCancel != null)
+                    this.makeResponseErrorDialog(messageOnCancel, this.iconOnCancel != null ? this.iconOnCancel : R.drawable.ic_package_open);
+            }
+        }
+
+        @Override
+        public void onDataChanged(@NonNull DataEventBuffer dataEventBuffer) {
+            for (DataEvent event : dataEventBuffer) {
+                if (event.getType() == DataEvent.TYPE_CHANGED) {
+                    DataItem dataItem = event.getDataItem();
+                    String path = dataItem.getUri().getPath();
+                    if (path.startsWith(getString(R.string.message_path_host_archive_fragment_sensor_files_sent))) {
+                        DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem);
+                        DataMap dataMap = dataMapItem.getDataMap();
+                        this.dataItemsBlockingQueue.offer(dataMap);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onMessageReceived(@NonNull MessageEvent messageEvent) {
+            String path = messageEvent.getPath();
+            if (path.equals(getString(R.string.message_path_host_archive_fragment_sensor_files_error))) {
+                byte[] data = messageEvent.getData();
+                this.messageOnCancel = String.format("%s: %s", getString(R.string.archive_failure_from_smartwatch), new String(data));
+                this.iconOnCancel = R.drawable.ic_smartphone_off;
+                cancel(true);
+            }
+        }
+
+        MaterialDialog makeResponseErrorDialog(Integer response) {
+
+            String[] messages = {
+                    getString(R.string.archive_close_dialog_no_smartwatch_error_content),
+                    getString(R.string.archive_dialog_close_capture_error_folder),
+                    getString(R.string.archive_dialog_close_capture_error_asset),
+                    getString(R.string.archive_dialog_close_capture_error_io),
+                    getString(R.string.archive_dialog_close_capture_error_execution),
+                    getString(R.string.archive_dialog_close_capture_error_timeout)
+            };
+
+            int[] icons = {
+                    R.drawable.ic_smartphone_off,
+                    R.drawable.ic_package_open,
+                    R.drawable.ic_package_open,
+                    R.drawable.ic_package_open,
+                    R.drawable.ic_package_open,
+                    R.drawable.ic_package_open
+            };
+
+            return this.makeResponseErrorDialog(messages[response], icons[response]);
+
+        }
+
+        MaterialDialog makeResponseErrorDialog(String message, @DrawableRes int icon){
+            return new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
+                    .title(R.string.archive_dialog_close_capture_error_title)
+                    .titleColorRes(R.color.colorAlert)
+                    .content(message)
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(icon)), ContextCompat.getColor(getContext(), R.color.colorAlert)))
+                    .cancelable(true)
+                    .canceledOnTouchOutside(true)
+                    .positiveText(R.string.button_ok)
+                    .build();
+        }
+
+        MaterialDialog makeReceiveFilesDialog(int nFiles){
+            return new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
+                    .title(R.string.archive_dialog_wear_sensors_title)
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(R.drawable.ic_smartwatch_on)), ContextCompat.getColor(getContext(), R.color.colorPrimary)))
+                    .content(R.string.archive_dialog_wear_sensors_content_waiting)
+                    .progress(false, nFiles, true)
+                    .cancelable(false)
+                    .build();
+        }
+
+        MaterialDialog makeCompressFilesDialog(int nFiles){
+            return new MaterialDialog.Builder(Objects.requireNonNull(getContext()))
+                    .title(R.string.archive_dialog_close_capture_title)
+                    .icon(Tools.changeDrawableColor(Objects.requireNonNull(getContext().getDrawable(R.drawable.ic_package_close)), ContextCompat.getColor(getContext(), R.color.colorPrimary)))
+                    .content(R.string.archive_dialog_close_capture_content)
+                    .progress(false, nFiles, true)
+                    .cancelable(false)
+                    .build();
+        }
+
+        private void unregisterListeners(){
+            Wearable.getDataClient(Objects.requireNonNull(getContext())).removeListener(this);
+            Wearable.getMessageClient(Objects.requireNonNull(getContext())).removeListener(this);
+            this.cleanDataItems();
+        }
+
+        private void dismissDialogs(){
+            if (this.dialogReceiveFiles != null)
+                this.dialogReceiveFiles.dismiss();
+            if (this.dialogCompressFiles != null)
+                this.dialogCompressFiles.dismiss();
+        }
+
+        private void cleanDataItems(){
+            Uri uri = Uri.parse(String.format("wear://*%s", getString(R.string.message_path_host_archive_fragment_sensor_files_sent)));
+            Wearable.getDataClient(Objects.requireNonNull(getContext())).deleteDataItems(uri, DataClient.FILTER_PREFIX);
+        }
+
+    }
 
 }
 

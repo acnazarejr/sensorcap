@@ -11,8 +11,6 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.zxing.BarcodeFormat;
@@ -22,20 +20,14 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.polyak.iconswitch.IconSwitch;
-import com.ssig.smartcap.R;
-import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.sensorsmanager.time.SystemTime;
+import com.ssig.smartcap.R;
+import com.ssig.smartcap.activity.MainActivity;
 import com.ssig.smartcap.utils.Tools;
 
-
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class TimeToolFragment extends AbstractMainFragment {
 
@@ -58,17 +50,17 @@ public class TimeToolFragment extends AbstractMainFragment {
     private TextView mTextTimestampDevice;
     private View mLayoutNtpNotAvailable;
 
-    private SystemTime mSystemTime;
-    private NTPTime mNTPTime;
+    private final SystemTime mSystemTime;
+    private final NTPTime mNTPTime;
 
     private ButtonState mButtonState;
     private ModeState mModeState;
     private Timer mUpdateTimer;
     private TimerTask mUpdateTimerTask;
     private SimpleDateFormat mSimpleDateFormat;
-    private MultiFormatWriter multiFormatWriter;
-    private Map<EncodeHintType, Object> encodeHintsType;
-    private BarcodeEncoder barcodeEncoder;
+    private final MultiFormatWriter multiFormatWriter;
+    private final Map<EncodeHintType, Object> encodeHintsType;
+    private final BarcodeEncoder barcodeEncoder;
 
     private Integer mDelayUpdateMillis;
 

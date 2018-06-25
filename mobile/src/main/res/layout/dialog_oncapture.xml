@@ -13,8 +13,7 @@
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
         android:textSize="@dimen/countdown_text"
-        android:textStyle="bold"
-        android:text="10"/>
+        android:textStyle="bold"/>
 
     <LinearLayout
         android:id="@+id/layout_during_capture"
@@ -32,7 +31,7 @@
             android:textColor="@color/colorPrimary"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:text="Capturing..."/>
+            android:text="@string/capture_dialog_capturing"/>
 
         <Chronometer
             android:id="@+id/chronometer"

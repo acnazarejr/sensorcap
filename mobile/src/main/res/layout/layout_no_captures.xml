@@ -6,13 +6,13 @@
     android:gravity="center"
     android:orientation="vertical">
 
-
     <ImageView
         android:layout_width="170dp"
         android:layout_height="170dp"
         android:layout_margin="@dimen/spacing_mxlarge"
         android:tint="@color/colorGreyMediumLight"
-        android:src="@drawable/ic_package_close" />
+        android:src="@drawable/ic_package_close"
+        android:contentDescription="@string/util_image_description"/>
 
     <TextView
         android:layout_width="wrap_content"

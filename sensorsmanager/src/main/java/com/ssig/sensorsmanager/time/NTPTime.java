@@ -4,7 +4,6 @@ package com.ssig.sensorsmanager.time;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import com.instacart.library.truetime.TrueTime;
 
 import java.io.IOException;

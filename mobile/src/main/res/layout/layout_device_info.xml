@@ -90,8 +90,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/android_api_text"
-                android:layout_width="wrap_content"
+                    android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimary"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small" />

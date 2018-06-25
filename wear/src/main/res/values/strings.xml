@@ -1,12 +1,11 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">SmartCap</string>
     <string name="start_screen">Sensor Capture</string>
-    <string name="time_tool_dummy_hour">--:--:--.--</string>
-    <string name="time_tool_dummy_value">----------</string>
+    <string name="time_tool_dummy_hour" tools:keep="@string/time_tool_dummy_hour">--:--:--.--</string>
+    <string name="time_tool_dummy_value" tools:keep="@string/time_tool_dummy_value">----------</string>
     <string name="image_description">image_description</string>
-    <string name="util_time_format">HH:mm:ss.SSS</string>
-    <string name="toast_press_hold">Press and hold the button</string>
-
+    <string name="util_time_format" tools:keep="@string/util_time_format">HH:mm:ss.SSS</string>
+    <string name="toast_press_hold" tools:keep="@string/toast_press_hold">Press and hold the button</string>
 
 
     <string name="ntp_toast_already_synchronized_error">The NTP Service is already synchronized.</string>
@@ -16,12 +15,13 @@
     <string name="ntp_toast_unknown_error">A unknown error has occurred:</string>
     <string name="ntp_toast_synchronization_success">NTP successfully synchronized</string>
     <string name="ready_to_capture">Ready to Capture!</string>
-    <string name="waiting_connection">Waiting Connection...</string>
-    <string name="capturing">Capturing...</string>
-    <string name="sending_files">Sending Files...</string>
-    <string name="close">Close</string>
+    <string name="waiting_connection">Waiting Connection…</string>
+    <string name="capturing">Capturing…</string>
+    <string name="sending_files">Sending Files…</string>
+    <string name="close" tools:keep="@string/close">Close</string>
     <string name="hardware_button_instruction">Stop (Click) - Close (Long)</string>
-    <string name="syncing_ntp">Syncing NTP...</string>
+    <string name="syncing_ntp">Syncing NTP…</string>
     <string name="capture_files_deleted">Capture Files Deleted</string>
+    <string name="files_sent">Sensor Files Sent</string>
 
 </resources>

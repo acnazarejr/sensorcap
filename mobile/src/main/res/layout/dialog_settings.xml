@@ -110,8 +110,7 @@
                 android:text="@string/settings_countdown_start_3s"/>
 
             <RadioButton
-                android:id="@+id/countdown_start_10_radio_option"
-                android:layout_width="wrap_content"
+                    android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/settings_countdown_start_10s"/>
 
@@ -150,7 +149,6 @@
             app:isb_tick_color="@color/colorAccentLight"
             app:isb_text_color="@color/colorGrey"
 
-
             app:isb_indicator_color="@color/colorAccent"
             app:isb_indicator_text_color="@color/colorGreyLight"
             app:isb_seek_bar_type="discrete_ticks_texts"
@@ -159,9 +157,6 @@
             app:isb_thumb_width="20dp"
             app:isb_track_background_bar_color="@color/colorGrey"
             app:isb_track_progress_bar_color="@color/colorAccent"/>
-
-
-            />
 
     </LinearLayout>
 

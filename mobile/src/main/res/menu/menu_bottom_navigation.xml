@@ -1,30 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/navigation_capture"
-        android:icon="@drawable/ic_running"
-        android:title="Capture" />
+    <item android:icon="@drawable/ic_running"
+        android:title="@string/menu_bottom_capture" />
 
-    <item
-        android:id="@+id/navigation_smartphone"
-        android:icon="@drawable/ic_smartphone"
-        android:title="Smartphone" />
+    <item android:icon="@drawable/ic_smartphone"
+        android:title="@string/menu_bottom_smartphone" />
 
-    <item
-        android:id="@+id/navigation_smartwatch"
-        android:icon="@drawable/ic_smartwatch"
-        android:title="Smartwatch" />
+    <item android:icon="@drawable/ic_smartwatch"
+        android:title="@string/menu_bottom_smartwatch" />
 
-    <item
-        android:id="@+id/navigation_time_tool"
-        android:icon="@drawable/ic_qrcode_scan"
-        android:title="Time Tool" />
+    <item android:icon="@drawable/ic_qrcode_scan"
+        android:title="@string/menu_bottom_timetool" />
 
-    <item
-        android:id="@+id/navigation_archive"
-        android:icon="@drawable/ic_folder_multiple"
-        android:title="Archive" />
+    <item android:icon="@drawable/ic_folder_multiple"
+        android:title="@string/menu_bottom_archive" />
 
 
 </menu>

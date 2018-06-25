@@ -1,7 +1,6 @@
 package com.ssig.smartcap.model;
 
 import android.annotation.SuppressLint;
-
 import com.ssig.sensorsmanager.data.CaptureData;
 
 import java.text.SimpleDateFormat;
@@ -10,18 +9,20 @@ import java.util.concurrent.TimeUnit;
 
 public class CaptureListItem {
 
-    public String captureUUID;
-    public boolean closed;
+    public CaptureData captureData;
+    public String captureDataUUID;
+    public final boolean closed;
 
-    public String itemTitle;
+    public final String itemTitle;
     public String itemDuration;
-    public Long itemTimestampLong;
+    public final Long itemTimestampLong;
     public String itemTimestampText;
     public boolean itemSmartphoneEnable;
     public boolean itemSmartwatchEnable;
     public String itemDevices = null;
 
-    public boolean section;
+    public final boolean section;
+
 
     public CaptureListItem(boolean closedSection){
         this.itemTitle = closedSection ? "Closed Captures" : "Unclosed Captures";
@@ -33,7 +34,8 @@ public class CaptureListItem {
     @SuppressLint({"SimpleDateFormat", "DefaultLocale"})
     public CaptureListItem(CaptureData captureData){
 
-        this.captureUUID = captureData.getCaptureDataUUID();
+        this.captureData = captureData;
+        this.captureDataUUID = captureData.getCaptureDataUUID();
         this.itemTitle = captureData.getSubjectInfo().getName();
 
         long duration = captureData.getEndTimestamp() - captureData.getStartTimestamp();
@@ -59,6 +61,7 @@ public class CaptureListItem {
 
         this.closed = captureData.isClosed();
         this.section = false;
+
 
     }
 

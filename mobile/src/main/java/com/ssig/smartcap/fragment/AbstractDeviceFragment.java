@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
-
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.ssig.sensorsmanager.SensorType;
@@ -31,21 +30,15 @@ import com.ssig.smartcap.adapter.AdapterSensorsGrid;
 import com.ssig.smartcap.model.SensorsGridItem;
 import com.ssig.smartcap.utils.Tools;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractDeviceFragment extends AbstractMainFragment {
 
-    protected Map<SensorType.SensorGroup, AdapterSensorsGrid> adapterSensorsGridMap;
-    @StringRes protected int preferencesFileName;
+    private Map<SensorType.SensorGroup, AdapterSensorsGrid> adapterSensorsGridMap;
+    @StringRes private final int preferencesFileName;
 
-    public AbstractDeviceFragment(@LayoutRes int layout, @StringRes int preferencesFileName) {
+    protected AbstractDeviceFragment(@LayoutRes int layout, @StringRes int preferencesFileName) {
         super(layout);
         this.clearAdapterSensorsGridMap();
         this.preferencesFileName = preferencesFileName;

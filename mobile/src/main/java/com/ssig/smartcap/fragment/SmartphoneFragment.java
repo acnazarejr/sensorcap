@@ -12,7 +12,6 @@ public class SmartphoneFragment extends AbstractDeviceFragment {
         super(R.layout.fragment_smartphone, R.string.preference_smartphone_file_id);
     }
 
-
     @Override
     protected void initUI() {
         DeviceInfo deviceInfo = DeviceInfo.get(this.getContext());
@@ -21,5 +20,9 @@ public class SmartphoneFragment extends AbstractDeviceFragment {
         this.configureAvailableSensors(deviceInfo);
     }
 
+    @Override
+    public void refresh() {
+
+    }
 
 }

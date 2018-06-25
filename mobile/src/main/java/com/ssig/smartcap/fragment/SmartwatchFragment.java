@@ -2,7 +2,6 @@ package com.ssig.smartcap.fragment;
 
 import android.view.View;
 import android.widget.Button;
-
 import com.ssig.sensorsmanager.info.DeviceInfo;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.activity.MainActivity;
@@ -23,8 +22,7 @@ public class SmartwatchFragment extends AbstractDeviceFragment {
 
         this.mLayoutSmartwatchError = Objects.requireNonNull(getActivity()).findViewById(R.id.layout_smartwatch_fragment_error);
         this.mLayoutSmartwatchContent = getActivity().findViewById(R.id.layout_smartwatch_fragment_content);
-        this.initDeviceSensors(this.getView().findViewById(R.id.available_sensors_layout));
-
+        this.initDeviceSensors(Objects.requireNonNull(this.getView()).findViewById(R.id.available_sensors_layout));
 
         Button layoutSmartwatchErrorButton = this.mLayoutSmartwatchError.findViewById(R.id.layout_smartwatch_error_button);
         layoutSmartwatchErrorButton.setOnClickListener(new View.OnClickListener() {

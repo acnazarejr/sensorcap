@@ -4,7 +4,6 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.support.annotation.NonNull;
-
 import com.ssig.sensorsmanager.SensorType;
 import com.ssig.sensorsmanager.config.DeviceConfig;
 import com.ssig.sensorsmanager.config.SensorConfig;
@@ -21,13 +20,13 @@ public class DeviceCaptureRunner {
         IDLE, RUNNING, STOPPED, FINISHED
     }
 
-    private DeviceConfig deviceConfig;
-    private File systemCapturesFolder;
+    private final DeviceConfig deviceConfig;
+    private final File systemCapturesFolder;
     private File deviceCaptureFolder;
     private Status status;
 
-    private SensorManager sensorManager;
-    private Map<SensorType, SensorListener> sensorListeners;
+    private final SensorManager sensorManager;
+    private final Map<SensorType, SensorListener> sensorListeners;
 
 
     public DeviceCaptureRunner(@NonNull Context context, @NonNull DeviceConfig deviceConfig, @NonNull File systemCapturesFolder) throws IOException {

@@ -52,7 +52,6 @@ public enum SensorType {
 
     public static SensorType fromCode(String code) {
         for(SensorType type : SensorType.values()) {
-            String typecode = type.code();
             if(code.equals(type.code())) {
                 return type;
             }
@@ -85,6 +84,7 @@ public enum SensorType {
 
     }
 
+    @Override
     public String toString() {
 
         @SuppressLint("UseSparseArrays") Map<String, String> codeMap = new HashMap<>();

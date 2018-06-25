@@ -1,12 +1,6 @@
 package com.ssig.smartcap.common;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public final class Serialization {
 
@@ -23,6 +17,7 @@ public final class Serialization {
         return bos.toByteArray();
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T deserializeObject(byte[] bytes){
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         ObjectInput in = null;
@@ -30,9 +25,7 @@ public final class Serialization {
         try {
             in = new ObjectInputStream(bis);
             object = (T)in.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {

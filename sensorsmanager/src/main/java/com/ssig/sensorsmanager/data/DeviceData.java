@@ -8,12 +8,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("ALL")
 public final class DeviceData implements Serializable {
 
     static final long serialVersionUID = 5331128914562345678L;
 
-    private String deviceDataUUID;
-    private String captureDataUUID;
+    private final String deviceDataUUID;
+    private final String captureDataUUID;
 
     private String deviceKey;
     private String deviceName;
@@ -27,7 +28,7 @@ public final class DeviceData implements Serializable {
     private SensorType.DeviceLocation deviceLocation;
     private SensorType.DeviceSide deviceSide;
     private Boolean enable;
-    private Map<SensorType, SensorData> sensorsData;
+    private final Map<SensorType, SensorData> sensorsData;
 
     private DeviceData(String deviceDataUUID, String captureDataUUID) {
         this.deviceDataUUID = deviceDataUUID;

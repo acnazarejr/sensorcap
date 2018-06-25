@@ -9,7 +9,7 @@ public class SensorsGridItem extends SensorInfo implements Serializable {
 
     static final long serialVersionUID = 123456789123456789L;
 
-    private boolean valid ;
+    private final boolean valid ;
     private boolean enabled;
     private int frequency;
 
@@ -38,10 +38,6 @@ public class SensorsGridItem extends SensorInfo implements Serializable {
 
     public boolean isValid() {
         return valid;
-    }
-
-    public void setValid(boolean valid) {
-        this.valid = valid;
     }
 
     public boolean isEnabled() {

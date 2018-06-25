@@ -1,5 +1,5 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
     <item
@@ -7,15 +7,13 @@
         android:icon="@drawable/ic_ntp_off"
         android:orderInCategory="100"
         android:title="@string/menu_action_ntp"
-        android:iconTint="@color/colorGreyDark"
-        app:showAsAction="always" />
+        app:showAsAction="always" tools:ignore="AlwaysShowAction"/>
 
     <item
         android:id="@+id/action_wear"
         android:icon="@drawable/ic_smartwatch_off"
         android:orderInCategory="150"
         android:title="@string/menu_action_wear"
-        android:iconTint="@color/colorGreyDark"
         app:showAsAction="always" />
 
     <item
@@ -23,7 +21,6 @@
         android:icon="@drawable/ic_settings"
         android:orderInCategory="200"
         android:title="@string/menu_action_settings"
-        android:iconTint="@color/colorGreyDark"
         app:showAsAction="never" />
 
     <item
@@ -31,7 +28,6 @@
         android:icon="@drawable/ic_delete"
         android:orderInCategory="250"
         android:title="@string/menu_action_clear"
-        android:iconTint="@color/colorGreyDark"
         app:showAsAction="never" />
 
     <item
@@ -39,7 +35,6 @@
         android:icon="@drawable/ic_info"
         android:orderInCategory="300"
         android:title="@string/menu_action_about"
-        android:iconTint="@color/colorGreyDark"
         app:showAsAction="never" />
 
 
