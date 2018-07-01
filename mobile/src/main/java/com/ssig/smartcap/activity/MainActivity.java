@@ -37,8 +37,8 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.ssig.sensorsmanager.data.CaptureData;
-import com.ssig.sensorsmanager.time.NTPTime;
 import com.ssig.sensorsmanager.util.JSONUtil;
+import com.ssig.sensorsmanager.util.NTPTime;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.adapter.ViewPagerAdapter;
 import com.ssig.smartcap.fragment.*;
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements
             unbindService(this.wearServiceConnection);
             this.wearServiceBounded = false;
         }
-
+        NTPTime.close();
         super.onDestroy();
     }
 
@@ -534,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (NTPTime.isSynchronized()){
 
-            NTPTime.close(this);
+            NTPTime.close();
             if (this.getWearService().isConnected()) {
                 this.getWearService().closeClientNTP();
             }
@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @SuppressLint("StaticFieldLeak")
-    private class NTPSynchronizationTask extends AsyncTask<Void, Void, NTPTime.NTPSynchronizationResponse>{
+    private class NTPSynchronizationTask extends AsyncTask<Void, Void, NTPTime.NTPTimeSyncResponse>{
 
         private String ntpPool;
         private MaterialDialog whileSynchronizationDialog;
@@ -557,7 +557,7 @@ public class MainActivity extends AppCompatActivity implements
             this.mainActivity = new WeakReference<>(mainActivity);
         }
 
-        MaterialDialog makeResponseErrorDialog(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse){
+        MaterialDialog makeResponseErrorDialog(NTPTime.NTPTimeSyncResponse ntpTimeSyncResponse){
 
             MaterialDialog responseErrorDialog = new MaterialDialog.Builder(this.mainActivity.get())
                     .title("")
@@ -581,7 +581,7 @@ public class MainActivity extends AppCompatActivity implements
                     })
                     .build();
 
-            switch (ntpSynchronizationResponse){
+            switch (ntpTimeSyncResponse.responseType){
 
                 case ALREADY_SYNCHRONIZED:
                     responseErrorDialog.setTitle(R.string.ntp_dialog_already_synchronized_error_title);
@@ -594,15 +594,10 @@ public class MainActivity extends AppCompatActivity implements
                     responseErrorDialog.setContent(R.string.ntp_dialog_network_error_content);
                     break;
 
-                case NTP_TIMEOUT:
-                    responseErrorDialog.setTitle(R.string.ntp_dialog_timeout_error_title);
-                    responseErrorDialog.setContent(R.string.ntp_dialog_timeout_error_content);
-                    break;
-
                 case NTP_ERROR:
                     responseErrorDialog.setTitle(R.string.ntp_dialog_synchronization_error_title);
-                    String lastExceptionMessage = NTPTime.getLastExceptionMessage();
-                    String errorContent = String.format("%s %s", getString(R.string.ntp_dialog_synchronization_error_content_prefix), lastExceptionMessage != null ? lastExceptionMessage : "None");
+                    String errorMessage = ntpTimeSyncResponse.errorMessage;
+                    String errorContent = String.format("%s %s", getString(R.string.ntp_dialog_synchronization_error_content_prefix), errorMessage != null ? errorMessage : "None");
                     responseErrorDialog.setContent(errorContent);
                     break;
 
@@ -630,26 +625,26 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         @Override
-        protected NTPTime.NTPSynchronizationResponse doInBackground(Void... voids) {
+        protected NTPTime.NTPTimeSyncResponse doInBackground(Void... voids) {
             return NTPTime.synchronize(mainActivity.get(), this.ntpPool);
         }
 
         @Override
-        protected void onPostExecute(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse) {
-            super.onPostExecute(ntpSynchronizationResponse);
+        protected void onPostExecute(NTPTime.NTPTimeSyncResponse ntpTimeSyncResponse) {
+            super.onPostExecute(ntpTimeSyncResponse);
 
             this.whileSynchronizationDialog.dismiss();
             this.mainActivity.get().updateNTPMenuItem();
 
 
-            if (ntpSynchronizationResponse == NTPTime.NTPSynchronizationResponse.SUCCESS) {
+            if (ntpTimeSyncResponse.responseType == NTPTime.SUCCESS) {
                 timeToolFragment.refresh();
                 if (isWearClientConnected()) {
                     getWearService().syncClientNTP(this.ntpPool);
                 }
                 Toast.makeText(this.mainActivity.get(), getString(R.string.ntp_toast_synchronization_success), Toast.LENGTH_LONG).show();
             } else {
-                MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(ntpSynchronizationResponse);
+                MaterialDialog responseErrorDialog = this.makeResponseErrorDialog(ntpTimeSyncResponse);
                 responseErrorDialog.show();
             }
 
@@ -807,7 +802,7 @@ public class MainActivity extends AppCompatActivity implements
                 smartwatchFragment.refresh();
                 captureFragment.refresh();
                 if (NTPTime.isSynchronized()){
-                    NTPTime.close(this.mainActivity.get());
+                    NTPTime.close();
                     updateNTPMenuItem();
                     timeToolFragment.refresh();
                 }

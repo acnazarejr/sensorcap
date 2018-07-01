@@ -29,7 +29,7 @@ import com.ssig.sensorsmanager.config.DeviceConfig;
 import com.ssig.sensorsmanager.data.DeviceData;
 import com.ssig.sensorsmanager.data.SensorData;
 import com.ssig.sensorsmanager.info.DeviceInfo;
-import com.ssig.sensorsmanager.time.NTPTime;
+import com.ssig.sensorsmanager.util.NTPTime;
 import com.ssig.smartcap.R;
 import com.ssig.smartcap.common.CountDownAnimation;
 import com.ssig.smartcap.common.Serialization;
@@ -108,7 +108,7 @@ public class MainActivity extends WearableActivity  implements
     protected void onDestroy() {
         Wearable.getCapabilityClient(this).removeLocalCapability(getString(R.string.capability_smartcap_wear));
         Wearable.getMessageClient(this).removeListener(this);
-        NTPTime.close(this);
+        NTPTime.close();
         this.disconnectFromHost();
         super.onDestroy();
     }
@@ -141,7 +141,7 @@ public class MainActivity extends WearableActivity  implements
         }
 
         if (path.equals(getString(R.string.message_path_client_activity_close_ntp))){
-            NTPTime.close(this);
+            NTPTime.close();
             this.updateStatusIcons();
         }
 
@@ -177,7 +177,7 @@ public class MainActivity extends WearableActivity  implements
 
     private void disconnect(){
         this.hostNodeId = null;
-        NTPTime.close(this);
+        NTPTime.close();
         this.setState(DeviceState.DISCONNECTED);
     }
 
@@ -420,7 +420,7 @@ public class MainActivity extends WearableActivity  implements
     // NTP STUFFS
     //----------------------------------------------------------------------------------------------
     @SuppressLint("StaticFieldLeak")
-    private class NTPSynchronizationTask extends AsyncTask<String, Void, NTPTime.NTPSynchronizationResponse> {
+    private class NTPSynchronizationTask extends AsyncTask<String, Void, NTPTime.NTPTimeSyncResponse> {
 
         private final WeakReference<MainActivity> mainActivity;
 
@@ -435,20 +435,20 @@ public class MainActivity extends WearableActivity  implements
         }
 
         @Override
-        protected NTPTime.NTPSynchronizationResponse doInBackground(String... strings) {
+        protected NTPTime.NTPTimeSyncResponse doInBackground(String... strings) {
             if (strings.length == 0)
-                return NTPTime.NTPSynchronizationResponse.UNKNOWN_ERROR;
+                return new NTPTime.NTPTimeSyncResponse(NTPTime.UNKNOWN_ERROR);
             return NTPTime.synchronize(mainActivity.get(), strings[0]);
         }
 
         @Override
-        protected void onPostExecute(NTPTime.NTPSynchronizationResponse ntpSynchronizationResponse) {
-            super.onPostExecute(ntpSynchronizationResponse);
+        protected void onPostExecute(NTPTime.NTPTimeSyncResponse ntpTimeSyncResponse) {
+            super.onPostExecute(ntpTimeSyncResponse);
 
             this.mainActivity.get().updateStatusIcons();
 
             String responseMessage = "";
-            switch (ntpSynchronizationResponse){
+            switch (ntpTimeSyncResponse.responseType){
 
                 case ALREADY_SYNCHRONIZED:
                     responseMessage = getString(R.string.ntp_toast_already_synchronized_error);
@@ -458,13 +458,9 @@ public class MainActivity extends WearableActivity  implements
                     responseMessage = getString(R.string.ntp_toast_network_error);
                     break;
 
-                case NTP_TIMEOUT:
-                    responseMessage = getString(R.string.ntp_toast_timeout_error);
-                    break;
-
                 case NTP_ERROR:
-                    String lastExceptionMessage = NTPTime.getLastExceptionMessage();
-                    responseMessage = String.format("%s %s", getString(R.string.ntp_toast_synchronization_error_prefix), lastExceptionMessage != null ? lastExceptionMessage : "None");
+                    String errorMessage = ntpTimeSyncResponse.errorMessage;
+                    responseMessage = String.format("%s %s", getString(R.string.ntp_toast_synchronization_error_prefix), errorMessage != null ? errorMessage : "None");
                     break;
 
                 case UNKNOWN_ERROR:

@@ -3,6 +3,13 @@
     <!-- ******************** APP *************************** -->
     <string name="app_name">SmartCap</string>
 
+    <!-- ******************** MenuBottom *************************** -->
+    <string name="menu_bottom_capture">Capture</string>
+    <string name="menu_bottom_smartphone">Smartphone</string>
+    <string name="menu_bottom_smartwatch">Smartwatch</string>
+    <string name="menu_bottom_timetool">TimeTool</string>
+    <string name="menu_bottom_archive">Archive</string>
+
     <!-- ******************** UTIL STRINGS *************************** -->
     <string name="util_time_format">HH:mm:ss.SSS</string>
     <string name="util_time_format_file">yyyyMMdd_HHmmss</string>
@@ -189,12 +196,6 @@
     <string name="archive_dialog_close_capture_error_execution">An Execution Error occurs during sensor files transmission.</string>
     <string name="archive_dialog_close_capture_error_timeout">A transmission timeout is reached.</string>
     <string name="archive_failure_from_smartwatch">Failure from smartwatch</string>
-    <string name="menu_bottom_capture">Capture</string>
-    <string name="menu_bottom_smartphone">Smartphone</string>
-    <string name="menu_bottom_smartwatch">Smartwatch</string>
-    <string name="menu_bottom_timetool">TimeTool</string>
-    <string name="menu_bottom_archive">Archive</string>
-
 
 </resources>
 
