@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/frequencies_radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:layout_margin="@dimen/spacing_medium"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/devices_dialog_frequency_basic"/>
+
+        <RadioButton
+            android:id="@+id/frequency_maximum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_maximum"/>
+
+        <RadioButton
+            android:id="@+id/frequency_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_medium"/>
+
+        <RadioButton
+            android:id="@+id/frequency_low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_low"/>
+
+        <RadioButton
+            android:id="@+id/frequency_minimum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_minimum"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:layout_margin="@dimen/spacing_medium"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:text="@string/devices_dialog_frequency_advanced"/>
+
+        <RadioButton
+            android:id="@+id/frequency_individual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_individual"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_middle"
+            android:paddingEnd="@dimen/spacing_middle"
+            android:text="@string/devices_dialog_frequency_individual_explanation"/>
+
+        <RadioButton
+            android:id="@+id/frequency_global"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/devices_dialog_frequency_global"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/spacing_middle"
+            android:paddingEnd="@dimen/spacing_middle"
+            android:text="@string/devices_dialog_frequency_global_explanation"/>
+
+        <LinearLayout
+            android:id="@+id/sensor_global_frequency_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="@dimen/spacing_xlarge"
+            android:paddingStart="@dimen/spacing_middle"
+            android:paddingEnd="@dimen/spacing_middle"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingTop="@dimen/spacing_small"
+                android:text="@string/devices_dialog_frequency_global_5hz"
+                android:textColor="@color/colorGrey"
+                android:textStyle="bold"/>
+
+            <com.warkiz.widget.IndicatorSeekBar
+                android:id="@+id/sensor_global_frequency"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:isb_indicator_stay="true"
+                app:isb_indicator_color="@color/colorAccent"
+                app:isb_indicator_text_color="@color/colorGreyLight"
+                app:isb_min="5"
+                app:isb_max="200"
+                app:isb_progress="100"
+                app:isb_seek_bar_type="continuous"
+                app:isb_show_indicator="true"
+                app:isb_thumb_width="22dp"
+                app:isb_thumb_color="@color/colorAccent"
+                app:isb_track_background_bar_size="5dp"
+                app:isb_track_background_bar_color="@color/colorAccentLight"
+                app:isb_track_progress_bar_size="5dp"
+                app:isb_track_progress_bar_color="@color/colorAccent"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/devices_dialog_frequency_global_200_hz"
+                android:paddingBottom="@dimen/spacing_small"
+                android:paddingTop="@dimen/spacing_small"
+                android:textColor="@color/colorGrey"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+
+
+
+    </RadioGroup>
+
+</LinearLayout>

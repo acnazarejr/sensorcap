@@ -27,18 +27,15 @@
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
                 android:textColor="@color/colorPrimary" />
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/frequency_menu_button"
-                style="@style/NoAllCaps"
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/sensor_options_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-
-                android:text="@string/devices_device_sensors_button_global_frequency"
                 android:backgroundTint="@color/colorGreyLight"
-                android:drawableStart="@drawable/ic_tune"
-                android:drawableTint="@color/colorGrey"
-                android:textColor="@color/colorGrey" />
+                android:src="@drawable/ic_tune"
+                android:tint="@color/colorGrey"
+                android:textColor="@color/colorGrey"/>
 
 
         </LinearLayout>

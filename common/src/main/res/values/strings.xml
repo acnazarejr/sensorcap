@@ -1,9 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ******************** APP *************************** -->
+    <string name="app_name">SensorCap</string>
+    <string name="app_short_description">Sensor Data Capture</string>
+
     <!-- CAPABILITIES -->
-    <string name="capability_smartcap_phone" tools:keep="@string/capability_smartcap_phone">capability_smartcap_phone</string>
-    <string name="capability_smartcap_wear">capability_smartcap_wear</string>
-    <!--<string name="capability_smartcap_capture">capability_smartcap_capture</string>-->
+    <string name="capability_sensorcap_phone" tools:keep="@string/capability_sensorcap_phone">capability_sensorcap_phone</string>
+    <string name="capability_sensorcap_wear">capability_sensorcap_wear</string>
 
 
     <!-- MESSAGES TO WEAR ACTIVITY -->
@@ -49,7 +52,7 @@
     <string name="data_item_sensors_smartwatch_key">data_item_sensors_smartwatch_key</string>
 
     <!-- FOLDERS -->
-    <string name="system_folder_name">smartcap</string>
+    <string name="system_folder_name">sensorcap</string>
     <string name="capture_folder_name">captures</string>
     <string name="archive_folder_name" tools:keep="@string/archive_folder_name">archive</string>
 

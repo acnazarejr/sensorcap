@@ -93,7 +93,7 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/colorGreyDark"
                                 android:textSize="15sp"
-                                android:text="@string/start_screen"
+                                android:text="@string/app_short_description"
                                 android:textStyle="italic"/>
 
                         </LinearLayout>

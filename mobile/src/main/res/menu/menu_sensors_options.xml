@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/device_option_frequencies"
+        android:orderInCategory="50"
+        android:title="@string/menu_device_frequencies" />
+
+    <item
+        android:id="@+id/device_option_reset"
+        android:orderInCategory="500"
+        android:title="@string/menu_device_reset" />
+
+</menu>

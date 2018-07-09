@@ -19,7 +19,7 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
         <ImageView
-                android:layout_width="80dp"
+            android:layout_width="80dp"
             android:layout_height="80dp"
             android:tint="@color/colorPrimary"
             app:srcCompat="@drawable/logo"
@@ -30,18 +30,26 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_middle"
             android:text="@string/app_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:textColor="@color/colorGreyDark"
             android:textStyle="bold" />
 
         <TextView
-                android:layout_width="wrap_content"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_small"
-            android:text="Version 0.1"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:text="@string/app_short_description"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/colorGreyMediumDark"
             tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/app_version_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@color/colorGreyMediumDark" />
 
     </LinearLayout>
 

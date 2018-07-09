@@ -15,8 +15,15 @@
     <string name="preference_main_key_has_vibration">has_vibration</string>
     <bool name="preference_main_default_has_vibration">false</bool>
 
+    <string name="preference_main_key_sensor_writer_type">sensor_writer_type</string>
+    <string name="preference_main_default_sensor_writer_type">CSV</string>
+
     <string name="preference_smartphone_file_id">SMARTPHONE_PREFERENCES</string>
     <string name="preference_smartwatch_file_id">SMARTWATCH_PREFERENCES</string>
+    <string name="preference_sensor_frequency_config_key">SENSOR_FREQUENCY_CONFIG</string>
+    <integer name="preference_sensor_frequency_config_default">0</integer>
+    <string name="preference_sensor_frequency_global_key">SENSOR_FREQUENCY_GLOBAL</string>
+    <integer name="preference_sensor_frequency_global_default">100</integer>
     <string name="preference_sensor_enabled_suffix">_ENABLED</string>
     <string name="preference_sensor_frequency_suffix">_FREQUENCY</string>
 

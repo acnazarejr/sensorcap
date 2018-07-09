@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 1
-        versionName "0.9"
+        versionCode 5
+        versionName "1.0.5"
     }
 
     buildTypes {
@@ -34,4 +34,5 @@ dependencies {
     implementation 'com.github.instacart.truetime-android:library-extension-rx:3.3'
     implementation 'com.jaredrummler:android-device-names:1.1.7'
     implementation 'commons-net:commons-net:3.3'
+    implementation "org.apache.commons:commons-csv:1.5"
 }

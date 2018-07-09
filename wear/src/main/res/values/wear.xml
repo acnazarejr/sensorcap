@@ -17,6 +17,6 @@
 <resources>
     <!--<string-array name="android_wear_capabilities" translatable="false">-->
         <!--&lt;!&ndash; declaring the provided capabilities &ndash;&gt;-->
-        <!--<item>@string/capability_smartcap_wear</item>-->
+        <!--<item>@string/capability_sensorcap_wear</item>-->
     <!--</string-array>-->
 </resources>
