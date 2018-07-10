@@ -147,7 +147,7 @@
                     android:cropToPadding="false"
                     android:src="@drawable/ic_package_down"
                     android:tint="@color/colorGreyLight"
-                    android:backgroundTint="@color/colorAccent"
+                    android:backgroundTint="@color/colorGrey"
                     android:contentDescription="@string/util_image_description"/>
 
             </LinearLayout>

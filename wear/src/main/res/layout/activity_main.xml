@@ -4,7 +4,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorBackgroundView"
         android:padding="@dimen/box_inset_layout_padding"
         tools:context=".activity.MainActivity"
         tools:deviceIds="wear" tools:ignore="Overdraw">
@@ -14,235 +13,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+        <include layout="@layout/main_layout"
+            android:id="@+id/main_layout"
+            android:visibility="visible" />
 
-            <LinearLayout
-                    android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
-                android:layout_above="@id/bottom_layout"
-                android:orientation="vertical">
+        <include layout="@layout/capture_layout"
+            android:id="@+id/capture_layout"
+            android:visibility="gone" />
 
-                <LinearLayout
-                        android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+        <include layout="@layout/task_layout"
+            android:id="@+id/task_layout"
+            android:visibility="gone"/>
 
-                    <ImageView
-                        android:id="@+id/host_connected_status_icon_image"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_margin="2dp"
-                        android:tint="@color/colorAlert"
-                        android:src="@drawable/ic_smartphone_off"
-                        android:contentDescription="@string/image_description" />
+        <include layout="@layout/permissions_denied_layout"
+            android:id="@+id/permissions_layout_denied"
+            android:visibility="gone"/>
 
-                    <ImageView
-                        android:id="@+id/ntp_synchronized_status_icon_image"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_margin="2dp"
-                        android:tint="@color/colorAlert"
-                        android:src="@drawable/ic_ntp_off"
-                        android:contentDescription="@string/image_description" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                        android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/logo_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-
-                        <ImageView
-                            android:layout_width="50dp"
-                            android:layout_height="50dp"
-                            android:tint="@color/colorPrimary"
-                            android:src="@drawable/logo"
-                            android:layout_marginEnd="5dp"
-                            android:contentDescription="@string/image_description" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <TextView
-                                    android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/colorPrimary"
-                                android:text="@string/app_name"
-                                android:textSize="20sp"
-                                android:textStyle="bold"/>
-
-                            <TextView
-                                    android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/colorGreyDark"
-                                android:textSize="15sp"
-                                android:text="@string/app_short_description"
-                                android:textStyle="italic"/>
-
-                        </LinearLayout>
-
-
-                    </LinearLayout>
-
-                    <Chronometer
-                        android:id="@+id/chronometer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorPrimary"
-                        android:textSize="50sp"
-                        android:textStyle="bold"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/status_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textStyle="bold"
-                    android:padding="4dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:textColor="@color/colorGreyLight"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/bottom_layout"
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:background="@color/colorPrimaryLight"
-                android:layout_alignParentBottom="true"
-                android:gravity="center_horizontal"
-                android:orientation="vertical">
-
-                <LinearLayout
-                        android:id="@+id/key_one_image_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="3dp"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical"
-                        tools:ignore="UseCompoundDrawables">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textAlignment="center"
-                        android:text="@string/hardware_button_instruction"/>
-
-                    <ImageView
-                        android:id="@+id/key_one_image"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:tint="@color/colorPrimaryDark"
-                        android:contentDescription="@string/image_description" />
-
-                </LinearLayout>
-
-
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
+        <include layout="@layout/countdown_layout"
             android:id="@+id/countdown_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundView"
-            android:visibility="gone">
+            android:visibility="gone"/>
 
-            <TextView
-                android:id="@+id/countdown_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimary"
-                android:textSize="120sp"
-                android:textStyle="bold" />
+        <include layout="@layout/ambient_mode_layout"
+            android:id="@+id/ambient_mode_layout"
+            android:visibility="gone" />
 
-        </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/sending_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundView"
-            android:visibility="gone"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="20dp"
-                android:padding="10dp"
-                android:tint="@color/colorPrimary"
-                android:src="@drawable/ic_progress_upload"
-                android:contentDescription="@string/image_description"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorGreyMediumDark"
-                android:textSize="20sp"
-                android:text="@string/sending_files"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ntp_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackgroundView"
-            android:visibility="gone"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="20dp"
-                android:padding="10dp"
-                android:tint="@color/colorPrimary"
-                android:src="@drawable/ic_ntp_on"
-                android:contentDescription="@string/image_description"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorGreyMediumDark"
-                android:textSize="20sp"
-                android:text="@string/syncing_ntp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
 
     </RelativeLayout>
 

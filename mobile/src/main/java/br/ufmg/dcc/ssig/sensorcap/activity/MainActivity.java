@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements
                         Manifest.permission.VIBRATE
                 ).withListener(new MultiplePermissionsListener() {
             @Override
-            public void onPermissionsChecked(MultiplePermissionsReport report) {
+            public void onPermissionsChecked(final MultiplePermissionsReport report) {
                 if (!report.areAllPermissionsGranted()){
                     new MaterialDialog.Builder(MainActivity.this)
                             .title(R.string.permissions_dialog_failed_title)
@@ -175,6 +176,12 @@ public class MainActivity extends AppCompatActivity implements
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    if(report.isAnyPermissionPermanentlyDenied()){
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivityForResult(intent, 333);
+                                    }
                                     requestPermissions();
                                 }
                             })
@@ -528,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void updateToolBarTitleAndIcon(int position){
         String fragmentTitle = this.ahBottomNavigation.getItem(position).getTitle(this);
-        this.getSupportActionBar().setTitle(fragmentTitle);
+        Objects.requireNonNull(this.getSupportActionBar()).setTitle(fragmentTitle);
         Drawable fragmentIcon;
         fragmentIcon = Objects.requireNonNull(this.ahBottomNavigation.getItem(position).getDrawable(this).getConstantState()).newDrawable().mutate();
         fragmentIcon = Tools.changeDrawableColor(fragmentIcon, ContextCompat.getColor(this, R.color.colorPrimary));

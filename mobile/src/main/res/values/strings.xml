@@ -166,7 +166,8 @@
 
 
     <!-- ******************** CAPTURE *************************** -->
-    <string name="capture_title">Capture Details</string>
+    <string name="capture_title">Capture Info</string>
+    <string name="capture_button_more_details">More Details</string>
     <string name="capture_name_hint">Capture Name</string>
     <string name="capture_smartphone_position">Smartphone Position</string>
     <string name="capture_smartphone_side">Smartphone Side</string>
@@ -200,7 +201,7 @@
     <string name="archive_close_dialog_no_smartwatch_error_content">The correct employed smartwatch is not connected.</string>
     <string name="archive_dialog_wear_sensors_title">Smartwatch Data</string>
     <string name="archive_dialog_wear_sensors_content_waiting">Waiting for smartwatch sensor files. This operation can long a few minutes.</string>
-    <string name="archive_dialog_wear_sensors_content_prefix">Copying Sensor File: </string>
+    <string name="archive_dialog_wear_sensors_content_prefix">Copying Sensor File</string>
     <string name="archive_dialog_close_capture_title">Close Capture</string>
     <string name="archive_dialog_close_capture_content">Compressing the capture files. This operation can long a few minutes.</string>
     <string name="archive_toast_closed_success">Capture closed successfully</string>

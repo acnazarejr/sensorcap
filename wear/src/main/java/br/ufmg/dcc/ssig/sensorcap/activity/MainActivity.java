@@ -2,19 +2,21 @@ package br.ufmg.dcc.ssig.sensorcap.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.input.WearableButtons;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,6 +25,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.*;
+
+import br.ufmg.dcc.ssig.sensorcap.BuildConfig;
 import br.ufmg.dcc.ssig.sensorsmanager.SensorType;
 import br.ufmg.dcc.ssig.sensorsmanager.capture.DeviceCaptureRunner;
 import br.ufmg.dcc.ssig.sensorsmanager.config.DeviceConfig;
@@ -38,6 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -45,23 +51,24 @@ public class MainActivity extends WearableActivity  implements
         MessageClient.OnMessageReceivedListener,
         ActivityCompat.OnRequestPermissionsResultCallback{
 
-    private final static int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
-    private final static int PERMISSION_REQUEST_BODY_SENSORS = 2;
-
     private enum DeviceState{
-        DISCONNECTED, CONNECTED, CAPTURING
+        IDLE, CAPTURING, STOPPING, NTP, SENDING, PERMISSIONS
     }
 
-    private ImageView imageHostConnectedStatusIcon;
-    private ImageView imageNTPSynchronizedStatusIcon;
-    private View layoutLogo;
-    private View layoutCountdown;
-    private Chronometer chronometer;
-    private TextView textCountdown;
-    private TextView textStatus;
+    private final static int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    private final static int PERMISSION_REQUEST_BODY_SENSORS = 2;
+    private final static int REQUEST_PERMISSION_SETTING = 9;
 
-    private View sendingFilesLayout;
-    private View syncingNTPLayout;
+    private View layoutMain;
+    private View layoutTask;
+    private View layoutCountdown;
+    private View layoutCapture;
+    private View layoutPermissionsDenied;
+    private View layoutAmbientMode;
+
+    private Chronometer chronometerPrimary;
+    private Chronometer chronometerAmbient;
+    private TextView textCountdown;
 
     private File systemCapturesFolder;
     private DeviceState deviceState;
@@ -75,34 +82,35 @@ public class MainActivity extends WearableActivity  implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setAmbientEnabled();
+
         setContentView(R.layout.activity_main);
 
         String systemFolderName = getString(R.string.system_folder_name);
         String captureFolderName = getString(R.string.capture_folder_name);
         this.systemCapturesFolder = new File(String.format("%s%s%s%s%s", Environment.getExternalStorageDirectory().getAbsolutePath(), File.separator, systemFolderName, File.separator, captureFolderName));
-        this.deviceState = DeviceState.DISCONNECTED;
 
         this.hostNodeId = null;
         this.deviceCaptureRunner = null;
 
         final String uri = String.format("wear://*%s", getString(R.string.message_path_client_activity_prefix));
         Wearable.getMessageClient(this).addListener(this, Uri.parse(uri), MessageClient.FILTER_PREFIX);
-        Wearable.getCapabilityClient(this).addLocalCapability(getString(R.string.capability_sensorcap_wear));
 
         this.initUI();
+        this.setState(DeviceState.IDLE);
+        this.checkPermissions(false);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        this.checkPermissions();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        this.updateStatusIcons();
-        this.updateStatus();
+        this.setState(this.deviceState);
     }
 
     @Override
@@ -113,6 +121,128 @@ public class MainActivity extends WearableActivity  implements
         this.disconnectFromHost();
         super.onDestroy();
     }
+
+    @Override
+    public void onEnterAmbient(Bundle ambientDetails) {
+        super.onEnterAmbient(ambientDetails);
+        this.chronometerAmbient.setVisibility(this.deviceState == DeviceState.CAPTURING ? View.VISIBLE : View.GONE);
+        this.layoutAmbientMode.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onExitAmbient() {
+        super.onExitAmbient();
+        this.layoutAmbientMode.setVisibility(View.GONE);
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // UI STUFFS
+    //----------------------------------------------------------------------------------------------
+    private void initUI(){
+
+        this.layoutMain = findViewById(R.id.main_layout);
+        this.layoutTask = findViewById(R.id.task_layout);
+
+        this.layoutCapture = findViewById(R.id.capture_layout);
+        this.chronometerPrimary = findViewById(R.id.chronometer_capture);
+        this.chronometerAmbient = findViewById(R.id.chronometer_ambient_mode);
+        Button stopButton = findViewById(R.id.stop_button);
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopHostCapture();
+            }
+        });
+
+        this.layoutPermissionsDenied = findViewById(R.id.permissions_layout_denied);
+        Button buttonPermission = this.layoutPermissionsDenied.findViewById(R.id.permissions_button);
+        buttonPermission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkPermissions(true);
+            }
+        });
+
+        this.layoutAmbientMode = findViewById(R.id.ambient_mode_layout);
+
+        this.layoutCountdown = findViewById(R.id.countdown_layout);
+        this.textCountdown = findViewById(R.id.countdown_text);
+
+    }
+
+    private void setState(DeviceState deviceState){
+        this.deviceState = deviceState;
+
+        this.layoutMain.setVisibility(View.GONE);
+        this.layoutTask.setVisibility(View.GONE);
+        this.layoutPermissionsDenied.setVisibility(View.GONE);
+        this.layoutCountdown.setVisibility(View.GONE);
+        this.layoutCapture.setVisibility(View.GONE);
+
+        switch(this.deviceState){
+            case IDLE:
+                this.layoutMain.setVisibility(View.VISIBLE);
+                TextView textAppVersion = findViewById(R.id.main_layout_app_version);
+                textAppVersion.setText(String.format("Version %s", BuildConfig.VERSION_NAME));
+                ImageView mainHostConnectedStatusIcon = findViewById(R.id.host_connected_status_icon_image);
+                ImageView mainNTPSynchronizedStatusIcon = findViewById(R.id.ntp_synchronized_status_icon_image);
+                mainHostConnectedStatusIcon.setImageResource(this.isConnected() ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
+                mainHostConnectedStatusIcon.setColorFilter(ContextCompat.getColor(this, this.isConnected() ? R.color.colorAccent : R.color.colorAlert));
+                mainNTPSynchronizedStatusIcon.setImageResource(NTPTime.isSynchronized() ? R.drawable.ic_ntp_on : R.drawable.ic_ntp_off);
+                mainNTPSynchronizedStatusIcon.setColorFilter(ContextCompat.getColor(this, NTPTime.isSynchronized() ? R.color.colorAccent : R.color.colorAlert));
+                break;
+            case NTP:
+                this.layoutTask.setVisibility(View.VISIBLE);
+                ImageView taskIconNTP = findViewById(R.id.task_icon);
+                TextView taskMessageNTP = findViewById(R.id.task_message);
+                taskIconNTP.setImageDrawable(getDrawable(R.drawable.ic_ntp_on));
+                taskMessageNTP.setText(R.string.syncing_ntp);
+                break;
+            case STOPPING:
+                this.layoutTask.setVisibility(View.VISIBLE);
+                ImageView taskIconStop = findViewById(R.id.task_icon);
+                TextView taskMessageStop = findViewById(R.id.task_message);
+                taskIconStop.setImageDrawable(getDrawable(R.drawable.ic_save));
+                taskMessageStop.setText(R.string.saving);
+                break;
+            case SENDING:
+                this.layoutTask.setVisibility(View.VISIBLE);
+                ImageView taskIconSend = findViewById(R.id.task_icon);
+                TextView taskMessageSend = findViewById(R.id.task_message);
+                taskIconSend.setImageDrawable(getDrawable(R.drawable.ic_progress_upload));
+                taskMessageSend.setText(R.string.sending_files);
+                break;
+            case CAPTURING:
+                this.layoutCapture.setVisibility(View.VISIBLE);
+                break;
+            case PERMISSIONS:
+                this.layoutPermissionsDenied.setVisibility(View.VISIBLE);
+                break;
+        }
+
+
+
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+    // Hardware Button STUFFS
+    //----------------------------------------------------------------------------------------------
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        super.onKeyDown(keyCode, event);
+        if (this.deviceState == DeviceState.CAPTURING)
+            this.stopHostCapture();
+        event.startTracking();
+        return true;
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        this.finish();
+        return false;
+    }
+
 
     //----------------------------------------------------------------------------------------------
     // Wear STUFFS
@@ -128,7 +258,7 @@ public class MainActivity extends WearableActivity  implements
 
         if (path.equals(getString(R.string.message_path_client_activity_connected))) {
             this.hostNodeId = messageEvent.getSourceNodeId();
-            this.setState(DeviceState.CONNECTED);
+            this.setState(DeviceState.IDLE);
         }
 
         if (path.equals(getString(R.string.message_path_client_activity_disconnected))) {
@@ -143,7 +273,7 @@ public class MainActivity extends WearableActivity  implements
 
         if (path.equals(getString(R.string.message_path_client_activity_close_ntp))){
             NTPTime.close();
-            this.updateStatusIcons();
+            this.setState(DeviceState.IDLE);
         }
 
         if (path.equals(getString(R.string.message_path_client_activity_start_capture))){
@@ -167,7 +297,7 @@ public class MainActivity extends WearableActivity  implements
     }
 
     private boolean isConnected(){
-        return this.deviceState != DeviceState.DISCONNECTED;
+        return this.hostNodeId != null;
     }
 
     private void disconnectFromHost(){
@@ -179,7 +309,7 @@ public class MainActivity extends WearableActivity  implements
     private void disconnect(){
         this.hostNodeId = null;
         NTPTime.close();
-        this.setState(DeviceState.DISCONNECTED);
+        this.setState(DeviceState.IDLE);
     }
 
     private void stopHostCapture(){
@@ -207,109 +337,56 @@ public class MainActivity extends WearableActivity  implements
     //----------------------------------------------------------------------------------------------
     // Permission STUFFS
     //----------------------------------------------------------------------------------------------
-    private void checkPermissions(){
+    private void checkPermissions(boolean request){
+
+        int requestCode = 0;
+        List<String> permissionsList = new LinkedList<>();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+            permissionsList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            requestCode += PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE;
         }
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BODY_SENSORS}, PERMISSION_REQUEST_BODY_SENSORS);
+            permissionsList.add(Manifest.permission.BODY_SENSORS);
+            requestCode += PERMISSION_REQUEST_BODY_SENSORS;
         }
+
+        if(requestCode > 0){
+            this.setState(DeviceState.PERMISSIONS);
+            if (request){
+                ActivityCompat.requestPermissions(this, permissionsList.toArray(new String[permissionsList.size()]), requestCode);
+            }
+
+        }else{
+            Wearable.getCapabilityClient(this).addLocalCapability(getString(R.string.capability_sensorcap_wear));
+            this.setState(DeviceState.IDLE);
+        }
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE){
-            if (!((grantResults.length == 1) && (grantResults[0] == PackageManager.PERMISSION_GRANTED))) {
-                finish();
+        boolean openSettings = false;
+        boolean someDenied = false;
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                someDenied = true;
+                if(!shouldShowRequestPermissionRationale(permissions[i]))
+                    openSettings = true;
             }
         }
-        if (requestCode == PERMISSION_REQUEST_BODY_SENSORS){
-            if (!((grantResults.length == 1) && (grantResults[0] == PackageManager.PERMISSION_GRANTED))) {
-                finish();
+        if (someDenied){
+            if (openSettings){
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
             }
+            return;
         }
+
+        checkPermissions(false);
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // UI STUFFS
-    //----------------------------------------------------------------------------------------------
-    private void initUI(){
-        this.imageHostConnectedStatusIcon = findViewById(R.id.host_connected_status_icon_image);
-        this.imageNTPSynchronizedStatusIcon = findViewById(R.id.ntp_synchronized_status_icon_image);
-
-        this.layoutLogo = findViewById(R.id.logo_layout);
-        this.layoutLogo.setVisibility(View.VISIBLE);
-
-        this.layoutCountdown = findViewById(R.id.countdown_layout);
-        this.textCountdown = findViewById(R.id.countdown_text);
-        this.layoutCountdown.setVisibility(View.GONE);
-
-        this.chronometer = findViewById(R.id.chronometer);
-        this.chronometer.setVisibility(View.GONE);
-
-        this.textStatus = findViewById(R.id.status_text);
-
-        this.syncingNTPLayout = findViewById(R.id.ntp_layout);
-        this.sendingFilesLayout = findViewById(R.id.sending_layout);
-
-        View imageKeyOneLayout = findViewById(R.id.key_one_image_layout);
-        imageKeyOneLayout.setVisibility(View.GONE);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            WearableButtons.ButtonInfo buttonOneInfo = WearableButtons.getButtonInfo(this, KeyEvent.KEYCODE_STEM_1);
-            if(buttonOneInfo != null){
-                imageKeyOneLayout.setVisibility(View.VISIBLE);
-                ImageView imageKeyOne = findViewById(R.id.key_one_image);
-                imageKeyOne.setImageDrawable(WearableButtons.getButtonIcon(this, KeyEvent.KEYCODE_STEM_1));
-            }
-        }
-
-    }
-
-    private void updateStatusIcons(){
-        this.imageHostConnectedStatusIcon.setImageResource(this.isConnected() ? R.drawable.ic_smartphone_on : R.drawable.ic_smartphone_off);
-        this.imageHostConnectedStatusIcon.setColorFilter(ContextCompat.getColor(this, this.isConnected() ? R.color.colorAccent : R.color.colorAlert));
-        this.imageNTPSynchronizedStatusIcon.setImageResource(NTPTime.isSynchronized() ? R.drawable.ic_ntp_on : R.drawable.ic_ntp_off);
-        this.imageNTPSynchronizedStatusIcon.setColorFilter(ContextCompat.getColor(this, NTPTime.isSynchronized() ? R.color.colorAccent : R.color.colorAlert));
-    }
-
-    private void updateStatus(){
-        switch(this.deviceState){
-            case DISCONNECTED:
-                this.textStatus.setText(R.string.waiting_connection);
-                break;
-            case CONNECTED:
-                this.textStatus.setText(R.string.ready_to_capture);
-                break;
-            case CAPTURING:
-                this.textStatus.setText(R.string.capturing);
-                break;
-        }
-    }
-
-    private void setState(DeviceState deviceState){
-        this.deviceState = deviceState;
-        this.updateStatus();
-        this.updateStatusIcons();
-    }
-
-    //----------------------------------------------------------------------------------------------
-    // Hardware Button STUFFS
-    //----------------------------------------------------------------------------------------------
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        super.onKeyDown(keyCode, event);
-        if (this.deviceState == DeviceState.CAPTURING)
-            this.stopHostCapture();
-        event.startTracking();
-        return true;
-    }
-
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        this.finish();
-        return false;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -331,47 +408,32 @@ public class MainActivity extends WearableActivity  implements
             @Override
             public void onCountDownEnd(CountDownAnimation animation) {
                 layoutCountdown.setVisibility(View.GONE);
-                layoutLogo.setVisibility(View.GONE);
-                chronometer.setBase(SystemClock.elapsedRealtime());
-                chronometer.start();
-                chronometer.setVisibility(View.VISIBLE);
+                setState(DeviceState.CAPTURING);
+                chronometerPrimary.setBase(SystemClock.elapsedRealtime());
+                chronometerAmbient.setBase(SystemClock.elapsedRealtime());
+                chronometerPrimary.start();
+                chronometerAmbient.start();
                 if (deviceCaptureRunner != null)
                     deviceCaptureRunner.start();
             }
         });
 
         this.layoutCountdown.setVisibility(View.VISIBLE);
-        this.setState(DeviceState.CAPTURING);
         countDownAnimation.start();
     }
 
     private void stopCapture(){
-
-        this.chronometer.stop();
-        this.chronometer.setVisibility(View.GONE);
-        this.layoutLogo.setVisibility(View.VISIBLE);
-        this.setState(DeviceState.CONNECTED);
-
-        if (this.deviceCaptureRunner != null){
-            try {
-                deviceCaptureRunner.finish();
-            } catch (IOException e) {
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                return;
-            }
-        }
-
-        this.deviceCaptureRunner = null;
+        new StopCaptureTask(this).execute();
     }
 
     private void sendSensorFiles(DeviceData deviceData){
 
-        this.sendingFilesLayout.setVisibility(View.VISIBLE);
+        this.setState(DeviceState.SENDING);
 
         File deviceCaptureFolder = new File(String.format("%s%s%s%s%s", this.systemCapturesFolder, File.separator, deviceData.getCaptureDataUUID(), File.separator, deviceData.getDeviceDataUUID()));
         if (!deviceCaptureFolder.exists()) {
             this.sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_capture_folder_no_exists).getBytes());
-            this.sendingFilesLayout.setVisibility(View.GONE);
+            this.setState(DeviceState.IDLE);
             Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_capture_folder_no_exists), Toast.LENGTH_LONG).show();
             return;
         }
@@ -379,13 +441,13 @@ public class MainActivity extends WearableActivity  implements
         Map<SensorType, Asset> assets = new HashMap<>();
         for (Map.Entry<SensorType, SensorData> entry : deviceData.getSensorsData().entrySet()){
             if (entry.getValue().isEnable()) {
-                File sensorFile = new File(String.format("%s%s%s.dat", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID()));
+                File sensorFile = new File(String.format("%s%s%s.%s", deviceCaptureFolder, File.separator, entry.getValue().getSensorDataUUID(), deviceData.getSensorWriterType().fileExtension()));
                 if (sensorFile.exists()) {
                     Asset asset = Asset.createFromUri(Uri.fromFile(sensorFile));
                     assets.put(entry.getKey(), asset);
                 } else {
                     this.sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_file_no_exists).getBytes());
-                    this.sendingFilesLayout.setVisibility(View.GONE);
+                    this.setState(DeviceState.IDLE);
                     Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_file_no_exists), Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -409,7 +471,7 @@ public class MainActivity extends WearableActivity  implements
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     sendMessageToHost(getString(R.string.message_path_host_archive_fragment_sensor_files_error), getString(R.string.sensor_files_error_data_item).getBytes());
-                    sendingFilesLayout.setVisibility(View.GONE);
+                    setState(DeviceState.IDLE);
                     Toast.makeText(MainActivity.this, getString(R.string.sensor_files_error_data_item), Toast.LENGTH_LONG).show();
                 }
             });
@@ -420,7 +482,7 @@ public class MainActivity extends WearableActivity  implements
 
         }
 
-        sendingFilesLayout.setVisibility(View.GONE);
+        this.setState(DeviceState.IDLE);
         Toast.makeText(MainActivity.this, R.string.files_sent, Toast.LENGTH_LONG).show();
 
     }
@@ -440,7 +502,7 @@ public class MainActivity extends WearableActivity  implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mainActivity.get().syncingNTPLayout.setVisibility(View.VISIBLE);
+            mainActivity.get().setState(DeviceState.NTP);
         }
 
         @Override
@@ -453,8 +515,6 @@ public class MainActivity extends WearableActivity  implements
         @Override
         protected void onPostExecute(NTPTime.NTPTimeSyncResponse ntpTimeSyncResponse) {
             super.onPostExecute(ntpTimeSyncResponse);
-
-            this.mainActivity.get().updateStatusIcons();
 
             String responseMessage = "";
             switch (ntpTimeSyncResponse.responseType){
@@ -481,10 +541,49 @@ public class MainActivity extends WearableActivity  implements
                     break;
 
             }
-            mainActivity.get().syncingNTPLayout.setVisibility(View.GONE);
+            mainActivity.get().setState(DeviceState.IDLE);
             Toast.makeText(this.mainActivity.get(), responseMessage, Toast.LENGTH_LONG).show();
 
 
+        }
+    }
+
+
+    @SuppressLint("StaticFieldLeak")
+    private class StopCaptureTask extends AsyncTask<Void, Void, String>{
+
+        private final WeakReference<MainActivity> mainActivity;
+
+        StopCaptureTask(MainActivity mainActivity){
+            this.mainActivity = new WeakReference<>(mainActivity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            chronometerPrimary.stop();
+            chronometerAmbient.stop();
+            setState(DeviceState.STOPPING);
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            if (deviceCaptureRunner != null){
+                try {
+                    deviceCaptureRunner.finish();
+                    return "Capture finished";
+                } catch (IOException e) {
+                    return e.getMessage();
+                }
+            }
+            return "Unknown error";
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            super.onPostExecute(message);
+            mainActivity.get().setState(DeviceState.IDLE);
+            Toast.makeText(this.mainActivity.get(), message, Toast.LENGTH_LONG).show();
         }
     }
 

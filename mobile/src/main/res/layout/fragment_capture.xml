@@ -50,12 +50,26 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="@string/capture_title"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                             android:textColor="@color/colorPrimary"
                             android:textStyle="bold" />
+
+                        <Button
+                            android:id="@+id/button_more_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:gravity="center"
+                            android:paddingTop="0dp"
+                            android:paddingBottom="0dp"
+                            android:drawableStart="@drawable/ic_edit"
+                            android:drawableTint="@color/colorAccent"
+                            android:text="@string/capture_button_more_details"
+                            android:textColor="@color/colorAccent"
+                            style="@style/Button.Primary.Borderless"/>
 
                     </LinearLayout>
 
@@ -85,15 +99,6 @@
                                 android:hint="@string/capture_name_hint" />
 
                         </android.support.design.widget.TextInputLayout>
-
-                        <android.support.v7.widget.AppCompatImageButton
-                            android:id="@+id/button_more_info"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:backgroundTint="@color/colorAccent"
-                            android:tint="@color/colorGreyLight"
-                            android:src="@drawable/ic_edit"
-                            android:contentDescription="@string/util_image_description"/>
 
                     </LinearLayout>
 

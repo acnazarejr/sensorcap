@@ -5,7 +5,7 @@
     <string name="app_short_description">Sensor Data Capture</string>
 
     <!-- CAPABILITIES -->
-    <string name="capability_sensorcap_phone" tools:keep="@string/capability_sensorcap_phone">capability_sensorcap_phone</string>
+    <string name="capability_sensorcap_phone">capability_sensorcap_phone</string>
     <string name="capability_sensorcap_wear">capability_sensorcap_wear</string>
 
 
@@ -54,6 +54,6 @@
     <!-- FOLDERS -->
     <string name="system_folder_name">sensorcap</string>
     <string name="capture_folder_name">captures</string>
-    <string name="archive_folder_name" tools:keep="@string/archive_folder_name">archive</string>
+    <string name="archive_folder_name">archive</string>
 
 </resources>

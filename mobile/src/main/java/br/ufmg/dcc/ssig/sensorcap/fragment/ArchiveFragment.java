@@ -290,13 +290,16 @@ public class ArchiveFragment extends AbstractMainFragment {
                         for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
                             CaptureListItem item = adapterCaptureList.getItem(selectedItemPositions.get(i));
 
-                            File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, item.captureDataUUID));
                             if(item.closed){
+                                File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, item.captureDataUUID));
                                 File captureDataCompressedFile = new File(String.format("%s%s%s.zip", getSystemArchiveFolder(), File.separator, item.captureDataUUID));
                                 if(captureDataCompressedFile.delete() && captureDataFile.delete())
                                     adapterCaptureList.removeData(selectedItemPositions.get(i));
                             }else{
-                                if(captureDataFile.delete())
+                                CaptureData captureData = item.captureData;
+                                File captureDataFile = new File(String.format("%s%s%s.json", getSystemArchiveFolder(), File.separator, captureData.getCaptureDataUUID()));
+                                File captureFolder = new File(String.format("%s%s%s", getSystemCapturesFolder(), File.separator, captureData.getCaptureDataUUID()));
+                                if(captureDataFile.delete() && deleteRecursive(captureFolder))
                                     adapterCaptureList.removeData(selectedItemPositions.get(i));
                             }
                         }
@@ -375,8 +378,6 @@ public class ArchiveFragment extends AbstractMainFragment {
         private final BlockingQueue<DataMap> dataItemsBlockingQueue = new LinkedBlockingQueue<>(50);
         private MaterialDialog dialogReceiveFiles;
         private MaterialDialog dialogCompressFiles;
-
-
 
         @Override
         protected void onPreExecute() {
@@ -528,6 +529,9 @@ public class ArchiveFragment extends AbstractMainFragment {
                 e.printStackTrace();
                 return this.RESPONSE_IO_FAILURE;
             }
+
+            if (!deleteRecursive(captureFolder))
+                return this.RESPONSE_IO_FAILURE;
 
             return RESPONSE_SUCCESS;
         }
@@ -702,6 +706,15 @@ public class ArchiveFragment extends AbstractMainFragment {
             Wearable.getDataClient(Objects.requireNonNull(getContext())).deleteDataItems(uri, DataClient.FILTER_PREFIX);
         }
 
+    }
+
+    private boolean deleteRecursive(File fileOrDirectory) {
+        if (!fileOrDirectory.exists())
+            return false;
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+        return fileOrDirectory.delete();
     }
 
 }

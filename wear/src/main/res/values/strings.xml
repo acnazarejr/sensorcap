@@ -23,7 +23,11 @@
     <string name="close" tools:keep="@string/close">Close</string>
     <string name="hardware_button_instruction">Stop (Click) - Close (Long)</string>
     <string name="syncing_ntp">Syncing NTP…</string>
+    <string name="saving">Saving Capture...</string>
     <string name="capture_files_deleted">Capture Files Deleted</string>
     <string name="files_sent">Sensor Files Sent</string>
+    <string name="grant_permissions">You need to grant all required permissions!</string>
+    <string name="button_try_again">Try again</string>
+    <string name="button_stop">Stop</string>
 
 </resources>

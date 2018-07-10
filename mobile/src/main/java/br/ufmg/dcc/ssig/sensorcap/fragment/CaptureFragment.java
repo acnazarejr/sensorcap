@@ -58,7 +58,7 @@ import java.util.Objects;
 public class CaptureFragment extends AbstractMainFragment implements MessageClient.OnMessageReceivedListener {
 
     private AppCompatEditText inputCaptureName;
-    private AppCompatImageButton buttonMoreDetails;
+    private AppCompatButton buttonMoreDetails;
     private RadioRealButtonGroup switchSmartphoneLocation;
     private RadioRealButtonGroup switchSmartphoneSide;
     private RadioRealButtonGroup switchSmartwatchSide;

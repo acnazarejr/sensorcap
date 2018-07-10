@@ -61,9 +61,10 @@
         <!--<item name="android:textColor">@android:color/white</item>-->
     <!--</style>-->
 
-    <!--<style name="Button.Primary.Borderless" parent="@style/Widget.AppCompat.Button.Borderless.Colored">-->
-        <!--<item name="android:textColor">@color/colorPrimary</item>-->
-    <!--</style>-->
+    <style name="Button.Primary.Borderless" parent="@style/Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
 
     <!--<style name="Button.Accent.Borderless" parent="@style/Widget.AppCompat.Button.Borderless.Colored">-->
         <!--<item name="android:textColor">@color/colorAccent</item>-->
