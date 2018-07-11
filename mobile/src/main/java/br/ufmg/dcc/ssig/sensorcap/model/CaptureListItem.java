@@ -52,11 +52,11 @@ public class CaptureListItem {
         this.itemSmartwatchEnable = captureData.getClientDeviceData() != null;
 
         if (this.itemSmartphoneEnable && this.itemSmartwatchEnable){
-            this.itemDevices = "Smartphone and Smartwatch";
+            this.itemDevices = "Phone and Wear";
         }else if (this.itemSmartphoneEnable){
-            this.itemDevices = "Smartphone only";
+            this.itemDevices = "Phone only";
         }else if (this.itemSmartwatchEnable){
-            this.itemDevices = "Smartwatch only";
+            this.itemDevices = "Wear only";
         }
 
         this.closed = captureData.isClosed();
