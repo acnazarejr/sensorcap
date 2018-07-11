@@ -1,12 +1,12 @@
-# SensorCap: Sensor Data Capture
+# SensorCap
 
 ![AnExplorer](media/promo.png)
 
-SensorCap is an all-in-one sensor data capture compatible with phone and war devices.
+SensorCap is an all-in-one sensor data capture tool compatible with phone and wear devices.
 
-It is an Android tool that captures sensor data in user-defined configurations. The purpose is to allow researchers and developers to quickly save sensor data for research, testing and prototyping. The sensors are broadly defined to include Motion, Position and Environment device sensors.
+It is an Android tool that captures sensor data using user-defined configurations. The purpose is to allow researchers and developers to quickly save sensor data for research, testing and prototyping. The sensors are broadly defined to include Motion, Position and Environment device sensors.
 
-An intuitive user interface makes tasks such as setting up a sensor, enter the capture details and share the sensor data easy. Capture settings include the ability to enable or disable any available sensor and set the sensor capture frequency. Note that some sensors ignore the update interval by internal design, including event based sensors such as step counters and certain orientation sensors.
+An intuitive user interface makes tasks such as setting up a sensor, enter the capture details and share the sensor data easy. Capture settings include the ability to enable or disable any available sensor and set the sensor capture frequency.
 
 To allow the data synchronization between phone and wear devices sensor data, we use the NTP time instead the device time.
 
@@ -14,19 +14,19 @@ To allow the data synchronization between phone and wear devices sensor data, we
 
 * Easy to use user interface;
 * The only app that allows capturing wear sensors;
-* Capture phone, wear or both devices sensors;
-* Allow setting capture info details as device positions and side. Also allow set the subject name, height, weight, genre and age;
+* Capture phone, wear or both device's sensors;
+* Allow setting capture info details as device positions and side. Also allow set the subject name, height, weight, genre, and age;
 * Ability to enable or disable any available device sensor;
 * Configure the sensors data generation frequency;
-* Save date as binary or CSV files;
+* Save data as binary or CSV files;
 * NTP time synchronization;
 * Data sharing via email, message apps, cloud storage and others;
 * Device time can be visualized by QRCodes for video and sensor synchronization purposes;
-* Sounds and vibration to alert the user before capture;
+* Sounds and vibration to alert the user before starting capturing;
 
 #### Sensors
 
-Whe available, the SensorCap save data from following sensors:
+If available, the SensorCap save data from the following sensors:
 
 ###### Motion Sensors
 
@@ -56,7 +56,7 @@ Whe available, the SensorCap save data from following sensors:
 
 #### Download
 
-[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](XXXX)
+[<img alt="Get it on Google Play" height="80" src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png">](https://play.google.com/store/apps/details?id=br.ufmg.dcc.ssig.sensorcap)
 
 ## Development
 
@@ -71,7 +71,7 @@ We will release apks to test features or to check if bugs have been fixed.
 
 ###### Code
 If you are a developer and you wish to contribute to the app please fork the project
-and submit a pull request on the [devloper branch](https://github.com/acnazarejr/sensorcap/tree/developer).
+and submit a pull request on the [developer branch](https://github.com/acnazarejr/sensorcap/tree/developer).
 If you want, you can join us on Telegram - send us a message we will add you!
 
 ###### Issues
