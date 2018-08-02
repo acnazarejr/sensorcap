@@ -88,4 +88,8 @@ public final class CaptureData implements Serializable {
     public void setClosed(boolean closed) {
         this.closed = closed;
     }
+
+    public String getCaptureName() {
+        return captureName;
+    }
 }

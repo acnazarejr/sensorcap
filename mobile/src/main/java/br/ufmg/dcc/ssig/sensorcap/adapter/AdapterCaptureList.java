@@ -59,10 +59,12 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
         private final View layoutParent;
 
         private final TextView textItemTitle;
+        private final TextView textItemSubjectName;
         private final TextView textItemDuration;
         private final TextView textItemTimestamp;
         private final ImageView imageSmartphoneEnable;
         private final ImageView imageSmartwatchEnable;
+        private final ImageView imageSubject;
         private final TextView textItemDevices;
 
         private final ImageView imageItemImageBackground;
@@ -82,6 +84,8 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
             this.imageSmartwatchEnable = view.findViewById(R.id.item_smartwatch_image);
             this.textItemDevices = view.findViewById(R.id.item_devices_text);
 
+            this.textItemSubjectName = view.findViewById(R.id.item_subject_name);
+            this.imageSubject = view.findViewById(R.id.item_subject_image);
 
             this.imageItemImageBackground = view.findViewById(R.id.item_image_background);
             this.imageItemImageIcon = view.findViewById(R.id.item_image_icon);
@@ -132,6 +136,9 @@ public class AdapterCaptureList extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             captureHolder.imageSmartwatchEnable.setImageTintList(ColorStateList.valueOf(context.getColor(captureListItem.closed ? R.color.colorPrimaryLight : R.color.colorAlert)));
             captureHolder.imageSmartwatchEnable.setVisibility(captureListItem.itemSmartwatchEnable ? View.VISIBLE : View.GONE);
+
+            captureHolder.imageSubject.setImageTintList(ColorStateList.valueOf(context.getColor(captureListItem.closed ? R.color.colorPrimaryLight : R.color.colorAlert)));
+            captureHolder.textItemSubjectName.setText(captureListItem.itemSubjectName);
 
             captureHolder.textItemDevices.setText(captureListItem.itemDevices);
 

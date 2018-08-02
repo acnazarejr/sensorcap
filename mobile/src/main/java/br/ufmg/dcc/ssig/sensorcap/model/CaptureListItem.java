@@ -14,6 +14,7 @@ public class CaptureListItem {
     public final boolean closed;
 
     public final String itemTitle;
+    public String itemSubjectName;
     public String itemDuration;
     public final Long itemTimestampLong;
     public String itemTimestampText;
@@ -36,7 +37,8 @@ public class CaptureListItem {
 
         this.captureData = captureData;
         this.captureDataUUID = captureData.getCaptureDataUUID();
-        this.itemTitle = captureData.getSubjectInfo().getName();
+        this.itemTitle = captureData.getCaptureName();
+        this.itemSubjectName = captureData.getSubjectInfo().getName();
 
         long duration = captureData.getEndTimestamp() - captureData.getStartTimestamp();
         final long hr = TimeUnit.MILLISECONDS.toHours(duration);

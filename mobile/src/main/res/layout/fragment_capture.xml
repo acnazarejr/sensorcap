@@ -503,7 +503,7 @@
                                 android:background="@drawable/shape_rounded"
                                 app:np_dividerColor="@color/colorAccent"
                                 app:np_dividerDistance="@dimen/spacing_xmlarge"
-                                app:np_min="60"
+                                app:np_min="10"
                                 app:np_max="210"
                                 app:np_wheelItemCount="3"
                                 app:np_wrapSelectorWheel="false"

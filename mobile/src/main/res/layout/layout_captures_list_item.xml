@@ -18,27 +18,27 @@
         android:focusable="true">
 
         <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/item_image_background"
-                    android:layout_width="@dimen/spacing_xmlarge"
-                    android:layout_height="@dimen/spacing_xmlarge"
-                    android:src="@drawable/shape_circle"
-                    android:tint="@color/colorPrimaryLight"
-                    android:contentDescription="@string/util_image_description" />
+            <ImageView
+                android:id="@+id/item_image_background"
+                android:layout_width="@dimen/spacing_xmlarge"
+                android:layout_height="@dimen/spacing_xmlarge"
+                android:src="@drawable/shape_circle"
+                android:tint="@color/colorPrimaryLight"
+                android:contentDescription="@string/util_image_description" />
 
-                <ImageView
-                    android:id="@+id/item_image_icon"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerInParent="true"
-                    android:tint="@color/colorGreyLight"
-                    app:srcCompat="@drawable/ic_package_close"
-                    android:contentDescription="@string/util_image_description" />
+            <ImageView
+                android:id="@+id/item_image_icon"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_centerInParent="true"
+                android:tint="@color/colorGreyLight"
+                app:srcCompat="@drawable/ic_package_close"
+                android:contentDescription="@string/util_image_description" />
 
-            </RelativeLayout>
+        </RelativeLayout>
 
         <View
             android:layout_width="@dimen/spacing_smlarge"
@@ -75,7 +75,6 @@
 
             </LinearLayout>
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -88,54 +87,83 @@
                     android:orientation="vertical">
 
                     <TextView
-                android:id="@+id/item_timestamp_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_small"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="@color/colorGreyMediumDark"
-                android:textStyle="bold" />
+                        android:id="@+id/item_timestamp_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_small"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                        android:textColor="@color/colorGreyMediumDark"
+                        android:textStyle="bold" />
 
                     <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/item_smartphone_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="2dp"
-                    android:layout_marginStart="-8dp"
-                    android:layout_marginEnd="-8dp"
-                    android:src="@drawable/ic_smartphone"
-                    android:tint="@color/colorPrimaryLight"
-                    android:contentDescription="@string/util_image_description"/>
+                        <ImageView
+                            android:id="@+id/item_subject_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:padding="2dp"
+                            android:layout_marginStart="-8dp"
+                            android:layout_marginEnd="-8dp"
+                            android:src="@drawable/subject"
+                            android:tint="@color/colorPrimaryLight"
+                            android:contentDescription="@string/util_image_description"/>
 
-                <ImageView
-                    android:id="@+id/item_smartwatch_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="2dp"
-                    android:layout_marginStart="-8dp"
-                    android:layout_marginEnd="-8dp"
-                    android:src="@drawable/ic_smartwatch"
-                    android:tint="@color/colorPrimaryLight"
-                    android:contentDescription="@string/util_image_description"/>
+                        <TextView
+                            android:id="@+id/item_subject_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:layout_marginStart="3dp"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            android:textColor="@color/colorGrey" />
 
-                <TextView
-                    android:id="@+id/item_devices_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:layout_marginStart="3dp"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textColor="@color/colorGrey" />
+                    </LinearLayout>
 
-            </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/item_smartphone_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:padding="2dp"
+                            android:layout_marginStart="-8dp"
+                            android:layout_marginEnd="-8dp"
+                            android:src="@drawable/ic_smartphone"
+                            android:tint="@color/colorPrimaryLight"
+                            android:contentDescription="@string/util_image_description"/>
+
+                        <ImageView
+                            android:id="@+id/item_smartwatch_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:padding="2dp"
+                            android:layout_marginStart="-8dp"
+                            android:layout_marginEnd="-8dp"
+                            android:src="@drawable/ic_smartwatch"
+                            android:tint="@color/colorPrimaryLight"
+                            android:contentDescription="@string/util_image_description"/>
+
+                        <TextView
+                            android:id="@+id/item_devices_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:layout_marginStart="3dp"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                            android:textColor="@color/colorGrey" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
