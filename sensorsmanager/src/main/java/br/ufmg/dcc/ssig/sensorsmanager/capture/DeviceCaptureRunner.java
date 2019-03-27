@@ -3,6 +3,7 @@ package br.ufmg.dcc.ssig.sensorsmanager.capture;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 
 import java.io.File;
@@ -29,6 +30,8 @@ public class DeviceCaptureRunner {
     private final File systemCapturesFolder;
     private File deviceCaptureFolder;
     private Status status;
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
 
     private final SensorManager sensorManager;
     private final Map<SensorType, SensorWriter> sensorListeners;
@@ -44,6 +47,9 @@ public class DeviceCaptureRunner {
         this.sensorManager = (SensorManager)this.context.getSystemService(Context.SENSOR_SERVICE);
         this.sensorListeners = new HashMap<>();
 
+        this.powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        this.wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SENSORCAP:WAKE_LOCK");
+
         this.configureFolders();
         this.configureListeners();
         this.status = Status.IDLE;
@@ -52,6 +58,7 @@ public class DeviceCaptureRunner {
     public void start(){
         if (this.status != Status.IDLE)
             return;
+        this.wakeLock.acquire();
         Map<SensorType, SensorConfig> sensorsConfig = this.deviceConfig.getAllSensorsConfig();
         for(SensorType sensorType : this.sensorListeners.keySet()){
             SensorConfig sensorConfig = sensorsConfig.get(sensorType);
@@ -71,6 +78,7 @@ public class DeviceCaptureRunner {
             sensorWriter.close();
         }
         this.status = Status.STOPPED;
+        this.wakeLock.release();
     }
 
     public void finish() throws IOException {
