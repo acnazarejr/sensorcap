@@ -22,9 +22,8 @@ def main(input_file: str) -> None:
 
     diff = np.diff(timestamps.values)
     print(diff.mean(), diff.min(), diff.max())
-    print(diff.argmax())
+    print(diff)
     print(timestamps[diff.argmax()-10:diff.argmax()+10])
-    # print(diff)
 
 if __name__ == "__main__":
     #pylint: disable=E1120
