@@ -1,11 +1,16 @@
 package br.ufmg.dcc.ssig.sensorcap.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -85,6 +90,13 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     private long currentCaptureStart;
     private long currentCaptureEnd;
 
+    private Handler periodicVibrationHandler;
+    private Runnable periodicVibration;
+    private Vibrator vibrator;
+    private ToneGenerator toneGenerator;
+
+    private static final int alertInterval = 60 * 1000;
+
     public CaptureFragment(){
         super(R.layout.fragment_capture);
     }
@@ -102,6 +114,21 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         this.currentCaptureConfig = null;
         this.currentCaptureStart = -1;
         this.currentCaptureEnd = -1;
+
+        this.vibrator = (Vibrator) this.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        this.toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, 500);
+        this.periodicVibrationHandler = new Handler();
+        this.periodicVibration = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    vibrator.vibrate(2000);
+                    toneGenerator.startTone(ToneGenerator.TONE_CDMA_CALL_SIGNAL_ISDN_NORMAL, 1000);
+                } finally {
+                    periodicVibrationHandler.postDelayed(periodicVibration, alertInterval);
+                }
+            }
+        };
 
         this.initUI();
         this.registerListeners();
@@ -344,7 +371,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         this.currentCaptureStart = System.currentTimeMillis();
 
         this.currentCaptureConfig = this.makeCaptureConfig();
-        DeviceConfig hostDeviceConfig = this.currentCaptureConfig.getHostDeviceConfig();
+        final DeviceConfig hostDeviceConfig = this.currentCaptureConfig.getHostDeviceConfig();
         if (hostDeviceConfig.isEnable()) {
             try {
                 this.deviceCaptureRunner = new DeviceCaptureRunner(Objects.requireNonNull(this.getContext()), hostDeviceConfig, this.getSystemCapturesFolder());
@@ -362,8 +389,12 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
                 chronometerCapture.setBase(SystemClock.elapsedRealtime());
                 chronometerCapture.start();
                 layoutDuringCapture.setVisibility(View.VISIBLE);
-                if (deviceCaptureRunner != null)
+                if (deviceCaptureRunner != null){
                     deviceCaptureRunner.start();
+                    if (hostDeviceConfig.isAlert())
+                        periodicVibrationHandler.postDelayed(periodicVibration, alertInterval);
+                }
+
             }
         });
 
@@ -375,10 +406,14 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
     }
 
     private void stopCapture(){
+        final DeviceConfig hostDeviceConfig = this.currentCaptureConfig.getHostDeviceConfig();
         this.chronometerCapture.stop();
         try {
-            if (this.deviceCaptureRunner != null)
+            if (this.deviceCaptureRunner != null) {
                 this.deviceCaptureRunner.finish();
+                if (hostDeviceConfig.isAlert())
+                    periodicVibrationHandler.removeCallbacks(periodicVibration);
+            }
             if (this.isWearClientConnected())
                 this.getWearService().stopCapture();
             this.currentCaptureEnd = System.currentTimeMillis();
@@ -414,6 +449,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
         int countdownStart = this.getSharedPreferences().getInt(getString(R.string.preference_main_key_countdown_capture), getResources().getInteger(R.integer.preference_main_default_countdown_capture));
         boolean hasSound = this.getSharedPreferences().getBoolean(getString(R.string.preference_main_key_has_sound), getResources().getBoolean(R.bool.preference_main_default_has_sound));
         boolean hasVibration = this.getSharedPreferences().getBoolean(getString(R.string.preference_main_key_has_vibration), getResources().getBoolean(R.bool.preference_main_default_has_vibration));
+        boolean hasAlert = this.getSharedPreferences().getBoolean(getString(R.string.preference_main_key_has_60s_alert), getResources().getBoolean(R.bool.preference_main_default_has_60s_alert));
         String sensorWriterTypeCode = this.getSharedPreferences().getString(getString(R.string.preference_main_key_sensor_writer_type), getResources().getString(R.string.preference_main_default_sensor_writer_type));
 
 
@@ -450,6 +486,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
             hostDeviceConfig.setCountdownStart(countdownStart);
             hostDeviceConfig.setSound(hasSound);
             hostDeviceConfig.setVibration(hasVibration);
+            hostDeviceConfig.setAlert(hasAlert);
             hostDeviceConfig.setSensorWriterType(SensorWriterType.fromCode(sensorWriterTypeCode));
         }
         //--------------------------------------------
@@ -489,6 +526,7 @@ public class CaptureFragment extends AbstractMainFragment implements MessageClie
             clientDeviceConfig.setCountdownStart(countdownStart);
             clientDeviceConfig.setSound(hasSound);
             clientDeviceConfig.setVibration(hasVibration);
+            clientDeviceConfig.setAlert(hasAlert);
             clientDeviceConfig.setSensorWriterType(SensorWriterType.fromCode(sensorWriterTypeCode));
 
             captureConfig.setClientDeviceConfig(clientDeviceConfig);

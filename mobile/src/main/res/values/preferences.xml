@@ -15,6 +15,9 @@
     <string name="preference_main_key_has_vibration">has_vibration</string>
     <bool name="preference_main_default_has_vibration">false</bool>
 
+    <string name="preference_main_key_has_60s_alert">has_60s_alert</string>
+    <bool name="preference_main_default_has_60s_alert">false</bool>
+
     <string name="preference_main_key_sensor_writer_type">sensor_writer_type</string>
     <string name="preference_main_default_sensor_writer_type">CSV</string>
 

@@ -29,6 +29,7 @@
     <string name="settings_ntp_pool_server_hint">NTP Pool Server</string>
     <string name="settings_enable_sound">Enable Sound</string>
     <string name="settings_enable_vibration">Enable Vibration</string>
+    <string name="settings_enable_60s_alert">Enable Alert (1 min)</string>
     <string name="settings_countdown_start">Countdown Start</string>
     <string name="settings_countdown_start_3s">3s</string>
     <string name="settings_countdown_start_10s">10s</string>

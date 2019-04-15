@@ -24,6 +24,7 @@ public class DeviceConfig implements Serializable {
     private Integer countdownStart;
     private Boolean sound;
     private Boolean vibration;
+    private Boolean alert;
 
     private SensorWriterType sensorWriterType;
 
@@ -40,6 +41,7 @@ public class DeviceConfig implements Serializable {
         this.countdownStart = 3;
         this.sound = false;
         this.vibration = false;
+        this.alert = false;
 
         this.sensorWriterType = SensorWriterType.BINARY;
 
@@ -115,6 +117,14 @@ public class DeviceConfig implements Serializable {
 
     public void setVibration(Boolean vibration) {
         this.vibration = vibration;
+    }
+
+    public Boolean isAlert() {
+        return alert;
+    }
+
+    public void setAlert(Boolean alert) {
+        this.alert = alert;
     }
 
     public String getCaptureConfigUUID() {

@@ -370,6 +370,9 @@ public class MainActivity extends AppCompatActivity implements
                         Switch switchVibrationEnable = view.findViewById(R.id.enable_vibration_switch);
                         editor.putBoolean(getString(R.string.preference_main_key_has_vibration), switchVibrationEnable.isChecked());
 
+                        Switch switch60sAlertEnable = view.findViewById(R.id.enable_60s_alert_switch);
+                        editor.putBoolean(getString(R.string.preference_main_key_has_60s_alert), switch60sAlertEnable.isChecked());
+
                         RadioGroup radioGroupCountdownStart = view.findViewById(R.id.countdown_start_radio_group);
                         int countdownStart = (radioGroupCountdownStart.getCheckedRadioButtonId() == R.id.countdown_start_3s_radio_option) ? 3 : 10;
                         editor.putInt(getString(R.string.preference_main_key_countdown_capture), countdownStart);
@@ -412,6 +415,9 @@ public class MainActivity extends AppCompatActivity implements
 
         Switch switchSoundVibration = view.findViewById(R.id.enable_vibration_switch);
         switchSoundVibration.setChecked(this.sharedPreferences.getBoolean(getString(R.string.preference_main_key_has_vibration), getResources().getBoolean(R.bool.preference_main_default_has_vibration)));
+
+        Switch switch60Alert = view.findViewById(R.id.enable_60s_alert_switch);
+        switch60Alert.setChecked(this.sharedPreferences.getBoolean(getString(R.string.preference_main_key_has_60s_alert), getResources().getBoolean(R.bool.preference_main_default_has_60s_alert)));
 
         IndicatorSeekBar indicatorSeekBar = view.findViewById(R.id.timetool_qrcode_fps);
         indicatorSeekBar.setProgress(this.sharedPreferences.getInt(getString(R.string.preference_main_key_qrcode_fps), getResources().getInteger(R.integer.preference_main_default_qrcode_fps)));
