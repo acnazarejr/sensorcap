@@ -6,8 +6,8 @@ android {
         applicationId "br.ufmg.dcc.ssig.sensorcap"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 13
-        versionName "1.1.1"
+        versionCode 14
+        versionName "1.1.2"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
